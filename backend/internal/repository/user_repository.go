@@ -171,6 +171,7 @@ func scanUser(scanner userScanner) (domain.User, error) {
 	var user domain.User
 	var createdAt time.Time
 	var updatedAt time.Time
+	var interestsRaw sql.NullString
 
 	err := scanner.Scan(
 		&user.ID,
@@ -181,7 +182,7 @@ func scanUser(scanner userScanner) (domain.User, error) {
 		&user.Job,
 		&user.Bio,
 		&user.Distance,
-		&user.Interests,
+		&interestsRaw,
 		&createdAt,
 		&updatedAt,
 	)
@@ -190,6 +191,15 @@ func scanUser(scanner userScanner) (domain.User, error) {
 			return domain.User{}, err
 		}
 		return domain.User{}, fmt.Errorf("scan user: %w", err)
+	}
+
+	if interestsRaw.Valid {
+		user.Interests, err = parseTextArray(interestsRaw.String)
+		if err != nil {
+			return domain.User{}, fmt.Errorf("parse user interests: %w", err)
+		}
+	} else {
+		user.Interests = []string{}
 	}
 
 	user.CreatedAt = createdAt.Format(time.RFC3339)

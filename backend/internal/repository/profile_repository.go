@@ -30,6 +30,7 @@ func (r *ProfileRepository) ListDiscoveryProfiles(ctx context.Context) ([]domain
 	profiles := make([]domain.Profile, 0)
 	for rows.Next() {
 		var profile domain.Profile
+		var interestsRaw sql.NullString
 		if err := rows.Scan(
 			&profile.ID,
 			&profile.Name,
@@ -37,9 +38,13 @@ func (r *ProfileRepository) ListDiscoveryProfiles(ctx context.Context) ([]domain
 			&profile.Job,
 			&profile.Bio,
 			&profile.Distance,
-			&profile.Interests,
+			&interestsRaw,
 		); err != nil {
 			return nil, fmt.Errorf("scan profile: %w", err)
+		}
+		profile.Interests, err = parseTextArray(interestsRaw.String)
+		if err != nil {
+			return nil, fmt.Errorf("parse profile interests: %w", err)
 		}
 		profiles = append(profiles, profile)
 	}
