@@ -319,9 +319,9 @@ function App() {
         <section className="hero auth-hero">
           <div>
             <p className="eyebrow">Kimura Admin</p>
-            <h1>Secure admin access for user management.</h1>
+            <h1>ログイン</h1>
             <p className="subcopy">
-              Sign in as an administrator to create, edit, delete, and review platform users.
+              管理者アカウントでログインしてください。
             </p>
           </div>
           <div className="server-card">
@@ -335,14 +335,14 @@ function App() {
           <div className="panel auth-panel">
             <div className="panel-header">
               <div>
-                <h2>Admin login</h2>
-                <p className="muted">Seeded account is prefilled for local development.</p>
+                <h2>ログイン</h2>
+                <p className="muted">メールアドレスとパスワードを入力してください。</p>
               </div>
             </div>
             {message ? <div className="notice">{message}</div> : null}
             <form className="user-form" onSubmit={(event) => void handleAdminLogin(event)}>
               <label className="full-span">
-                Admin email
+                メールアドレス
                 <input
                   onChange={(event) => setAdminEmail(event.target.value)}
                   type="email"
@@ -350,7 +350,7 @@ function App() {
                 />
               </label>
               <label className="full-span">
-                Password
+                パスワード
                 <input
                   onChange={(event) => setAdminPassword(event.target.value)}
                   type="password"
@@ -358,8 +358,8 @@ function App() {
                 />
               </label>
               <div className="form-actions full-span">
-                <button disabled={loginLoading} type="submit">
-                  {loginLoading ? 'Signing in...' : 'Sign in as admin'}
+                <button className="login-submit" disabled={loginLoading} type="submit">
+                  {loginLoading ? 'ログイン中...' : 'ログイン'}
                 </button>
               </div>
             </form>
