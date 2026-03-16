@@ -68,6 +68,7 @@ function App() {
   const [refreshToken, setRefreshToken] = useState('');
   const [adminUser, setAdminUser] = useState<User | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
     fetch(`${apiBaseUrl}/health`)
@@ -195,12 +196,25 @@ function App() {
   }
 
   async function handleLogout() {
+    setLogoutLoading(true);
+    setMessage('');
+
     if (refreshToken) {
-      await fetch(`${apiBaseUrl}/api/v1/auth/logout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      }).catch(() => undefined);
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/v1/admin/auth/logout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
+        });
+        const data = (await response.json()) as { error?: string };
+        if (!response.ok) {
+          throw new Error(data.error ?? 'Failed to logout');
+        }
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : 'Failed to logout');
+        setLogoutLoading(false);
+        return;
+      }
     }
 
     setAuthToken('');
@@ -209,6 +223,7 @@ function App() {
     setUsers([]);
     resetForm();
     setMessage('Logged out.');
+    setLogoutLoading(false);
   }
 
   function selectUser(user: User) {
@@ -412,8 +427,13 @@ function App() {
               <button onClick={() => void loadUsers()} type="button">
                 Refresh users
               </button>
-              <button className="ghost" onClick={() => void handleLogout()} type="button">
-                Logout
+              <button
+                className="ghost"
+                disabled={logoutLoading}
+                onClick={() => void handleLogout()}
+                type="button"
+              >
+                {logoutLoading ? 'Logging out...' : 'Logout'}
               </button>
             </div>
           </div>
