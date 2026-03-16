@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 
 	backendauth "github.com/kimura/dating/backend/internal/auth"
@@ -150,6 +151,7 @@ func (h *UserHandler) login(w http.ResponseWriter, r *http.Request, adminOnly bo
 			writeError(w, http.StatusUnauthorized, "invalid email or password")
 			return
 		}
+		log.Printf("auth login failed adminOnly=%t email=%q: %v", adminOnly, input.Email, err)
 		writeError(w, http.StatusInternalServerError, "failed to login")
 		return
 	}
@@ -170,6 +172,7 @@ func (h *UserHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusUnauthorized, "invalid refresh token")
 			return
 		}
+		log.Printf("auth refresh failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "failed to refresh session")
 		return
 	}
@@ -189,6 +192,7 @@ func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusUnauthorized, "invalid refresh token")
 			return
 		}
+		log.Printf("auth logout failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "failed to logout")
 		return
 	}
