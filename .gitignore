@@ -16,4 +16,5 @@ mobile/.env
 tools/
 admin/dist/
 backend/api.exe
+backend/api.exe~
 mobile/.metadata
