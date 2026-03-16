@@ -1,0 +1,44 @@
+package httpapi
+
+import (
+	"net/http"
+
+	backendauth "github.com/kimura/dating/backend/internal/auth"
+	"github.com/kimura/dating/backend/internal/config"
+	"github.com/kimura/dating/backend/internal/service"
+)
+
+func NewRouter(
+	cfg config.Config,
+	profileService *service.ProfileService,
+	matchService *service.MatchService,
+	userService *service.UserService,
+	tokenManager *backendauth.TokenManager,
+) http.Handler {
+	mux := http.NewServeMux()
+
+	healthHandler := NewHealthHandler(cfg)
+	discoveryHandler := NewDiscoveryHandler(profileService)
+	matchHandler := NewMatchHandler(matchService)
+	userHandler := NewUserHandler(userService, tokenManager)
+
+	mux.HandleFunc("GET /health", healthHandler.Handle)
+	mux.HandleFunc("GET /api/v1/discovery", discoveryHandler.ListProfiles)
+	mux.HandleFunc("GET /api/v1/matches", matchHandler.ListMatches)
+	mux.HandleFunc("POST /api/v1/admin/auth/login", userHandler.AdminLogin)
+	mux.HandleFunc("GET /api/v1/admin/users", withAuth(tokenManager, requireRole("admin", userHandler.ListUsers)))
+	mux.HandleFunc("POST /api/v1/admin/users", withAuth(tokenManager, requireRole("admin", userHandler.CreateUser)))
+	mux.HandleFunc("GET /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.GetUser)))
+	mux.HandleFunc("PUT /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.UpdateUser)))
+	mux.HandleFunc("DELETE /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.DeleteUser)))
+	mux.HandleFunc("POST /api/v1/users", userHandler.CreateUser)
+	mux.HandleFunc("GET /api/v1/users/me", withAuth(tokenManager, userHandler.Me))
+	mux.HandleFunc("GET /api/v1/users/{id}", withAuth(tokenManager, userHandler.GetUser))
+	mux.HandleFunc("PUT /api/v1/users/{id}", withAuth(tokenManager, userHandler.UpdateUser))
+	mux.HandleFunc("DELETE /api/v1/users/{id}", withAuth(tokenManager, userHandler.DeleteUser))
+	mux.HandleFunc("POST /api/v1/auth/login", userHandler.Login)
+	mux.HandleFunc("POST /api/v1/auth/refresh", userHandler.Refresh)
+	mux.HandleFunc("POST /api/v1/auth/logout", userHandler.Logout)
+
+	return mux
+}

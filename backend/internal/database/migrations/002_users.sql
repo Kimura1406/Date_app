@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    name TEXT NOT NULL,
+    age INT NOT NULL DEFAULT 18,
+    job TEXT NOT NULL DEFAULT '',
+    bio TEXT NOT NULL DEFAULT '',
+    distance TEXT NOT NULL DEFAULT '',
+    interests TEXT[] NOT NULL DEFAULT '{}',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
