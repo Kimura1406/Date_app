@@ -1,14 +1,15 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 const apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
   defaultValue: 'http://localhost:8080',
 );
 const authStorageKey = 'kimura_mobile_auth';
+const _secureStorage = FlutterSecureStorage();
 
 void main() {
   runApp(const KimuraApp());
@@ -451,8 +452,7 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _restoreSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(authStorageKey);
+    final raw = await _secureStorage.read(key: authStorageKey);
     if (!mounted) return;
 
     if (raw == null || raw.isEmpty) {
@@ -470,13 +470,13 @@ class _AccountScreenState extends State<AccountScreen> {
       authToken = jsonMap['authToken'] as String? ?? '';
       refreshToken = jsonMap['refreshToken'] as String? ?? '';
       if (authToken.isEmpty || refreshToken.isEmpty || storedUser.id.isEmpty) {
-        await prefs.remove(authStorageKey);
+        await _secureStorage.delete(key: authStorageKey);
       } else {
         _applyUser(storedUser);
         statusMessage = 'Session restored successfully.';
       }
     } catch (_) {
-      await prefs.remove(authStorageKey);
+      await _secureStorage.delete(key: authStorageKey);
     }
 
     if (!mounted) return;
@@ -486,15 +486,14 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _persistSession() async {
-    final prefs = await SharedPreferences.getInstance();
     if (currentUser == null || authToken.isEmpty || refreshToken.isEmpty) {
-      await prefs.remove(authStorageKey);
+      await _secureStorage.delete(key: authStorageKey);
       return;
     }
 
-    await prefs.setString(
-      authStorageKey,
-      jsonEncode({
+    await _secureStorage.write(
+      key: authStorageKey,
+      value: jsonEncode({
         'authToken': authToken,
         'refreshToken': refreshToken,
         'user': currentUser!.toJson(),
@@ -503,8 +502,7 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _clearSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(authStorageKey);
+    await _secureStorage.delete(key: authStorageKey);
   }
 
   void _clearForm({required bool keepAuthFields}) {

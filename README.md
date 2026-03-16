@@ -64,6 +64,13 @@ npm install
 npm run dev
 ```
 
+## CI
+
+GitHub Actions now builds:
+
+- `backend/` with Go
+- `admin/` with Node.js + Vite
+
 ## Next Steps
 
 1. Add likes, matches, messages, and reports.
@@ -133,3 +140,5 @@ Demo admin login:
 - `POST /api/v1/auth/logout` revokes the submitted refresh token.
 - Admin user CRUD routes require `Authorization: Bearer <token>`.
 - App `update/delete/get me` routes require a valid token, and non-admin users can only access their own account.
+- Admin auth state is persisted in browser `localStorage`.
+- Mobile auth state is persisted with `flutter_secure_storage`.
