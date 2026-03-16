@@ -1,15 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 const apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
   defaultValue: 'http://localhost:8080',
 );
 const authStorageKey = 'kimura_mobile_auth';
-const _secureStorage = FlutterSecureStorage();
 
 void main() {
   runApp(const KimuraApp());
@@ -265,12 +264,11 @@ class _AccountScreenState extends State<AccountScreen> {
   final _apiClient = ApiClient();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _nameController = TextEditingController();
-  final _ageController = TextEditingController(text: '18');
-  final _jobController = TextEditingController();
-  final _bioController = TextEditingController();
-  final _distanceController = TextEditingController();
-  final _interestsController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _birthDateController = TextEditingController();
+  final _countryController = TextEditingController();
+  final _prefectureController = TextEditingController();
+  final _datingReasonController = TextEditingController();
 
   AppUser? currentUser;
   String authToken = '';
@@ -289,12 +287,11 @@ class _AccountScreenState extends State<AccountScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _nameController.dispose();
-    _ageController.dispose();
-    _jobController.dispose();
-    _bioController.dispose();
-    _distanceController.dispose();
-    _interestsController.dispose();
+    _usernameController.dispose();
+    _birthDateController.dispose();
+    _countryController.dispose();
+    _prefectureController.dispose();
+    _datingReasonController.dispose();
     super.dispose();
   }
 
@@ -424,16 +421,11 @@ class _AccountScreenState extends State<AccountScreen> {
     return CreateUserPayload(
       email: _emailController.text.trim(),
       password: includePassword ? _passwordController.text.trim() : '',
-      name: _nameController.text.trim(),
-      age: int.tryParse(_ageController.text.trim()) ?? 0,
-      job: _jobController.text.trim(),
-      bio: _bioController.text.trim(),
-      distance: _distanceController.text.trim(),
-      interests: _interestsController.text
-          .split(',')
-          .map((item) => item.trim())
-          .where((item) => item.isNotEmpty)
-          .toList(),
+      name: _usernameController.text.trim(),
+      birthDate: _birthDateController.text.trim(),
+      country: _countryController.text.trim(),
+      prefecture: _prefectureController.text.trim(),
+      datingReason: _datingReasonController.text.trim(),
     );
   }
 
@@ -442,17 +434,17 @@ class _AccountScreenState extends State<AccountScreen> {
       currentUser = user;
     });
     _emailController.text = user.email;
-    _nameController.text = user.name;
-    _ageController.text = user.age.toString();
-    _jobController.text = user.job;
-    _bioController.text = user.bio;
-    _distanceController.text = user.distance;
-    _interestsController.text = user.interests.join(', ');
+    _usernameController.text = user.name;
+    _birthDateController.text = user.birthDate;
+    _countryController.text = user.country;
+    _prefectureController.text = user.prefecture;
+    _datingReasonController.text = user.datingReason;
     _passwordController.clear();
   }
 
   Future<void> _restoreSession() async {
-    final raw = await _secureStorage.read(key: authStorageKey);
+    final preferences = await SharedPreferences.getInstance();
+    final raw = preferences.getString(authStorageKey);
     if (!mounted) return;
 
     if (raw == null || raw.isEmpty) {
@@ -470,13 +462,13 @@ class _AccountScreenState extends State<AccountScreen> {
       authToken = jsonMap['authToken'] as String? ?? '';
       refreshToken = jsonMap['refreshToken'] as String? ?? '';
       if (authToken.isEmpty || refreshToken.isEmpty || storedUser.id.isEmpty) {
-        await _secureStorage.delete(key: authStorageKey);
+        await preferences.remove(authStorageKey);
       } else {
         _applyUser(storedUser);
         statusMessage = 'Session restored successfully.';
       }
     } catch (_) {
-      await _secureStorage.delete(key: authStorageKey);
+      await preferences.remove(authStorageKey);
     }
 
     if (!mounted) return;
@@ -486,14 +478,15 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _persistSession() async {
+    final preferences = await SharedPreferences.getInstance();
     if (currentUser == null || authToken.isEmpty || refreshToken.isEmpty) {
-      await _secureStorage.delete(key: authStorageKey);
+      await preferences.remove(authStorageKey);
       return;
     }
 
-    await _secureStorage.write(
-      key: authStorageKey,
-      value: jsonEncode({
+    await preferences.setString(
+      authStorageKey,
+      jsonEncode({
         'authToken': authToken,
         'refreshToken': refreshToken,
         'user': currentUser!.toJson(),
@@ -502,7 +495,8 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _clearSession() async {
-    await _secureStorage.delete(key: authStorageKey);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove(authStorageKey);
   }
 
   void _clearForm({required bool keepAuthFields}) {
@@ -510,12 +504,11 @@ class _AccountScreenState extends State<AccountScreen> {
       _emailController.clear();
       _passwordController.clear();
     }
-    _nameController.clear();
-    _ageController.text = '18';
-    _jobController.clear();
-    _bioController.clear();
-    _distanceController.clear();
-    _interestsController.clear();
+    _usernameController.clear();
+    _birthDateController.clear();
+    _countryController.clear();
+    _prefectureController.clear();
+    _datingReasonController.clear();
   }
 
   void _showStatus(String message) {
@@ -568,7 +561,11 @@ class _AccountScreenState extends State<AccountScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _ProfileField(label: 'Email', controller: _emailController),
+                  _ProfileField(
+                    label: 'Email',
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
                   _ProfileField(
                     label: currentUser == null
                         ? 'Password'
@@ -577,24 +574,27 @@ class _AccountScreenState extends State<AccountScreen> {
                     obscureText: true,
                   ),
                   _ProfileField(
-                      label: 'Display name', controller: _nameController),
-                  _ProfileField(
-                    label: 'Age',
-                    controller: _ageController,
-                    keyboardType: TextInputType.number,
+                    label: 'ユーザーネーム',
+                    controller: _usernameController,
                   ),
-                  _ProfileField(label: 'Job', controller: _jobController),
                   _ProfileField(
-                      label: 'Distance', controller: _distanceController),
+                    label: '生年月日',
+                    controller: _birthDateController,
+                    hintText: 'YYYY-MM-DD',
+                  ),
                   _ProfileField(
-                    label: 'Bio',
-                    controller: _bioController,
+                    label: '国',
+                    controller: _countryController,
+                  ),
+                  _ProfileField(
+                    label: '都道府県',
+                    controller: _prefectureController,
+                  ),
+                  _ProfileField(
+                    label: '付き合う理由',
+                    controller: _datingReasonController,
                     maxLines: 3,
-                  ),
-                  _ProfileField(
-                    label: 'Interests',
-                    controller: _interestsController,
-                    hintText: 'Travel, Music, Coffee',
+                    maxLength: 100,
                   ),
                   const SizedBox(height: 8),
                   Wrap(
@@ -657,6 +657,7 @@ class _ProfileField extends StatelessWidget {
     this.hintText,
     this.keyboardType,
     this.maxLines = 1,
+    this.maxLength,
     this.obscureText = false,
   });
 
@@ -665,6 +666,7 @@ class _ProfileField extends StatelessWidget {
   final String? hintText;
   final TextInputType? keyboardType;
   final int maxLines;
+  final int? maxLength;
   final bool obscureText;
 
   @override
@@ -685,6 +687,7 @@ class _ProfileField extends StatelessWidget {
             controller: controller,
             keyboardType: keyboardType,
             maxLines: maxLines,
+            maxLength: maxLength,
             obscureText: obscureText,
             decoration: InputDecoration(
               hintText: hintText,
@@ -1012,6 +1015,10 @@ class AppUser {
     required this.bio,
     required this.distance,
     required this.interests,
+    required this.birthDate,
+    required this.country,
+    required this.prefecture,
+    required this.datingReason,
   });
 
   final String id;
@@ -1023,6 +1030,10 @@ class AppUser {
   final String bio;
   final String distance;
   final List<String> interests;
+  final String birthDate;
+  final String country;
+  final String prefecture;
+  final String datingReason;
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
     return AppUser(
@@ -1037,6 +1048,10 @@ class AppUser {
       interests: (json['interests'] as List<dynamic>? ?? [])
           .map((item) => item.toString())
           .toList(),
+      birthDate: json['birthDate'] as String? ?? '',
+      country: json['country'] as String? ?? '',
+      prefecture: json['prefecture'] as String? ?? '',
+      datingReason: json['datingReason'] as String? ?? '',
     );
   }
 
@@ -1051,6 +1066,10 @@ class AppUser {
       'bio': bio,
       'distance': distance,
       'interests': interests,
+      'birthDate': birthDate,
+      'country': country,
+      'prefecture': prefecture,
+      'datingReason': datingReason,
     };
   }
 }
@@ -1060,32 +1079,29 @@ class CreateUserPayload {
     required this.email,
     required this.password,
     required this.name,
-    required this.age,
-    required this.job,
-    required this.bio,
-    required this.distance,
-    required this.interests,
+    required this.birthDate,
+    required this.country,
+    required this.prefecture,
+    required this.datingReason,
   });
 
   final String email;
   final String password;
   final String name;
-  final int age;
-  final String job;
-  final String bio;
-  final String distance;
-  final List<String> interests;
+  final String birthDate;
+  final String country;
+  final String prefecture;
+  final String datingReason;
 
   Map<String, dynamic> toJson() {
     return {
       'email': email,
       'password': password,
       'name': name,
-      'age': age,
-      'job': job,
-      'bio': bio,
-      'distance': distance,
-      'interests': interests,
+      'birthDate': birthDate,
+      'country': country,
+      'prefecture': prefecture,
+      'datingReason': datingReason,
     };
   }
 }

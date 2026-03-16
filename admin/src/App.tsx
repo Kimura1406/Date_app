@@ -18,6 +18,10 @@ type User = {
   bio: string;
   distance: string;
   interests: string[];
+  birthDate: string;
+  country: string;
+  prefecture: string;
+  datingReason: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -36,11 +40,10 @@ type UserFormState = {
   email: string;
   password: string;
   name: string;
-  age: string;
-  job: string;
-  bio: string;
-  distance: string;
-  interests: string;
+  birthDate: string;
+  country: string;
+  prefecture: string;
+  datingReason: string;
 };
 
 type MenuKey = 'user-list' | 'chat' | 'gift' | 'sales' | 'revenue';
@@ -92,11 +95,10 @@ const emptyForm: UserFormState = {
   email: '',
   password: '',
   name: '',
-  age: '18',
-  job: '',
-  bio: '',
-  distance: '',
-  interests: '',
+  birthDate: '',
+  country: '',
+  prefecture: '',
+  datingReason: '',
 };
 
 function App() {
@@ -281,11 +283,10 @@ function App() {
       email: user.email,
       password: '',
       name: user.name,
-      age: String(user.age),
-      job: user.job,
-      bio: user.bio,
-      distance: user.distance,
-      interests: user.interests.join(', '),
+      birthDate: user.birthDate,
+      country: user.country,
+      prefecture: user.prefecture,
+      datingReason: user.datingReason,
     });
     setMessage('');
   }
@@ -310,14 +311,10 @@ function App() {
       email: form.email,
       password: form.password,
       name: form.name,
-      age: Number(form.age),
-      job: form.job,
-      bio: form.bio,
-      distance: form.distance,
-      interests: form.interests
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean),
+      birthDate: form.birthDate,
+      country: form.country,
+      prefecture: form.prefecture,
+      datingReason: form.datingReason,
     };
 
     const endpoint = selectedUserId
@@ -571,30 +568,49 @@ function App() {
                 ) : users.length === 0 ? (
                   <p className="muted">No users found yet.</p>
                 ) : (
-                  <div className="user-list">
-                    {users.map((user) => (
-                      <article className="user-item" key={user.id}>
-                        <div className="user-item-main">
-                          <div>
-                            <strong>{user.name}</strong>
-                            <p>{user.email}</p>
-                          </div>
-                          <span className="pill">{user.role}</span>
-                        </div>
-                        <p className="user-meta">
-                          {user.job || 'No job'} | {user.distance || 'No distance'} |{' '}
-                          {user.interests.join(', ') || 'No interests'}
-                        </p>
-                        <div className="user-actions">
-                          <button onClick={() => selectUser(user)} type="button">
-                            Edit
-                          </button>
-                          <button className="ghost" onClick={() => void handleDelete(user.id)} type="button">
-                            Delete
-                          </button>
-                        </div>
-                      </article>
-                    ))}
+                  <div className="table-wrap">
+                    <table className="user-table">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>{'\u30e6\u30fc\u30b6\u30fc\u30cd\u30fc\u30e0'}</th>
+                          <th>{'\u751f\u5e74\u6708\u65e5'}</th>
+                          <th>{'\u56fd'}</th>
+                          <th>{'\u90fd\u9053\u5e9c\u770c'}</th>
+                          <th>{'\u4ed8\u304d\u5408\u3046\u7406\u7531'}</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {users.map((user) => (
+                          <tr key={user.id}>
+                            <td>
+                              <div className="table-id-cell">
+                                <code>{user.id}</code>
+                                <span className="pill">{user.role}</span>
+                              </div>
+                            </td>
+                            <td>{user.name}</td>
+                            <td>{formatDate(user.birthDate)}</td>
+                            <td>{user.country || '-'}</td>
+                            <td>{user.prefecture || '-'}</td>
+                            <td className="reason-cell" title={user.datingReason}>
+                              {truncateReason(user.datingReason)}
+                            </td>
+                            <td>
+                              <div className="user-actions">
+                                <button onClick={() => selectUser(user)} type="button">
+                                  Edit
+                                </button>
+                                <button className="ghost" onClick={() => void handleDelete(user.id)} type="button">
+                                  Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>
@@ -630,7 +646,7 @@ function App() {
                     />
                   </label>
                   <label>
-                    Name
+                    {'\u30e6\u30fc\u30b6\u30fc\u30cd\u30fc\u30e0'}
                     <input
                       onChange={(event) => updateField('name', event.target.value)}
                       type="text"
@@ -638,46 +654,38 @@ function App() {
                     />
                   </label>
                   <label>
-                    Age
+                    {'\u751f\u5e74\u6708\u65e5'}
                     <input
-                      min="18"
-                      onChange={(event) => updateField('age', event.target.value)}
-                      type="number"
-                      value={form.age}
+                      onChange={(event) => updateField('birthDate', event.target.value)}
+                      type="date"
+                      value={form.birthDate}
                     />
                   </label>
                   <label>
-                    Job
+                    {'\u56fd'}
                     <input
-                      onChange={(event) => updateField('job', event.target.value)}
+                      onChange={(event) => updateField('country', event.target.value)}
                       type="text"
-                      value={form.job}
+                      value={form.country}
                     />
                   </label>
                   <label>
-                    Distance
+                    {'\u90fd\u9053\u5e9c\u770c'}
                     <input
-                      onChange={(event) => updateField('distance', event.target.value)}
+                      onChange={(event) => updateField('prefecture', event.target.value)}
                       type="text"
-                      value={form.distance}
+                      value={form.prefecture}
                     />
                   </label>
                   <label className="full-span">
-                    Bio
+                    {'\u4ed8\u304d\u5408\u3046\u7406\u7531'}
                     <textarea
-                      onChange={(event) => updateField('bio', event.target.value)}
+                      maxLength={100}
+                      onChange={(event) => updateField('datingReason', event.target.value)}
                       rows={4}
-                      value={form.bio}
+                      value={form.datingReason}
                     />
-                  </label>
-                  <label className="full-span">
-                    Interests
-                    <input
-                      onChange={(event) => updateField('interests', event.target.value)}
-                      placeholder="Travel, Music, Coffee"
-                      type="text"
-                      value={form.interests}
-                    />
+                    <small className="field-note">{form.datingReason.length}/100</small>
                   </label>
                   <div className="form-actions full-span">
                     <button disabled={saving} type="submit">
@@ -694,6 +702,20 @@ function App() {
       </section>
     </main>
   );
+}
+
+function truncateReason(value: string) {
+  if (value.length <= 100) {
+    return value;
+  }
+  return `${value.slice(0, 100)}...`;
+}
+
+function formatDate(value: string) {
+  if (!value) {
+    return '-';
+  }
+  return value;
 }
 
 function StatCard({

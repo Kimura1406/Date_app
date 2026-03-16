@@ -19,7 +19,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 
 func (r *UserRepository) ListUsers(ctx context.Context) ([]domain.User, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, email, role, name, age, job, bio, distance, interests, created_at, updated_at
+		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, created_at, updated_at
 		FROM users
 		ORDER BY created_at DESC, id DESC
 	`)
@@ -46,7 +46,7 @@ func (r *UserRepository) ListUsers(ctx context.Context) ([]domain.User, error) {
 
 func (r *UserRepository) GetUserByID(ctx context.Context, id string) (domain.User, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, email, role, name, age, job, bio, distance, interests, created_at, updated_at
+		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, created_at, updated_at
 		FROM users
 		WHERE id = $1
 	`, id)
@@ -78,8 +78,8 @@ func (r *UserRepository) GetCredentialsByEmail(ctx context.Context, email string
 
 func (r *UserRepository) CreateUser(ctx context.Context, id string, input domain.CreateUserInput, passwordHash string) (domain.User, error) {
 	_, err := r.db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, role, name, age, job, bio, distance, interests)
-		VALUES ($1, $2, $3, 'user', $4, $5, $6, $7, $8, $9)
+		INSERT INTO users (id, email, password_hash, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason)
+		VALUES ($1, $2, $3, 'user', $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 	`,
 		id,
 		input.Email,
@@ -90,6 +90,10 @@ func (r *UserRepository) CreateUser(ctx context.Context, id string, input domain
 		input.Bio,
 		input.Distance,
 		input.Interests,
+		input.BirthDate,
+		input.Country,
+		input.Prefecture,
+		input.DatingReason,
 	)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("create user: %w", err)
@@ -108,10 +112,14 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id string, input domain
 			bio = $6,
 			distance = $7,
 			interests = $8,
+			birth_date = $9,
+			country = $10,
+			prefecture = $11,
+			dating_reason = $12,
 			updated_at = NOW()
 		WHERE id = $1
 	`
-	args := []any{id, input.Email, input.Name, input.Age, input.Job, input.Bio, input.Distance, input.Interests}
+	args := []any{id, input.Email, input.Name, input.Age, input.Job, input.Bio, input.Distance, input.Interests, input.BirthDate, input.Country, input.Prefecture, input.DatingReason}
 
 	if passwordHash != nil {
 		query = `
@@ -124,10 +132,14 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id string, input domain
 				bio = $7,
 				distance = $8,
 				interests = $9,
+				birth_date = $10,
+				country = $11,
+				prefecture = $12,
+				dating_reason = $13,
 				updated_at = NOW()
 			WHERE id = $1
 		`
-		args = []any{id, input.Email, *passwordHash, input.Name, input.Age, input.Job, input.Bio, input.Distance, input.Interests}
+		args = []any{id, input.Email, *passwordHash, input.Name, input.Age, input.Job, input.Bio, input.Distance, input.Interests, input.BirthDate, input.Country, input.Prefecture, input.DatingReason}
 	}
 
 	result, err := r.db.ExecContext(ctx, query, args...)
@@ -172,6 +184,7 @@ func scanUser(scanner userScanner) (domain.User, error) {
 	var createdAt time.Time
 	var updatedAt time.Time
 	var interestsRaw sql.NullString
+	var birthDate time.Time
 
 	err := scanner.Scan(
 		&user.ID,
@@ -183,6 +196,10 @@ func scanUser(scanner userScanner) (domain.User, error) {
 		&user.Bio,
 		&user.Distance,
 		&interestsRaw,
+		&birthDate,
+		&user.Country,
+		&user.Prefecture,
+		&user.DatingReason,
 		&createdAt,
 		&updatedAt,
 	)
@@ -204,5 +221,6 @@ func scanUser(scanner userScanner) (domain.User, error) {
 
 	user.CreatedAt = createdAt.Format(time.RFC3339)
 	user.UpdatedAt = updatedAt.Format(time.RFC3339)
+	user.BirthDate = birthDate.Format("2006-01-02")
 	return user, nil
 }

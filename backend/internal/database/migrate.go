@@ -106,11 +106,16 @@ func Seed(db *sql.DB) error {
 	}
 
 	if _, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, role, name, age, job, bio, distance, interests)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-		ON CONFLICT (email) DO UPDATE SET role = EXCLUDED.role
+		INSERT INTO users (id, email, password_hash, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		ON CONFLICT (email) DO UPDATE SET
+			role = EXCLUDED.role,
+			birth_date = EXCLUDED.birth_date,
+			country = EXCLUDED.country,
+			prefecture = EXCLUDED.prefecture,
+			dating_reason = EXCLUDED.dating_reason
 	`,
-		"usr_seed_001",
+		"281LINAQ",
 		"lina@example.com",
 		string(passwordHash),
 		"user",
@@ -120,6 +125,10 @@ func Seed(db *sql.DB) error {
 		"Coffee first, road trips second, great conversations always.",
 		"2 km away",
 		[]string{"Travel", "Film", "Brunch"},
+		"2001-04-18",
+		"Japan",
+		"Tokyo",
+		"Long-term relationship with honest communication.",
 	); err != nil {
 		return fmt.Errorf("seed users: %w", err)
 	}
@@ -130,11 +139,16 @@ func Seed(db *sql.DB) error {
 	}
 
 	if _, err := db.ExecContext(ctx, `
-		INSERT INTO users (id, email, password_hash, role, name, age, job, bio, distance, interests)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-		ON CONFLICT (email) DO UPDATE SET role = EXCLUDED.role
+		INSERT INTO users (id, email, password_hash, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		ON CONFLICT (email) DO UPDATE SET
+			role = EXCLUDED.role,
+			birth_date = EXCLUDED.birth_date,
+			country = EXCLUDED.country,
+			prefecture = EXCLUDED.prefecture,
+			dating_reason = EXCLUDED.dating_reason
 	`,
-		"adm_seed_001",
+		"913ADMIN",
 		"admin@kimura.local",
 		string(adminPasswordHash),
 		"admin",
@@ -144,6 +158,10 @@ func Seed(db *sql.DB) error {
 		"Platform administrator",
 		"HQ",
 		[]string{"Moderation", "Safety", "Growth"},
+		"1995-08-09",
+		"Japan",
+		"Osaka",
+		"Admin account for moderation and customer support.",
 	); err != nil {
 		return fmt.Errorf("seed admin user: %w", err)
 	}

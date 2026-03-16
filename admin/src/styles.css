@@ -260,18 +260,6 @@ button:disabled {
   color: #825a09;
 }
 
-.user-list {
-  display: grid;
-  gap: 12px;
-}
-
-.user-item {
-  border: 1px solid rgba(31, 27, 28, 0.08);
-  border-radius: 20px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.72);
-}
-
 .user-item-main,
 .user-actions,
 .form-actions {
@@ -294,6 +282,63 @@ button:disabled {
   background: #f5d9e8;
   color: #6d2f40;
   font-weight: 700;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(31, 27, 28, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.user-table th,
+.user-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(31, 27, 28, 0.08);
+  vertical-align: top;
+}
+
+.user-table th {
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7b646c;
+  background: rgba(255, 248, 245, 0.96);
+}
+
+.user-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.user-table code {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #4e2230;
+}
+
+.table-id-cell {
+  display: grid;
+  gap: 8px;
+}
+
+.reason-cell {
+  max-width: 320px;
+  white-space: normal;
+  line-height: 1.5;
+  color: #4b3d42;
+}
+
+.field-note {
+  color: #7b646c;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .user-form {
