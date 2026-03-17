@@ -117,6 +117,7 @@ function App() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [activeMenu, setActiveMenu] = useState<MenuKey>('user-list');
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
   useEffect(() => {
     fetch(`${apiBaseUrl}/health`)
@@ -276,7 +277,7 @@ function App() {
     setLogoutLoading(false);
   }
 
-  function selectUser(user: User) {
+  function openEditUserModal(user: User) {
     setActiveMenu('user-list');
     setSelectedUserId(user.id);
     setForm({
@@ -289,6 +290,18 @@ function App() {
       datingReason: user.datingReason,
     });
     setMessage('');
+    setIsUserModalOpen(true);
+  }
+
+  function openCreateUserModal() {
+    resetForm();
+    setMessage('');
+    setIsUserModalOpen(true);
+  }
+
+  function closeUserModal() {
+    setIsUserModalOpen(false);
+    resetForm();
   }
 
   function resetForm() {
@@ -337,7 +350,7 @@ function App() {
       }
 
       setMessage(selectedUserId ? 'User updated successfully.' : 'User created successfully.');
-      resetForm();
+      closeUserModal();
       await loadUsers();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save user');
@@ -529,7 +542,7 @@ function App() {
               <StatCard label="Total users" value={String(activeUserCount)} accent="rose" />
               <StatCard
                 label="Selected mode"
-                value={selectedUserId ? 'Edit' : 'Create'}
+                value={isUserModalOpen ? (selectedUserId ? 'Edit' : 'Create') : 'Closed'}
                 accent="gold"
               />
               <StatCard label="Admin role" value={adminUser?.role ?? 'admin'} accent="ink" />
@@ -540,7 +553,7 @@ function App() {
               />
             </section>
 
-            <section className="content-grid users-layout">
+            <section className="content-grid user-list-layout">
               <div className="panel">
                 <div className="panel-header">
                   <div>
@@ -552,6 +565,9 @@ function App() {
                     </p>
                   </div>
                   <div className="inline-actions">
+                    <button onClick={openCreateUserModal} type="button">
+                      {'\u65b0\u898f\u767b\u9332'}
+                    </button>
                     <button className="ghost" onClick={() => void handleRefreshSession()} type="button">
                       Refresh session
                     </button>
@@ -599,7 +615,7 @@ function App() {
                             </td>
                             <td>
                               <div className="user-actions">
-                                <button onClick={() => selectUser(user)} type="button">
+                                <button onClick={() => openEditUserModal(user)} type="button">
                                   Edit
                                 </button>
                                 <button className="ghost" onClick={() => void handleDelete(user.id)} type="button">
@@ -614,87 +630,92 @@ function App() {
                   </div>
                 )}
               </div>
-
-              <div className="panel">
-                <div className="panel-header">
-                  <div>
-                    <h2>{selectedUserId ? 'Edit user' : 'Create user'}</h2>
-                    <p className="muted">Admin actions here are authenticated with Bearer JWT.</p>
-                  </div>
-                  {selectedUserId ? (
-                    <button className="ghost" onClick={resetForm} type="button">
-                      New user
-                    </button>
-                  ) : null}
-                </div>
-
-                <form className="user-form" onSubmit={(event) => void handleSubmit(event)}>
-                  <label>
-                    Email
-                    <input
-                      onChange={(event) => updateField('email', event.target.value)}
-                      type="email"
-                      value={form.email}
-                    />
-                  </label>
-                  <label>
-                    Password {selectedUserId ? '(leave blank to keep current password)' : ''}
-                    <input
-                      onChange={(event) => updateField('password', event.target.value)}
-                      type="password"
-                      value={form.password}
-                    />
-                  </label>
-                  <label>
-                    {'\u30e6\u30fc\u30b6\u30fc\u30cd\u30fc\u30e0'}
-                    <input
-                      onChange={(event) => updateField('name', event.target.value)}
-                      type="text"
-                      value={form.name}
-                    />
-                  </label>
-                  <label>
-                    {'\u751f\u5e74\u6708\u65e5'}
-                    <input
-                      onChange={(event) => updateField('birthDate', event.target.value)}
-                      type="date"
-                      value={form.birthDate}
-                    />
-                  </label>
-                  <label>
-                    {'\u56fd'}
-                    <input
-                      onChange={(event) => updateField('country', event.target.value)}
-                      type="text"
-                      value={form.country}
-                    />
-                  </label>
-                  <label>
-                    {'\u90fd\u9053\u5e9c\u770c'}
-                    <input
-                      onChange={(event) => updateField('prefecture', event.target.value)}
-                      type="text"
-                      value={form.prefecture}
-                    />
-                  </label>
-                  <label className="full-span">
-                    {'\u4ed8\u304d\u5408\u3046\u7406\u7531'}
-                    <textarea
-                      maxLength={100}
-                      onChange={(event) => updateField('datingReason', event.target.value)}
-                      rows={4}
-                      value={form.datingReason}
-                    />
-                    <small className="field-note">{form.datingReason.length}/100</small>
-                  </label>
-                  <div className="form-actions full-span">
-                    <button disabled={saving} type="submit">
-                      {saving ? 'Saving...' : selectedUserId ? 'Update user' : 'Create user'}
-                    </button>
-                  </div>
-                </form>
-              </div>
             </section>
+
+            {isUserModalOpen ? (
+              <div className="modal-backdrop" onClick={closeUserModal} role="presentation">
+                <div className="modal-panel" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+                  <div className="panel-header">
+                    <div>
+                      <h2>{selectedUserId ? 'Edit user' : 'Create new user'}</h2>
+                      <p className="muted">Admin actions here are authenticated with Bearer JWT.</p>
+                    </div>
+                    <button className="ghost" onClick={closeUserModal} type="button">
+                      Close
+                    </button>
+                  </div>
+
+                  <form className="user-form" onSubmit={(event) => void handleSubmit(event)}>
+                    <label>
+                      Email
+                      <input
+                        onChange={(event) => updateField('email', event.target.value)}
+                        type="email"
+                        value={form.email}
+                      />
+                    </label>
+                    <label>
+                      Password {selectedUserId ? '(leave blank to keep current password)' : ''}
+                      <input
+                        onChange={(event) => updateField('password', event.target.value)}
+                        type="password"
+                        value={form.password}
+                      />
+                    </label>
+                    <label>
+                      {'\u30e6\u30fc\u30b6\u30fc\u30cd\u30fc\u30e0'}
+                      <input
+                        onChange={(event) => updateField('name', event.target.value)}
+                        type="text"
+                        value={form.name}
+                      />
+                    </label>
+                    <label>
+                      {'\u751f\u5e74\u6708\u65e5'}
+                      <input
+                        onChange={(event) => updateField('birthDate', event.target.value)}
+                        type="date"
+                        value={form.birthDate}
+                      />
+                    </label>
+                    <label>
+                      {'\u56fd'}
+                      <input
+                        onChange={(event) => updateField('country', event.target.value)}
+                        type="text"
+                        value={form.country}
+                      />
+                    </label>
+                    <label>
+                      {'\u90fd\u9053\u5e9c\u770c'}
+                      <input
+                        onChange={(event) => updateField('prefecture', event.target.value)}
+                        type="text"
+                        value={form.prefecture}
+                      />
+                    </label>
+                    <label className="full-span">
+                      {'\u4ed8\u304d\u5408\u3046\u7406\u7531'}
+                      <textarea
+                        maxLength={100}
+                        onChange={(event) => updateField('datingReason', event.target.value)}
+                        rows={4}
+                        value={form.datingReason}
+                      />
+                      <small className="field-note">{form.datingReason.length}/100</small>
+                    </label>
+                    <div className="form-actions full-span">
+                      <button className="ghost" onClick={closeUserModal} type="button">
+                        Cancel
+                      </button>
+                      <button disabled={saving} type="submit">
+                        {saving ? 'Saving...' : selectedUserId ? 'Update user' : 'Create user'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            ) : null}
           </>
         ) : (
           renderPlaceholderView(activeMenu)
