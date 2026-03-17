@@ -8,6 +8,20 @@ type Profile struct {
 	Bio       string   `json:"bio"`
 	Distance  string   `json:"distance"`
 	Interests []string `json:"interests"`
+	Country   string   `json:"country"`
+	Gender    string   `json:"gender"`
+	Location  string   `json:"location"`
+	ImageURL  string   `json:"imageUrl"`
+	IsNew     bool     `json:"isNew"`
+}
+
+type DiscoveryFilter struct {
+	Country  string
+	Job      string
+	MinAge   int
+	MaxAge   int
+	Gender   string
+	Location string
 }
 
 type Match struct {

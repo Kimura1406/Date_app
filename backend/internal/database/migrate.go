@@ -82,11 +82,28 @@ func Seed(db *sql.DB) error {
 	defer cancel()
 
 	seedStatements := []string{
-		`INSERT INTO profiles (id, name, age, job, bio, distance, interests)
+		`INSERT INTO profiles (id, name, age, job, bio, distance, interests, country, gender, location, image_url, is_new)
 		 VALUES
-			('p-001', 'Lina', 24, 'Photographer', 'Coffee first, road trips second, great conversations always.', '2 km away', ARRAY['Travel', 'Film', 'Brunch']),
-			('p-002', 'Mai', 27, 'UX Designer', 'Looking for someone kind, curious, and up for late-night noodles.', '5 km away', ARRAY['Design', 'Music', 'Cats'])
-		 ON CONFLICT (id) DO NOTHING`,
+			('p-001', 'Samantha', 26, 'Photographer', 'Coffee first, road trips second, great conversations always.', '3 km from you', ARRAY['Travel', 'Film', 'Brunch'], 'Vietnam', 'female', 'Ho Chi Minh City', 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80', true),
+			('p-002', 'Mary', 27, 'Fitness Coach', 'Looking for a kind person who loves staying active and trying new cafes.', '1 km from you', ARRAY['Workout', 'Travel', 'Coffee'], 'Thailand', 'female', 'Bangkok', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80', true),
+			('p-003', 'Dakota', 30, 'Designer', 'Big on design, city walks, and quiet Sunday brunches.', '11 km from you', ARRAY['Design', 'Books', 'Fashion'], 'England', 'female', 'London', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80', false),
+			('p-004', 'Vi', 24, 'Marketing Specialist', 'Looking for warm conversations and someone who enjoys spontaneous trips.', '8 km from you', ARRAY['Music', 'Travel', 'Photo'], 'Vietnam', 'female', 'Da Nang', 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=900&q=80', true),
+			('p-005', 'Yuna', 25, 'Product Manager', 'I enjoy thoughtful chats, beautiful spaces, and ramen after work.', '6 km from you', ARRAY['Product', 'Food', 'Art'], 'Japan', 'female', 'Tokyo', 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80', false),
+			('p-006', 'Elena', 29, 'Doctor', 'Looking for honesty, kindness, and someone who loves the sea.', '14 km from you', ARRAY['Wellness', 'Beach', 'Cooking'], 'Russia', 'female', 'Moscow', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=900&q=80', false),
+			('p-007', 'Minji', 28, 'Software Engineer', 'I like building things, deep talks, and late-night desserts.', '4 km from you', ARRAY['Coding', 'Dessert', 'Movies'], 'Korea', 'female', 'Seoul', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=80', true),
+			('p-008', 'Lin', 26, 'Teacher', 'Calm energy, good books, and long walks are my comfort zone.', '9 km from you', ARRAY['Reading', 'Tea', 'Nature'], 'China', 'female', 'Shanghai', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80', false)
+		 ON CONFLICT (id) DO UPDATE SET
+			name = EXCLUDED.name,
+			age = EXCLUDED.age,
+			job = EXCLUDED.job,
+			bio = EXCLUDED.bio,
+			distance = EXCLUDED.distance,
+			interests = EXCLUDED.interests,
+			country = EXCLUDED.country,
+			gender = EXCLUDED.gender,
+			location = EXCLUDED.location,
+			image_url = EXCLUDED.image_url,
+			is_new = EXCLUDED.is_new`,
 		`INSERT INTO matches (id, name, last_message, last_seen, status)
 		 VALUES
 			('m-001', 'Ava', 'Dinner this weekend?', '2m ago', 'new'),
