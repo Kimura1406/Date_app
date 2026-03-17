@@ -46,35 +46,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int currentTab = 0;
-  bool isAuthenticated = false;
+  int currentTab = 2;
 
   @override
   Widget build(BuildContext context) {
-    if (!isAuthenticated) {
-      return AccountScreen(
-        onAuthChanged: (loggedIn) {
-          if (!mounted) return;
-          setState(() {
-            isAuthenticated = loggedIn;
-            currentTab = loggedIn ? 0 : 2;
-          });
-        },
-      );
-    }
-
     final screens = [
       const DiscoverScreen(),
       const MatchesScreen(),
-      AccountScreen(
-        onAuthChanged: (loggedIn) {
-          if (!mounted) return;
-          setState(() {
-            isAuthenticated = loggedIn;
-            currentTab = loggedIn ? currentTab : 2;
-          });
-        },
-      ),
+      const AccountScreen(),
     ];
 
     return Scaffold(
@@ -278,9 +257,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
 }
 
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key, this.onAuthChanged});
-
-  final ValueChanged<bool>? onAuthChanged;
+  const AccountScreen({super.key});
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -411,7 +388,6 @@ class _AccountScreenState extends State<AccountScreen> {
       setState(() {
         currentUser = null;
       });
-      widget.onAuthChanged?.call(false);
       _clearForm(keepAuthFields: false);
       await _clearSession();
       _showStatus('Account deleted successfully.');
@@ -427,7 +403,6 @@ class _AccountScreenState extends State<AccountScreen> {
         setState(() {
           currentUser = null;
         });
-        widget.onAuthChanged?.call(false);
         await _clearSession();
         _showStatus('Logged out successfully.');
       });
@@ -439,7 +414,6 @@ class _AccountScreenState extends State<AccountScreen> {
     setState(() {
       currentUser = null;
     });
-    widget.onAuthChanged?.call(false);
     await _clearSession();
     _showStatus('Logged out.');
   }
@@ -483,7 +457,6 @@ class _AccountScreenState extends State<AccountScreen> {
     setState(() {
       currentUser = user;
     });
-    widget.onAuthChanged?.call(true);
     _emailController.text = user.email;
     _nameController.text = user.name;
     _ageController.text = user.age.toString();
