@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../data/models.dart';
+import '../localization/app_language.dart';
+import '../localization/app_localizations.dart';
+import '../widgets/language_selector_field.dart';
 import '../widgets/profile_field.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({
     super.key,
     required this.currentUser,
+    required this.selectedLanguage,
+    required this.onLanguageChanged,
     required this.statusMessage,
     required this.busy,
     required this.emailController,
@@ -24,6 +29,8 @@ class AccountScreen extends StatelessWidget {
   });
 
   final AppUser currentUser;
+  final AppLanguage selectedLanguage;
+  final ValueChanged<AppLanguage> onLanguageChanged;
   final String statusMessage;
   final bool busy;
   final TextEditingController emailController;
@@ -41,6 +48,8 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
+
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -48,14 +57,14 @@ class AccountScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Account Center',
+              strings.myPageTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Logged in as ${currentUser.name} (${currentUser.email}) with role ${currentUser.role}.',
+              '${strings.myPageSubtitle}: ${currentUser.name} (${currentUser.email})',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: const Color(0xFF6E5960),
                   ),
@@ -70,35 +79,43 @@ class AccountScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ProfileField(label: 'Email', controller: emailController),
+                  LanguageSelectorField(
+                    label: strings.changeLanguage,
+                    language: selectedLanguage,
+                    onChanged: onLanguageChanged,
+                  ),
                   ProfileField(
-                    label: 'Password (leave blank to keep current password)',
+                    label: strings.emailLabel,
+                    controller: emailController,
+                  ),
+                  ProfileField(
+                    label: strings.passwordKeepCurrent,
                     controller: passwordController,
                     obscureText: true,
                   ),
                   ProfileField(
-                    label: 'Display name',
+                    label: strings.displayName,
                     controller: nameController,
                   ),
                   ProfileField(
-                    label: 'Age',
+                    label: strings.age,
                     controller: ageController,
                     keyboardType: TextInputType.number,
                   ),
-                  ProfileField(label: 'Job', controller: jobController),
+                  ProfileField(label: strings.job, controller: jobController),
                   ProfileField(
-                    label: 'Distance',
+                    label: strings.distance,
                     controller: distanceController,
                   ),
                   ProfileField(
-                    label: 'Bio',
+                    label: strings.bio,
                     controller: bioController,
                     maxLines: 3,
                   ),
                   ProfileField(
-                    label: 'Interests',
+                    label: strings.interests,
                     controller: interestsController,
-                    hintText: 'Travel, Music, Coffee',
+                    hintText: strings.interestsHint,
                   ),
                   const SizedBox(height: 8),
                   Wrap(
@@ -107,22 +124,22 @@ class AccountScreen extends StatelessWidget {
                     children: [
                       FilledButton.tonal(
                         onPressed: busy ? null : () async => onRefreshSession(),
-                        child: const Text('Refresh token'),
+                        child: Text(strings.refreshToken),
                       ),
                       OutlinedButton(
                         onPressed: busy ? null : () async => onUpdate(),
-                        child: const Text('Edit user'),
+                        child: Text(strings.editUser),
                       ),
                       OutlinedButton(
                         onPressed: busy ? null : () async => onDelete(),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: const Color(0xFF9B1C31),
                         ),
-                        child: const Text('Delete user'),
+                        child: Text(strings.deleteUser),
                       ),
                       OutlinedButton(
                         onPressed: busy ? null : () async => onLogout(),
-                        child: const Text('Logout'),
+                        child: Text(strings.logout),
                       ),
                     ],
                   ),

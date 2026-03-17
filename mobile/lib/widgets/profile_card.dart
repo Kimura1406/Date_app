@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/models.dart';
+import '../localization/app_localizations.dart';
 
 class ProfileCard extends StatelessWidget {
   const ProfileCard({super.key, required this.profile});
@@ -9,6 +10,8 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -61,14 +64,14 @@ class ProfileCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {},
-                  child: const Text('Skip'),
+                  child: Text(strings.skip),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton(
                   onPressed: () {},
-                  child: const Text('Like'),
+                  child: Text(strings.like),
                 ),
               ),
             ],

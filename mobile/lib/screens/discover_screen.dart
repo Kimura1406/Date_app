@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/api_client.dart';
 import '../data/models.dart';
+import '../localization/app_localizations.dart';
 import '../widgets/error_state.dart';
 import '../widgets/profile_card.dart';
 
@@ -23,6 +24,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -30,7 +33,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Kimura',
+              strings.discoverTitle,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF4A2330),
@@ -38,7 +41,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Find people you actually want to talk to.',
+              strings.discoverSubtitle,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: const Color(0xFF6E5960),
                   ),
@@ -53,7 +56,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   }
                   if (snapshot.hasError) {
                     return ErrorState(
-                      title: 'Cannot load profiles',
+                      title: strings.cannotLoadProfiles,
                       message: snapshot.error.toString(),
                       onRetry: () {
                         setState(() {
@@ -64,7 +67,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   }
                   final profiles = snapshot.data ?? [];
                   if (profiles.isEmpty) {
-                    return const Center(child: Text('No profiles yet'));
+                    return Center(child: Text(strings.noProfilesYet));
                   }
                   return ListView.separated(
                     itemCount: profiles.length,

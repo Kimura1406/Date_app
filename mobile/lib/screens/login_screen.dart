@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../localization/app_language.dart';
+import '../localization/app_localizations.dart';
+import '../widgets/language_selector_field.dart';
+
 class LoginScreen extends StatelessWidget {
   const LoginScreen({
     super.key,
+    required this.selectedLanguage,
+    required this.onLanguageChanged,
     required this.emailController,
     required this.passwordController,
     required this.passwordFocusNode,
@@ -23,6 +29,8 @@ class LoginScreen extends StatelessWidget {
     required this.onSubmit,
   });
 
+  final AppLanguage selectedLanguage;
+  final ValueChanged<AppLanguage> onLanguageChanged;
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final FocusNode passwordFocusNode;
@@ -43,6 +51,8 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -56,7 +66,7 @@ class LoginScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'ログイン',
+                        strings.loginTitle,
                         style:
                             Theme.of(context).textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.w800,
@@ -65,7 +75,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'メールアドレスとパスワードでログインしてください',
+                        strings.loginSubtitle,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: const Color(0xFF6E5960),
                             ),
@@ -80,8 +90,13 @@ class LoginScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            LanguageSelectorField(
+                              label: strings.changeLanguage,
+                              language: selectedLanguage,
+                              onChanged: onLanguageChanged,
+                            ),
                             Text(
-                              'メールアドレス',
+                              strings.emailLabel,
                               style:
                                   Theme.of(context).textTheme.labelLarge?.copyWith(
                                         color: const Color(0xFF7A6D72),
@@ -97,7 +112,7 @@ class LoginScreen extends StatelessWidget {
                                 LengthLimitingTextInputFormatter(50),
                               ],
                               decoration: InputDecoration(
-                                hintText: 'メールアドレスを入力',
+                                hintText: strings.emailPlaceholder,
                                 counterText: '',
                                 errorText: emailErrorText,
                                 border: const OutlineInputBorder(),
@@ -107,7 +122,7 @@ class LoginScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 14),
                             Text(
-                              'パスワード',
+                              strings.passwordLabel,
                               style:
                                   Theme.of(context).textTheme.labelLarge?.copyWith(
                                         color: const Color(0xFF7A6D72),
@@ -120,7 +135,7 @@ class LoginScreen extends StatelessWidget {
                               obscureText: obscurePassword,
                               textInputAction: TextInputAction.done,
                               decoration: InputDecoration(
-                                hintText: 'パスワードを入力',
+                                hintText: strings.passwordPlaceholder,
                                 errorText: passwordErrorText,
                                 border: const OutlineInputBorder(),
                                 suffixIcon: IconButton(
@@ -154,8 +169,8 @@ class LoginScreen extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(width: 8),
-                                    const Expanded(
-                                      child: Text('ログイン情報を記憶する'),
+                                    Expanded(
+                                      child: Text(strings.rememberLogin),
                                     ),
                                   ],
                                 ),
@@ -169,7 +184,11 @@ class LoginScreen extends StatelessWidget {
                                 onPressed: isLoginEnabled
                                     ? () async => onSubmit()
                                     : null,
-                                child: Text(busy ? 'ログイン中...' : 'ログイン'),
+                                child: Text(
+                                  busy
+                                      ? strings.signingIn
+                                      : strings.loginButton,
+                                ),
                               ),
                             ),
                             if (statusMessage.isNotEmpty) ...[

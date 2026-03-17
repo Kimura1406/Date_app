@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/api_client.dart';
 import '../data/models.dart';
+import '../localization/app_localizations.dart';
 import '../widgets/error_state.dart';
 
 class MatchesScreen extends StatefulWidget {
@@ -22,6 +23,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -33,7 +36,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
             }
             if (snapshot.hasError) {
               return ErrorState(
-                title: 'Cannot load matches',
+                title: strings.cannotLoadMatches,
                 message: snapshot.error.toString(),
                 onRetry: () {
                   setState(() {
@@ -47,7 +50,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Your Matches',
+                  strings.matchesTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -85,7 +88,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                     : const Color(0xFFD9F4DD),
                                 borderRadius: BorderRadius.circular(999),
                               ),
-                              child: Text(item.status),
+                              child: Text(strings.matchStatus(item.status)),
                             ),
                           ],
                         ),

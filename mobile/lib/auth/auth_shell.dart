@@ -1,17 +1,17 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/constants.dart';
 import '../data/api_client.dart';
 import '../data/models.dart';
+import '../localization/app_language.dart';
+import '../localization/app_localizations.dart';
 import '../screens/account_screen.dart';
 import '../screens/discover_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/matches_screen.dart';
-
-const _secureStorage = FlutterSecureStorage();
 
 class AuthShell extends StatefulWidget {
   const AuthShell({super.key});
@@ -76,22 +76,21 @@ class _AuthShellState extends State<AuthShell> {
   bool get _isPasswordValid => _trimmedPassword.isNotEmpty;
   bool get _isLoginFormValid => _isEmailValid && _isPasswordValid && !busy;
 
-  String? get _emailErrorText {
+  String? _emailErrorText(AppStrings strings) {
     if (!(emailTouched || loginAttempted)) return null;
-    if (_trimmedEmail.isEmpty) return 'メールアドレスを入力してください';
-    if (!_emailPattern.hasMatch(_trimmedEmail)) {
-      return '有効なメールアドレスを入力してくだい';
-    }
+    if (_trimmedEmail.isEmpty) return strings.emailRequired;
+    if (!_emailPattern.hasMatch(_trimmedEmail)) return strings.emailInvalid;
     return null;
   }
 
-  String? get _passwordErrorText {
+  String? _passwordErrorText(AppStrings strings) {
     if (!(passwordTouched || loginAttempted)) return null;
-    if (_trimmedPassword.isEmpty) return 'パスワードを入力してください';
+    if (_trimmedPassword.isEmpty) return strings.passwordRequired;
     return null;
   }
 
   Future<void> _login() async {
+    final strings = context.strings;
     await _runAction(() async {
       final loginResult = await _apiClient.login(
         email: _emailController.text,
@@ -102,7 +101,7 @@ class _AuthShellState extends State<AuthShell> {
       refreshToken = loginResult.refreshToken;
       await _persistRememberedLogin();
       await _persistSession();
-      _showStatus('Login successful.');
+      _showStatus(strings.loginSuccessful);
     });
   }
 
@@ -117,8 +116,9 @@ class _AuthShellState extends State<AuthShell> {
   }
 
   Future<void> _refreshSession() async {
+    final strings = context.strings;
     if (refreshToken.isEmpty) {
-      _showStatus('No refresh token available. Please login again.');
+      _showStatus(strings.noRefreshToken);
       return;
     }
     await _runAction(() async {
@@ -127,13 +127,14 @@ class _AuthShellState extends State<AuthShell> {
       authToken = loginResult.accessToken;
       refreshToken = loginResult.refreshToken;
       await _persistSession();
-      _showStatus('Session refreshed successfully.');
+      _showStatus(strings.sessionRefreshed);
     });
   }
 
   Future<void> _update() async {
+    final strings = context.strings;
     if (currentUser == null) {
-      _showStatus('Please login first before updating.');
+      _showStatus(strings.loginBeforeUpdate);
       return;
     }
     await _runAction(() async {
@@ -146,13 +147,14 @@ class _AuthShellState extends State<AuthShell> {
       );
       _applyUser(user);
       await _persistSession();
-      _showStatus('Profile updated successfully.');
+      _showStatus(strings.profileUpdated);
     });
   }
 
   Future<void> _delete() async {
+    final strings = context.strings;
     if (currentUser == null) {
-      _showStatus('Please login first before deleting.');
+      _showStatus(strings.loginBeforeDelete);
       return;
     }
     await _runAction(() async {
@@ -164,11 +166,12 @@ class _AuthShellState extends State<AuthShell> {
       });
       _clearForm(keepAuthFields: false);
       await _clearSession();
-      _showStatus('Account deleted successfully.');
+      _showStatus(strings.accountDeleted);
     });
   }
 
   Future<void> _logout() async {
+    final strings = context.strings;
     if (refreshToken.isNotEmpty) {
       await _runAction(() async {
         await _apiClient.logout(refreshToken: refreshToken);
@@ -178,7 +181,7 @@ class _AuthShellState extends State<AuthShell> {
           currentUser = null;
         });
         await _clearSession();
-        _showStatus('Logged out successfully.');
+        _showStatus(strings.loggedOutSuccessfully);
       });
       return;
     }
@@ -188,7 +191,7 @@ class _AuthShellState extends State<AuthShell> {
       currentUser = null;
     });
     await _clearSession();
-    _showStatus('Logged out.');
+    _showStatus(strings.loggedOut);
   }
 
   Future<void> _runAction(Future<void> Function() action) async {
@@ -242,7 +245,8 @@ class _AuthShellState extends State<AuthShell> {
 
   Future<void> _restoreSession() async {
     await _restoreRememberedLogin();
-    final raw = await _secureStorage.read(key: authStorageKey);
+    final preferences = await SharedPreferences.getInstance();
+    final raw = preferences.getString(authStorageKey);
     if (!mounted) return;
 
     if (raw == null || raw.isEmpty) {
@@ -260,13 +264,13 @@ class _AuthShellState extends State<AuthShell> {
       authToken = jsonMap['authToken'] as String? ?? '';
       refreshToken = jsonMap['refreshToken'] as String? ?? '';
       if (authToken.isEmpty || refreshToken.isEmpty || storedUser.id.isEmpty) {
-        await _secureStorage.delete(key: authStorageKey);
+        await preferences.remove(authStorageKey);
       } else {
         _applyUser(storedUser);
-        statusMessage = 'Session restored successfully.';
+        statusMessage = context.strings.sessionRestored;
       }
     } catch (_) {
-      await _secureStorage.delete(key: authStorageKey);
+      await preferences.remove(authStorageKey);
     }
 
     if (!mounted) return;
@@ -276,13 +280,14 @@ class _AuthShellState extends State<AuthShell> {
   }
 
   Future<void> _persistSession() async {
+    final preferences = await SharedPreferences.getInstance();
     if (currentUser == null || authToken.isEmpty || refreshToken.isEmpty) {
-      await _secureStorage.delete(key: authStorageKey);
+      await preferences.remove(authStorageKey);
       return;
     }
-    await _secureStorage.write(
-      key: authStorageKey,
-      value: jsonEncode({
+    await preferences.setString(
+      authStorageKey,
+      jsonEncode({
         'authToken': authToken,
         'refreshToken': refreshToken,
         'user': currentUser!.toJson(),
@@ -291,11 +296,13 @@ class _AuthShellState extends State<AuthShell> {
   }
 
   Future<void> _clearSession() async {
-    await _secureStorage.delete(key: authStorageKey);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove(authStorageKey);
   }
 
   Future<void> _restoreRememberedLogin() async {
-    final raw = await _secureStorage.read(key: rememberedLoginStorageKey);
+    final preferences = await SharedPreferences.getInstance();
+    final raw = preferences.getString(rememberedLoginStorageKey);
     if (raw == null || raw.isEmpty) return;
     try {
       final jsonMap = jsonDecode(raw) as Map<String, dynamic>;
@@ -303,18 +310,19 @@ class _AuthShellState extends State<AuthShell> {
       _passwordController.text = jsonMap['password'] as String? ?? '';
       rememberLoginInfo = jsonMap['remember'] as bool? ?? false;
     } catch (_) {
-      await _secureStorage.delete(key: rememberedLoginStorageKey);
+      await preferences.remove(rememberedLoginStorageKey);
     }
   }
 
   Future<void> _persistRememberedLogin() async {
+    final preferences = await SharedPreferences.getInstance();
     if (!rememberLoginInfo) {
-      await _secureStorage.delete(key: rememberedLoginStorageKey);
+      await preferences.remove(rememberedLoginStorageKey);
       return;
     }
-    await _secureStorage.write(
-      key: rememberedLoginStorageKey,
-      value: jsonEncode({
+    await preferences.setString(
+      rememberedLoginStorageKey,
+      jsonEncode({
         'email': _trimmedEmail,
         'password': _passwordController.text,
         'remember': true,
@@ -344,8 +352,16 @@ class _AuthShellState extends State<AuthShell> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _changeLanguage(AppLanguage language) async {
+    await context.languageController.setLanguage(language);
+    if (!mounted) return;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
+
     if (restoringSession) {
       return const Scaffold(
         body: SafeArea(
@@ -356,6 +372,8 @@ class _AuthShellState extends State<AuthShell> {
 
     if (currentUser == null) {
       return LoginScreen(
+        selectedLanguage: context.languageController.language,
+        onLanguageChanged: _changeLanguage,
         emailController: _emailController,
         passwordController: _passwordController,
         passwordFocusNode: _passwordFocusNode,
@@ -363,8 +381,8 @@ class _AuthShellState extends State<AuthShell> {
         obscurePassword: obscurePassword,
         rememberLoginInfo: rememberLoginInfo,
         statusMessage: statusMessage,
-        emailErrorText: _emailErrorText,
-        passwordErrorText: _passwordErrorText,
+        emailErrorText: _emailErrorText(strings),
+        passwordErrorText: _passwordErrorText(strings),
         isLoginEnabled: _isLoginFormValid,
         onEmailChanged: (_) {
           if (!emailTouched) emailTouched = true;
@@ -406,6 +424,8 @@ class _AuthShellState extends State<AuthShell> {
       const MatchesScreen(),
       AccountScreen(
         currentUser: currentUser!,
+        selectedLanguage: context.languageController.language,
+        onLanguageChanged: _changeLanguage,
         statusMessage: statusMessage,
         busy: busy,
         emailController: _emailController,
@@ -432,18 +452,18 @@ class _AuthShellState extends State<AuthShell> {
             currentTab = index;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.favorite_border),
-            label: 'Discover',
+            icon: const Icon(Icons.favorite_border),
+            label: strings.discoverTab,
           ),
           NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'Matches',
+            icon: const Icon(Icons.chat_bubble_outline),
+            label: strings.matchesTab,
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            label: 'Account',
+            icon: const Icon(Icons.person_outline),
+            label: strings.myPageTab,
           ),
         ],
       ),
