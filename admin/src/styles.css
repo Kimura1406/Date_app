@@ -1,5 +1,6 @@
 :root {
   --admin-bg-base: #050505;
+  --admin-main-bg: #505753;
   --admin-bg-surface: rgba(18, 18, 18, 0.92);
   --admin-bg-sidebar: rgba(12, 12, 12, 0.94);
   --admin-bg-soft: rgba(255, 255, 255, 0.08);
@@ -130,7 +131,9 @@ button:disabled {
 }
 
 .admin-main {
+  min-height: 100vh;
   padding: 32px;
+  background: var(--admin-main-bg);
 }
 
 .hero {
@@ -315,7 +318,13 @@ button:disabled {
   padding: 14px 16px;
   text-align: left;
   border-bottom: 1px solid var(--admin-border);
+  border-right: 1px solid var(--admin-border);
   vertical-align: top;
+}
+
+.user-table th:last-child,
+.user-table td:last-child {
+  border-right: 0;
 }
 
 .user-table th {
@@ -352,6 +361,35 @@ button:disabled {
   color: #b8aeb1;
   font-size: 0.85rem;
   font-weight: 500;
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.pagination-meta,
+.pagination-actions,
+.page-size-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-size-label {
+  color: #f5efec;
+}
+
+.page-size-label select {
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5efec;
 }
 
 .user-form {

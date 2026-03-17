@@ -102,6 +102,7 @@ const emptyForm: UserFormState = {
 };
 
 function App() {
+  const pageSizeOptions = [10, 20, 50, 100];
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -118,6 +119,8 @@ function App() {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [activeMenu, setActiveMenu] = useState<MenuKey>('user-list');
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     fetch(`${apiBaseUrl}/health`)
@@ -184,6 +187,7 @@ function App() {
       }
 
       setUsers(data.items ?? []);
+      setCurrentPage(1);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to load users');
     } finally {
@@ -448,6 +452,9 @@ function App() {
   }
 
   const activeUserCount = users.length;
+  const totalPages = Math.max(1, Math.ceil(users.length / pageSize));
+  const normalizedPage = Math.min(currentPage, totalPages);
+  const pagedUsers = users.slice((normalizedPage - 1) * pageSize, normalizedPage * pageSize);
 
   if (!authToken) {
     return (
@@ -584,50 +591,95 @@ function App() {
                 ) : users.length === 0 ? (
                   <p className="muted">No users found yet.</p>
                 ) : (
-                  <div className="table-wrap">
-                    <table className="user-table">
-                      <thead>
-                        <tr>
-                          <th>ID</th>
-                          <th>{'\u30e6\u30fc\u30b6\u30fc\u30cd\u30fc\u30e0'}</th>
-                          <th>{'\u751f\u5e74\u6708\u65e5'}</th>
-                          <th>{'\u56fd'}</th>
-                          <th>{'\u90fd\u9053\u5e9c\u770c'}</th>
-                          <th>{'\u4ed8\u304d\u5408\u3046\u7406\u7531'}</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {users.map((user) => (
-                          <tr key={user.id}>
-                            <td>
-                              <div className="table-id-cell">
-                                <code>{user.id}</code>
-                                <span className="pill">{user.role}</span>
-                              </div>
-                            </td>
-                            <td>{user.name}</td>
-                            <td>{formatDate(user.birthDate)}</td>
-                            <td>{user.country || '-'}</td>
-                            <td>{user.prefecture || '-'}</td>
-                            <td className="reason-cell" title={user.datingReason}>
-                              {truncateReason(user.datingReason)}
-                            </td>
-                            <td>
-                              <div className="user-actions">
-                                <button onClick={() => openEditUserModal(user)} type="button">
-                                  Edit
-                                </button>
-                                <button className="ghost" onClick={() => void handleDelete(user.id)} type="button">
-                                  Delete
-                                </button>
-                              </div>
-                            </td>
+                  <>
+                    <div className="table-wrap">
+                      <table className="user-table">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>{'\u30e6\u30fc\u30b6\u30fc\u30cd\u30fc\u30e0'}</th>
+                            <th>{'\u751f\u5e74\u6708\u65e5'}</th>
+                            <th>{'\u56fd'}</th>
+                            <th>{'\u90fd\u9053\u5e9c\u770c'}</th>
+                            <th>{'\u4ed8\u304d\u5408\u3046\u7406\u7531'}</th>
+                            <th>Actions</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {pagedUsers.map((user) => (
+                            <tr key={user.id}>
+                              <td>
+                                <div className="table-id-cell">
+                                  <code>{user.id}</code>
+                                  <span className="pill">{user.role}</span>
+                                </div>
+                              </td>
+                              <td>{user.name}</td>
+                              <td>{formatDate(user.birthDate)}</td>
+                              <td>{user.country || '-'}</td>
+                              <td>{user.prefecture || '-'}</td>
+                              <td className="reason-cell" title={user.datingReason}>
+                                {truncateReason(user.datingReason)}
+                              </td>
+                              <td>
+                                <div className="user-actions">
+                                  <button onClick={() => openEditUserModal(user)} type="button">
+                                    Edit
+                                  </button>
+                                  <button className="ghost" onClick={() => void handleDelete(user.id)} type="button">
+                                    Delete
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="pagination-bar">
+                      <div className="pagination-meta">
+                        <span>{users.length} users</span>
+                        <label className="page-size-label">
+                          <span>Rows per page</span>
+                          <select
+                            onChange={(event) => {
+                              setPageSize(Number(event.target.value));
+                              setCurrentPage(1);
+                            }}
+                            value={pageSize}
+                          >
+                            {pageSizeOptions.map((option) => (
+                              <option key={option} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+
+                      <div className="pagination-actions">
+                        <span>
+                          Page {normalizedPage} / {totalPages}
+                        </span>
+                        <button
+                          className="ghost"
+                          disabled={normalizedPage <= 1}
+                          onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                          type="button"
+                        >
+                          Prev
+                        </button>
+                        <button
+                          disabled={normalizedPage >= totalPages}
+                          onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                          type="button"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             </section>
