@@ -118,6 +118,12 @@ The backend now uses PostgreSQL for discovery and match data.
 docker compose up -d postgres
 ```
 
+## Project Notes
+
+- Docs index: [docs/README.md](./docs/README.md)
+- Vietnamese setup history: [docs/lich-su-thiet-lap-du-an.md](./docs/lich-su-thiet-lap-du-an.md)
+- English setup history: [docs/dev-setup-history.md](./docs/dev-setup-history.md)
+
 ### Backend env
 
 ```bash
