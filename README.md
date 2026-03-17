@@ -71,6 +71,36 @@ GitHub Actions now builds:
 - `backend/` with Go
 - `admin/` with Node.js + Vite
 
+## Deploy
+
+This repo includes a Render Blueprint in `render.yaml` for:
+
+- `date-app-backend` as a Go web service
+- `date-app-admin` as a static site
+- `date-app-db` as PostgreSQL
+
+To deploy on Render:
+
+1. Sign in to Render and connect your GitHub account.
+2. Create a new Blueprint and select this repository.
+3. Render will read `render.yaml` from the repo root and provision backend, admin, and database together.
+4. After deploy finishes, open the admin site URL and sign in with the seeded admin account.
+
+### One-click deploy from GitHub Actions
+
+This repo also includes a manual GitHub Actions workflow in `.github/workflows/deploy-render.yml`.
+
+Set these repository secrets once in GitHub:
+
+- `RENDER_BACKEND_DEPLOY_HOOK_URL`
+- `RENDER_ADMIN_DEPLOY_HOOK_URL`
+
+After that, deploy is just:
+
+1. Open the `Actions` tab in GitHub.
+2. Choose `Deploy Render`.
+3. Click `Run workflow`.
+4. Pick `all`, `backend`, or `admin`.
 ## Next Steps
 
 1. Add likes, matches, messages, and reports.
