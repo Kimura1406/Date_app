@@ -10,6 +10,7 @@ const apiBaseUrl = String.fromEnvironment(
   defaultValue: 'http://localhost:8080',
 );
 const authStorageKey = 'kimura_mobile_auth';
+const rememberedLoginStorageKey = 'kimura_mobile_login_form';
 const _secureStorage = FlutterSecureStorage();
 
 void main() {
@@ -270,6 +271,7 @@ class _AccountScreenState extends State<AccountScreen> {
   final _apiClient = ApiClient();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
   final _nameController = TextEditingController();
   final _ageController = TextEditingController(text: '18');
   final _jobController = TextEditingController();
@@ -286,6 +288,8 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _emailTouched = false;
   bool _passwordTouched = false;
   bool _loginAttempted = false;
+  bool _obscurePassword = true;
+  bool _rememberLoginInfo = false;
 
   @override
   void initState() {
@@ -297,6 +301,7 @@ class _AccountScreenState extends State<AccountScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordFocusNode.dispose();
     _nameController.dispose();
     _ageController.dispose();
     _jobController.dispose();
@@ -315,6 +320,7 @@ class _AccountScreenState extends State<AccountScreen> {
       _applyUser(loginResult.user);
       authToken = loginResult.accessToken;
       refreshToken = loginResult.refreshToken;
+      await _persistRememberedLogin();
       await _persistSession();
       _showStatus('Login successful.');
     });
@@ -462,6 +468,8 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _restoreSession() async {
+    await _restoreRememberedLogin();
+
     final raw = await _secureStorage.read(key: authStorageKey);
     if (!mounted) return;
 
@@ -513,6 +521,38 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _clearSession() async {
     await _secureStorage.delete(key: authStorageKey);
+  }
+
+  Future<void> _restoreRememberedLogin() async {
+    final raw = await _secureStorage.read(key: rememberedLoginStorageKey);
+    if (raw == null || raw.isEmpty) {
+      return;
+    }
+
+    try {
+      final jsonMap = jsonDecode(raw) as Map<String, dynamic>;
+      _emailController.text = jsonMap['email'] as String? ?? '';
+      _passwordController.text = jsonMap['password'] as String? ?? '';
+      _rememberLoginInfo = jsonMap['remember'] as bool? ?? false;
+    } catch (_) {
+      await _secureStorage.delete(key: rememberedLoginStorageKey);
+    }
+  }
+
+  Future<void> _persistRememberedLogin() async {
+    if (!_rememberLoginInfo) {
+      await _secureStorage.delete(key: rememberedLoginStorageKey);
+      return;
+    }
+
+    await _secureStorage.write(
+      key: rememberedLoginStorageKey,
+      value: jsonEncode({
+        'email': _trimmedEmail,
+        'password': _passwordController.text,
+        'remember': true,
+      }),
+    );
   }
 
   void _clearForm({required bool keepAuthFields}) {
@@ -582,11 +622,13 @@ class _AccountScreenState extends State<AccountScreen> {
     }
 
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             if (currentUser == null) ...[
               Text(
                 'ログイン',
@@ -622,6 +664,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
                       maxLength: 50,
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(50),
@@ -638,6 +681,9 @@ class _AccountScreenState extends State<AccountScreen> {
                         }
                         setState(() {});
                       },
+                      onFieldSubmitted: (_) {
+                        FocusScope.of(context).requestFocus(_passwordFocusNode);
+                      },
                     ),
                     const SizedBox(height: 14),
                     Text(
@@ -649,17 +695,54 @@ class _AccountScreenState extends State<AccountScreen> {
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _passwordController,
-                      obscureText: true,
+                      focusNode: _passwordFocusNode,
+                      obscureText: _obscurePassword,
+                      textInputAction: TextInputAction.done,
                       decoration: InputDecoration(
                         hintText: 'パスワードを入力',
                         errorText: _passwordErrorText,
                         border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                        ),
                       ),
                       onChanged: (_) {
                         if (!_passwordTouched) {
                           _passwordTouched = true;
                         }
                         setState(() {});
+                      },
+                      onFieldSubmitted: (_) async {
+                        if (_isLoginFormValid) {
+                          await _submitLogin();
+                        } else {
+                          setState(() {
+                            _loginAttempted = true;
+                            _emailTouched = true;
+                            _passwordTouched = true;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    CheckboxListTile(
+                      value: _rememberLoginInfo,
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: const Text('ログイン情報を記憶する'),
+                      onChanged: (value) {
+                        setState(() {
+                          _rememberLoginInfo = value ?? false;
+                        });
                       },
                     ),
                     const SizedBox(height: 20),
@@ -764,8 +847,19 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
               child: Text(statusMessage),
             ),
-          ],
-        ),
+              ],
+            ),
+          ),
+          if (busy && currentUser == null)
+            Positioned.fill(
+              child: ColoredBox(
+                color: Colors.black.withValues(alpha: 0.28),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
