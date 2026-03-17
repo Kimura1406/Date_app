@@ -26,6 +26,7 @@ func NewRouter(
 	mux.HandleFunc("GET /api/v1/discovery", discoveryHandler.ListProfiles)
 	mux.HandleFunc("GET /api/v1/matches", matchHandler.ListMatches)
 	mux.HandleFunc("POST /api/v1/admin/auth/login", userHandler.AdminLogin)
+	mux.HandleFunc("POST /api/v1/admin/auth/logout", userHandler.Logout)
 	mux.HandleFunc("GET /api/v1/admin/users", withAuth(tokenManager, requireRole("admin", userHandler.ListUsers)))
 	mux.HandleFunc("POST /api/v1/admin/users", withAuth(tokenManager, requireRole("admin", userHandler.CreateUser)))
 	mux.HandleFunc("GET /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.GetUser)))

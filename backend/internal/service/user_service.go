@@ -4,9 +4,9 @@ import (
 	"context"
 	"crypto/rand"
 	"database/sql"
-	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/big"
 	"strings"
 	"time"
 
@@ -72,7 +72,22 @@ func (s *UserService) CreateUser(ctx context.Context, input domain.CreateUserInp
 		return domain.User{}, fmt.Errorf("hash password: %w", err)
 	}
 
-	return s.repo.CreateUser(ctx, generateUserID(), normalizeCreateInput(input), string(passwordHash))
+	normalized, err := normalizeCreateInput(input)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	for range 10 {
+		user, createErr := s.repo.CreateUser(ctx, generateUserID(), normalized, string(passwordHash))
+		if createErr == nil {
+			return user, nil
+		}
+		if !isDuplicateKeyError(createErr) {
+			return domain.User{}, createErr
+		}
+	}
+
+	return domain.User{}, fmt.Errorf("generate unique user id: exhausted retries")
 }
 
 func (s *UserService) UpdateUser(ctx context.Context, id string, input domain.UpdateUserInput) (domain.User, error) {
@@ -80,7 +95,10 @@ func (s *UserService) UpdateUser(ctx context.Context, id string, input domain.Up
 		return domain.User{}, err
 	}
 
-	normalized := normalizeUpdateInput(input)
+	normalized, err := normalizeUpdateInput(input)
+	if err != nil {
+		return domain.User{}, err
+	}
 	var passwordHash *string
 	if strings.TrimSpace(normalized.Password) != "" {
 		hashed, err := bcrypt.GenerateFromPassword([]byte(normalized.Password), bcrypt.DefaultCost)
@@ -227,8 +245,20 @@ func validateCreateUser(input domain.CreateUserInput) error {
 	if strings.TrimSpace(input.Name) == "" {
 		return fmt.Errorf("name is required")
 	}
-	if input.Age <= 0 {
-		return fmt.Errorf("age must be greater than 0")
+	if _, err := parseBirthDate(input.BirthDate); err != nil {
+		return err
+	}
+	if strings.TrimSpace(input.Country) == "" {
+		return fmt.Errorf("country is required")
+	}
+	if strings.TrimSpace(input.Prefecture) == "" {
+		return fmt.Errorf("prefecture is required")
+	}
+	if strings.TrimSpace(input.DatingReason) == "" {
+		return fmt.Errorf("dating reason is required")
+	}
+	if len([]rune(strings.TrimSpace(input.DatingReason))) > 100 {
+		return fmt.Errorf("dating reason must be 100 characters or fewer")
 	}
 	return nil
 }
@@ -240,13 +270,30 @@ func validateUpdateUser(input domain.UpdateUserInput) error {
 	if strings.TrimSpace(input.Name) == "" {
 		return fmt.Errorf("name is required")
 	}
-	if input.Age <= 0 {
-		return fmt.Errorf("age must be greater than 0")
+	if _, err := parseBirthDate(input.BirthDate); err != nil {
+		return err
+	}
+	if strings.TrimSpace(input.Country) == "" {
+		return fmt.Errorf("country is required")
+	}
+	if strings.TrimSpace(input.Prefecture) == "" {
+		return fmt.Errorf("prefecture is required")
+	}
+	if strings.TrimSpace(input.DatingReason) == "" {
+		return fmt.Errorf("dating reason is required")
+	}
+	if len([]rune(strings.TrimSpace(input.DatingReason))) > 100 {
+		return fmt.Errorf("dating reason must be 100 characters or fewer")
 	}
 	return nil
 }
 
-func normalizeCreateInput(input domain.CreateUserInput) domain.CreateUserInput {
+func normalizeCreateInput(input domain.CreateUserInput) (domain.CreateUserInput, error) {
+	birthDate, err := parseBirthDate(input.BirthDate)
+	if err != nil {
+		return domain.CreateUserInput{}, err
+	}
+
 	input.Email = strings.TrimSpace(strings.ToLower(input.Email))
 	input.Password = strings.TrimSpace(input.Password)
 	input.Name = strings.TrimSpace(input.Name)
@@ -254,10 +301,20 @@ func normalizeCreateInput(input domain.CreateUserInput) domain.CreateUserInput {
 	input.Bio = strings.TrimSpace(input.Bio)
 	input.Distance = strings.TrimSpace(input.Distance)
 	input.Interests = normalizeInterests(input.Interests)
-	return input
+	input.BirthDate = birthDate.Format("2006-01-02")
+	input.Country = strings.TrimSpace(input.Country)
+	input.Prefecture = strings.TrimSpace(input.Prefecture)
+	input.DatingReason = strings.TrimSpace(input.DatingReason)
+	input.Age = calculateAge(birthDate, time.Now())
+	return input, nil
 }
 
-func normalizeUpdateInput(input domain.UpdateUserInput) domain.UpdateUserInput {
+func normalizeUpdateInput(input domain.UpdateUserInput) (domain.UpdateUserInput, error) {
+	birthDate, err := parseBirthDate(input.BirthDate)
+	if err != nil {
+		return domain.UpdateUserInput{}, err
+	}
+
 	input.Email = strings.TrimSpace(strings.ToLower(input.Email))
 	input.Password = strings.TrimSpace(input.Password)
 	input.Name = strings.TrimSpace(input.Name)
@@ -265,7 +322,12 @@ func normalizeUpdateInput(input domain.UpdateUserInput) domain.UpdateUserInput {
 	input.Bio = strings.TrimSpace(input.Bio)
 	input.Distance = strings.TrimSpace(input.Distance)
 	input.Interests = normalizeInterests(input.Interests)
-	return input
+	input.BirthDate = birthDate.Format("2006-01-02")
+	input.Country = strings.TrimSpace(input.Country)
+	input.Prefecture = strings.TrimSpace(input.Prefecture)
+	input.DatingReason = strings.TrimSpace(input.DatingReason)
+	input.Age = calculateAge(birthDate, time.Now())
+	return input, nil
 }
 
 func normalizeInterests(interests []string) []string {
@@ -280,17 +342,76 @@ func normalizeInterests(interests []string) []string {
 }
 
 func generateUserID() string {
-	return generateID("usr_")
+	const digits = "123456789"
+	const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	var builder strings.Builder
+	builder.Grow(8)
+	for i := 0; i < 3; i++ {
+		builder.WriteByte(randomCharsetByte(digits))
+	}
+	for i := 0; i < 5; i++ {
+		builder.WriteByte(randomCharsetByte(letters))
+	}
+	return builder.String()
 }
 
 func generateSessionID() string {
-	return generateID("ses_")
+	return "ses_" + generateHexID(12)
 }
 
-func generateID(prefix string) string {
-	bytes := make([]byte, 6)
+func generateHexID(size int) string {
+	bytes := make([]byte, size/2)
 	if _, err := rand.Read(bytes); err != nil {
-		return fmt.Sprintf("%s%d", prefix, len(bytes))
+		return fmt.Sprintf("fallback%d", len(bytes))
 	}
-	return prefix + hex.EncodeToString(bytes)
+	const hexdigits = "0123456789abcdef"
+	var builder strings.Builder
+	builder.Grow(len(bytes) * 2)
+	for _, value := range bytes {
+		builder.WriteByte(hexdigits[value>>4])
+		builder.WriteByte(hexdigits[value&0x0f])
+	}
+	return builder.String()
+}
+
+func randomCharsetByte(charset string) byte {
+	if len(charset) == 0 {
+		return 'X'
+	}
+
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+	if err != nil {
+		return charset[0]
+	}
+	return charset[n.Int64()]
+}
+
+func parseBirthDate(value string) (time.Time, error) {
+	birthDate, err := time.Parse("2006-01-02", strings.TrimSpace(value))
+	if err != nil {
+		return time.Time{}, fmt.Errorf("birth date must be in YYYY-MM-DD format")
+	}
+	if birthDate.After(time.Now()) {
+		return time.Time{}, fmt.Errorf("birth date cannot be in the future")
+	}
+	return birthDate, nil
+}
+
+func calculateAge(birthDate time.Time, now time.Time) int {
+	age := now.Year() - birthDate.Year()
+	if now.Month() < birthDate.Month() || (now.Month() == birthDate.Month() && now.Day() < birthDate.Day()) {
+		age--
+	}
+	if age < 0 {
+		return 0
+	}
+	return age
+}
+
+func isDuplicateKeyError(err error) bool {
+	if err == nil {
+		return false
+	}
+	return strings.Contains(strings.ToLower(err.Error()), "duplicate key")
 }
