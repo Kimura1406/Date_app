@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -262,6 +263,10 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  static final RegExp _emailPattern = RegExp(
+    r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
+  );
+
   final _apiClient = ApiClient();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -278,6 +283,9 @@ class _AccountScreenState extends State<AccountScreen> {
   bool busy = false;
   bool restoringSession = true;
   String statusMessage = 'Create a user or login with an existing account.';
+  bool _emailTouched = false;
+  bool _passwordTouched = false;
+  bool _loginAttempted = false;
 
   @override
   void initState() {
@@ -298,18 +306,6 @@ class _AccountScreenState extends State<AccountScreen> {
     super.dispose();
   }
 
-  Future<void> _register() async {
-    await _runAction(() async {
-      final user =
-          await _apiClient.createUser(_buildPayload(includePassword: true));
-      _applyUser(user);
-      authToken = '';
-      refreshToken = '';
-      await _persistSession();
-      _showStatus('User created successfully. Please login to receive a JWT.');
-    });
-  }
-
   Future<void> _login() async {
     await _runAction(() async {
       final loginResult = await _apiClient.login(
@@ -322,6 +318,20 @@ class _AccountScreenState extends State<AccountScreen> {
       await _persistSession();
       _showStatus('Login successful.');
     });
+  }
+
+  Future<void> _submitLogin() async {
+    setState(() {
+      _loginAttempted = true;
+      _emailTouched = true;
+      _passwordTouched = true;
+    });
+
+    if (!_isLoginFormValid) {
+      return;
+    }
+
+    await _login();
   }
 
   Future<void> _refreshSession() async {
@@ -527,6 +537,40 @@ class _AccountScreenState extends State<AccountScreen> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
+  String get _trimmedEmail => _emailController.text.trim();
+
+  String get _trimmedPassword => _passwordController.text.trim();
+
+  bool get _isEmailValid =>
+      _trimmedEmail.isNotEmpty && _emailPattern.hasMatch(_trimmedEmail);
+
+  bool get _isPasswordValid => _trimmedPassword.isNotEmpty;
+
+  bool get _isLoginFormValid => _isEmailValid && _isPasswordValid && !busy;
+
+  String? get _emailErrorText {
+    if (!(_emailTouched || _loginAttempted)) {
+      return null;
+    }
+    if (_trimmedEmail.isEmpty) {
+      return 'メールアドレスを入力してください';
+    }
+    if (!_emailPattern.hasMatch(_trimmedEmail)) {
+      return '有効なメールアドレスを入力してくだい';
+    }
+    return null;
+  }
+
+  String? get _passwordErrorText {
+    if (!(_passwordTouched || _loginAttempted)) {
+      return null;
+    }
+    if (_trimmedPassword.isEmpty) {
+      return 'パスワードを入力してください';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (restoringSession) {
@@ -543,96 +587,173 @@ class _AccountScreenState extends State<AccountScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Account Center',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              currentUser == null
-                  ? 'App users can create, login, edit, and delete their own account here.'
-                  : 'Logged in as ${currentUser!.name} (${currentUser!.email}) with role ${currentUser!.role}.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF6E5960),
-                  ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
+            if (currentUser == null) ...[
+              Text(
+                'ログイン',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF4A2330),
+                    ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _ProfileField(label: 'Email', controller: _emailController),
-                  _ProfileField(
-                    label: currentUser == null
-                        ? 'Password'
-                        : 'Password (leave blank to keep current password)',
-                    controller: _passwordController,
-                    obscureText: true,
-                  ),
-                  _ProfileField(
-                      label: 'Display name', controller: _nameController),
-                  _ProfileField(
-                    label: 'Age',
-                    controller: _ageController,
-                    keyboardType: TextInputType.number,
-                  ),
-                  _ProfileField(label: 'Job', controller: _jobController),
-                  _ProfileField(
-                      label: 'Distance', controller: _distanceController),
-                  _ProfileField(
-                    label: 'Bio',
-                    controller: _bioController,
-                    maxLines: 3,
-                  ),
-                  _ProfileField(
-                    label: 'Interests',
-                    controller: _interestsController,
-                    hintText: 'Travel, Music, Coffee',
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      FilledButton(
-                        onPressed: busy ? null : _register,
-                        child: Text(busy ? 'Working...' : 'Create user'),
+              const SizedBox(height: 8),
+              Text(
+                'メールアドレスとパスワードでログインしてください',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF6E5960),
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'メールアドレス',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: const Color(0xFF7A6D72),
+                          ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      maxLength: 50,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(50),
+                      ],
+                      decoration: InputDecoration(
+                        hintText: 'メールアドレスを入力',
+                        counterText: '',
+                        errorText: _emailErrorText,
+                        border: const OutlineInputBorder(),
                       ),
-                      FilledButton.tonal(
-                        onPressed: busy ? null : _login,
-                        child: const Text('Login'),
+                      onChanged: (_) {
+                        if (!_emailTouched) {
+                          _emailTouched = true;
+                        }
+                        setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'パスワード',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: const Color(0xFF7A6D72),
+                          ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: 'パスワードを入力',
+                        errorText: _passwordErrorText,
+                        border: const OutlineInputBorder(),
                       ),
-                      FilledButton.tonal(
-                        onPressed: busy ? null : _refreshSession,
-                        child: const Text('Refresh token'),
+                      onChanged: (_) {
+                        if (!_passwordTouched) {
+                          _passwordTouched = true;
+                        }
+                        setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: _isLoginFormValid ? _submitLogin : null,
+                        child: Text(busy ? 'ログイン中...' : 'ログイン'),
                       ),
-                      OutlinedButton(
-                        onPressed: busy ? null : _update,
-                        child: const Text('Edit user'),
-                      ),
-                      OutlinedButton(
-                        onPressed: busy ? null : _delete,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF9B1C31),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              Text(
+                'Account Center',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Logged in as ${currentUser!.name} (${currentUser!.email}) with role ${currentUser!.role}.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF6E5960),
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _ProfileField(label: 'Email', controller: _emailController),
+                    _ProfileField(
+                      label:
+                          'Password (leave blank to keep current password)',
+                      controller: _passwordController,
+                      obscureText: true,
+                    ),
+                    _ProfileField(
+                        label: 'Display name', controller: _nameController),
+                    _ProfileField(
+                      label: 'Age',
+                      controller: _ageController,
+                      keyboardType: TextInputType.number,
+                    ),
+                    _ProfileField(label: 'Job', controller: _jobController),
+                    _ProfileField(
+                        label: 'Distance', controller: _distanceController),
+                    _ProfileField(
+                      label: 'Bio',
+                      controller: _bioController,
+                      maxLines: 3,
+                    ),
+                    _ProfileField(
+                      label: 'Interests',
+                      controller: _interestsController,
+                      hintText: 'Travel, Music, Coffee',
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: [
+                        FilledButton.tonal(
+                          onPressed: busy ? null : _refreshSession,
+                          child: const Text('Refresh token'),
                         ),
-                        child: const Text('Delete user'),
-                      ),
-                      OutlinedButton(
-                        onPressed: busy ? null : _logout,
-                        child: const Text('Logout'),
-                      ),
-                    ],
-                  ),
-                ],
+                        OutlinedButton(
+                          onPressed: busy ? null : _update,
+                          child: const Text('Edit user'),
+                        ),
+                        OutlinedButton(
+                          onPressed: busy ? null : _delete,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF9B1C31),
+                          ),
+                          child: const Text('Delete user'),
+                        ),
+                        OutlinedButton(
+                          onPressed: busy ? null : _logout,
+                          child: const Text('Logout'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
             const SizedBox(height: 16),
             Container(
               width: double.infinity,
