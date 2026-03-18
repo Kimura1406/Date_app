@@ -650,52 +650,16 @@ function App() {
             <h1>{viewMeta[activeMenu].title}</h1>
             <p className="subcopy">{viewMeta[activeMenu].description}</p>
           </div>
-          {activeMenu !== 'chat' ? (
-            <div className="server-card">
-              <span>Backend</span>
-              <strong>{health?.status ?? 'offline'}</strong>
-              <small>{health ? `Environment: ${health.env}` : 'Cannot reach API'}</small>
-            </div>
-          ) : null}
         </section>
 
         {activeMenu === 'user-list' ? (
           <>
-            <section className="stats-grid">
-              <StatCard label="Total users" value={String(activeUserCount)} accent="rose" />
-              <StatCard
-                label="Selected mode"
-                value={isUserModalOpen ? (selectedUserId ? 'Edit' : 'Create') : 'Closed'}
-                accent="gold"
-              />
-              <StatCard label="Admin role" value={adminUser?.role ?? 'admin'} accent="ink" />
-              <StatCard
-                label="Directory state"
-                value={loadingUsers ? 'Syncing' : 'Ready'}
-                accent="mint"
-              />
-            </section>
-
             <section className="content-grid user-list-layout">
               <div className="panel">
-                <div className="panel-header">
-                  <div>
-                    <h2>{'\u30e6\u30fc\u30b6\u30fc\u4e00\u89a7'}</h2>
-                    <p className="muted">
-                      {
-                        '\u7ba1\u7406\u8005\u306e\u307f\u30c7\u30a3\u30ec\u30af\u30c8\u30ea\u3092\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002'
-                      }
-                    </p>
-                  </div>
+                <div className="panel-header panel-header-right">
                   <div className="inline-actions">
                     <button onClick={openCreateUserModal} type="button">
                       {'\u65b0\u898f\u767b\u9332'}
-                    </button>
-                    <button className="ghost" onClick={() => void handleRefreshSession()} type="button">
-                      Refresh session
-                    </button>
-                    <button onClick={() => void loadUsers()} type="button">
-                      Refresh users
                     </button>
                   </div>
                 </div>
