@@ -54,6 +54,21 @@ func (h *ChatHandler) ListUserRooms(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"items": items})
 }
 
+func (h *ChatHandler) EnsureAdminRoomForUser(w http.ResponseWriter, r *http.Request) {
+	room, err := h.chatService.EnsureAndGetAdminRoom(r.Context(), r.PathValue("id"))
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			writeError(w, http.StatusNotFound, "chat room not found")
+		default:
+			writeDomainError(w, err, "failed to ensure chat room")
+		}
+		return
+	}
+
+	writeJSON(w, http.StatusOK, room)
+}
+
 func (h *ChatHandler) GetRoomDetail(w http.ResponseWriter, r *http.Request) {
 	claims, ok := authClaimsFromContext(r.Context())
 	if !ok {

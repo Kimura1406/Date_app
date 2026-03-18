@@ -14,6 +14,7 @@ var ErrForbiddenChatRoom = errors.New("forbidden chat room")
 
 type chatRepository interface {
 	EnsureAdminRoomForUser(ctx context.Context, userID string) error
+	GetAdminRoomIDForUser(ctx context.Context, userID string) (string, error)
 	ListRooms(ctx context.Context, roomType string) ([]domain.ChatRoomSummary, error)
 	ListRoomsForUser(ctx context.Context, userID, roomType string) ([]domain.ChatRoomSummary, error)
 	GetRoomDetail(ctx context.Context, roomID string) (domain.ChatRoomDetail, error)
@@ -31,6 +32,19 @@ func NewChatService(repo chatRepository) *ChatService {
 
 func (s *ChatService) EnsureAdminRoomForUser(ctx context.Context, userID string) error {
 	return s.repo.EnsureAdminRoomForUser(ctx, userID)
+}
+
+func (s *ChatService) EnsureAndGetAdminRoom(ctx context.Context, userID string) (domain.ChatRoomDetail, error) {
+	if err := s.repo.EnsureAdminRoomForUser(ctx, userID); err != nil {
+		return domain.ChatRoomDetail{}, err
+	}
+
+	roomID, err := s.repo.GetAdminRoomIDForUser(ctx, userID)
+	if err != nil {
+		return domain.ChatRoomDetail{}, err
+	}
+
+	return s.repo.GetRoomDetail(ctx, roomID)
 }
 
 func (s *ChatService) ListRooms(ctx context.Context, roomType string) ([]domain.ChatRoomSummary, error) {

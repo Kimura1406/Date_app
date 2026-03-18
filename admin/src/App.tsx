@@ -319,31 +319,23 @@ function App() {
     setMessage('');
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/v1/admin/chat-rooms?type=admin`, {
+      const response = await fetch(`${apiBaseUrl}/api/v1/admin/users/${user.id}/operator-chat`, {
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
       });
-      const data = (await response.json()) as { items?: ChatRoom[]; error?: string };
+      const data = (await response.json()) as ChatRoom & { error?: string };
       if (isInvalidTokenResponse(response, data)) {
         clearAdminSession('Session expired. Please login again.');
         return;
       }
       if (!response.ok) {
-        throw new Error(data.error ?? 'Failed to load operator chat rooms');
+        throw new Error(data.error ?? 'Failed to open operator chat room');
       }
 
-      const targetRoom = (data.items ?? []).find((room) =>
-        room.participants.some(
-          (participant) => participant.userId === user.id && participant.role !== 'admin',
-        ),
-      );
-
-      if (!targetRoom) {
-        throw new Error('Operator chat room not found for this user');
-      }
-
-      await openChatRoomDetail(targetRoom.roomId);
+      setSelectedChatRoom(data);
+      setChatMessageDraft('');
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : 'Failed to open operator chat room',

@@ -34,6 +34,7 @@ func NewRouter(
 	mux.HandleFunc("GET /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.GetUser)))
 	mux.HandleFunc("PUT /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.UpdateUser)))
 	mux.HandleFunc("DELETE /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.DeleteUser)))
+	mux.HandleFunc("POST /api/v1/admin/users/{id}/operator-chat", withAuth(tokenManager, requireRole("admin", chatHandler.EnsureAdminRoomForUser)))
 	mux.HandleFunc("GET /api/v1/admin/chat-rooms", withAuth(tokenManager, requireRole("admin", chatHandler.ListAdminRooms)))
 	mux.HandleFunc("GET /api/v1/admin/chat-rooms/{id}", withAuth(tokenManager, requireRole("admin", chatHandler.GetRoomDetail)))
 	mux.HandleFunc("POST /api/v1/admin/chat-rooms/{id}/messages", withAuth(tokenManager, requireRole("admin", chatHandler.CreateMessage)))

@@ -49,6 +49,26 @@ func (r *ChatRepository) EnsureAdminRoomForUser(ctx context.Context, userID stri
 	return nil
 }
 
+func (r *ChatRepository) GetAdminRoomIDForUser(ctx context.Context, userID string) (string, error) {
+	var adminID string
+	err := r.db.QueryRowContext(ctx, `
+		SELECT id
+		FROM users
+		WHERE role = 'admin'
+		ORDER BY created_at ASC
+		LIMIT 1
+	`).Scan(&adminID)
+	if err != nil {
+		return "", fmt.Errorf("find admin user: %w", err)
+	}
+
+	if adminID == userID {
+		return "", sql.ErrNoRows
+	}
+
+	return buildDeterministicRoomID("admin", adminID, userID), nil
+}
+
 func (r *ChatRepository) ListRooms(ctx context.Context, roomType string) ([]domain.ChatRoomSummary, error) {
 	return r.listRoomsByQuery(ctx, `
 		SELECT
