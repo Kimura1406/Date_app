@@ -979,6 +979,173 @@ class AppStrings {
     }
   }
 
+  String get flowerShopTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Cửa hàng hoa';
+      case AppLanguage.japanese:
+        return 'フラワーショップ';
+      case AppLanguage.korean:
+        return '플라워 샵';
+      case AppLanguage.russian:
+        return 'Магазин цветов';
+      case AppLanguage.chinese:
+        return '鲜花商店';
+      case AppLanguage.english:
+        return 'Flower Shop';
+      case AppLanguage.thai:
+        return 'ร้านดอกไม้';
+    }
+  }
+
+  String get flowerShopSubtitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chọn hoa để tặng bằng point của bạn.';
+      case AppLanguage.japanese:
+        return 'ポイントで贈れるお花をここから選べます。';
+      case AppLanguage.korean:
+        return '포인트로 선물할 꽃을 여기에서 고를 수 있습니다.';
+      case AppLanguage.russian:
+        return 'Выберите цветы, которые можно подарить за поинты.';
+      case AppLanguage.chinese:
+        return '在这里选择可用点数赠送的鲜花。';
+      case AppLanguage.english:
+        return 'Choose flowers you can send with your points.';
+      case AppLanguage.thai:
+        return 'เลือกดอกไม้ที่คุณสามารถส่งเป็นของขวัญด้วยพอยต์ได้ที่นี่';
+    }
+  }
+
+  String get flowerShopTab {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Hoa';
+      case AppLanguage.japanese:
+        return '花';
+      case AppLanguage.korean:
+        return '꽃';
+      case AppLanguage.russian:
+        return 'Цветы';
+      case AppLanguage.chinese:
+        return '鲜花';
+      case AppLanguage.english:
+        return 'Flowers';
+      case AppLanguage.thai:
+        return 'ดอกไม้';
+    }
+  }
+
+  String flowerGiftName(Object type) {
+    final normalized = type.toString().split('.').last;
+    switch (normalized) {
+      case 'rose':
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Hoa hồng';
+          case AppLanguage.japanese:
+            return 'ローズ';
+          case AppLanguage.korean:
+            return '장미';
+          case AppLanguage.russian:
+            return 'Роза';
+          case AppLanguage.chinese:
+            return '玫瑰';
+          case AppLanguage.english:
+            return 'Rose';
+          case AppLanguage.thai:
+            return 'กุหลาบ';
+        }
+      case 'tulip':
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Tulip';
+          case AppLanguage.japanese:
+            return 'チューリップ';
+          case AppLanguage.korean:
+            return '튤립';
+          case AppLanguage.russian:
+            return 'Тюльпан';
+          case AppLanguage.chinese:
+            return '郁金香';
+          case AppLanguage.english:
+            return 'Tulip';
+          case AppLanguage.thai:
+            return 'ทิวลิป';
+        }
+      case 'lily':
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Hoa ly';
+          case AppLanguage.japanese:
+            return 'リリー';
+          case AppLanguage.korean:
+            return '백합';
+          case AppLanguage.russian:
+            return 'Лилия';
+          case AppLanguage.chinese:
+            return '百合';
+          case AppLanguage.english:
+            return 'Lily';
+          case AppLanguage.thai:
+            return 'ลิลลี่';
+        }
+      case 'sunflower':
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Hoa hướng dương';
+          case AppLanguage.japanese:
+            return 'ひまわり';
+          case AppLanguage.korean:
+            return '해바라기';
+          case AppLanguage.russian:
+            return 'Подсолнух';
+          case AppLanguage.chinese:
+            return '向日葵';
+          case AppLanguage.english:
+            return 'Sunflower';
+          case AppLanguage.thai:
+            return 'ทานตะวัน';
+        }
+      case 'lavender':
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Lavender';
+          case AppLanguage.japanese:
+            return 'ラベンダー';
+          case AppLanguage.korean:
+            return '라벤더';
+          case AppLanguage.russian:
+            return 'Лаванда';
+          case AppLanguage.chinese:
+            return '薰衣草';
+          case AppLanguage.english:
+            return 'Lavender';
+          case AppLanguage.thai:
+            return 'ลาเวนเดอร์';
+        }
+      case 'camellia':
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Hoa trà';
+          case AppLanguage.japanese:
+            return 'カメリア';
+          case AppLanguage.korean:
+            return '동백꽃';
+          case AppLanguage.russian:
+            return 'Камелия';
+          case AppLanguage.chinese:
+            return '山茶花';
+          case AppLanguage.english:
+            return 'Camellia';
+          case AppLanguage.thai:
+            return 'คามิเลีย';
+        }
+      default:
+        return normalized;
+    }
+  }
+
   String get myPageBirthDateLabel {
     switch (language) {
       case AppLanguage.vietnamese:
