@@ -248,12 +248,12 @@ button:disabled {
   max-width: none;
 }
 
-.chat-hero {
+.admin-page-hero {
   margin-top: 6px;
   margin-bottom: 8px;
 }
 
-.chat-hero h1 {
+.admin-page-hero h1 {
   font-size: clamp(1.8rem, 3vw, 3rem);
   max-width: none;
 }
