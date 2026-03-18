@@ -865,6 +865,253 @@ class AppStrings {
     }
   }
 
+  String get myPageProfileEdit {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chỉnh sửa hồ sơ';
+      case AppLanguage.japanese:
+        return 'プロフィール変更';
+      case AppLanguage.korean:
+        return '프로필 변경';
+      case AppLanguage.russian:
+        return 'Изменить профиль';
+      case AppLanguage.chinese:
+        return '修改资料';
+      case AppLanguage.english:
+        return 'Edit profile';
+      case AppLanguage.thai:
+        return 'แก้ไขโปรไฟล์';
+    }
+  }
+
+  String get myPageMyHome {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'My Home';
+      case AppLanguage.japanese:
+        return 'マイホーム';
+      case AppLanguage.korean:
+        return '마이홈';
+      case AppLanguage.russian:
+        return 'Мой дом';
+      case AppLanguage.chinese:
+        return '我的主页';
+      case AppLanguage.english:
+        return 'My Home';
+      case AppLanguage.thai:
+        return 'มายโฮม';
+    }
+  }
+
+  String get myPageBlockList {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Danh sách chặn';
+      case AppLanguage.japanese:
+        return 'ブロックリスト';
+      case AppLanguage.korean:
+        return '차단 목록';
+      case AppLanguage.russian:
+        return 'Черный список';
+      case AppLanguage.chinese:
+        return '屏蔽列表';
+      case AppLanguage.english:
+        return 'Block list';
+      case AppLanguage.thai:
+        return 'รายการบล็อก';
+    }
+  }
+
+  String get myPageTerms {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Điều khoản sử dụng';
+      case AppLanguage.japanese:
+        return '利用規約';
+      case AppLanguage.korean:
+        return '이용약관';
+      case AppLanguage.russian:
+        return 'Условия использования';
+      case AppLanguage.chinese:
+        return '使用条款';
+      case AppLanguage.english:
+        return 'Terms of Service';
+      case AppLanguage.thai:
+        return 'ข้อกำหนดการใช้งาน';
+    }
+  }
+
+  String get myPagePrivacy {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chính sách bảo mật';
+      case AppLanguage.japanese:
+        return 'プライバシーポリシー';
+      case AppLanguage.korean:
+        return '개인정보 처리방침';
+      case AppLanguage.russian:
+        return 'Политика конфиденциальности';
+      case AppLanguage.chinese:
+        return '隐私政策';
+      case AppLanguage.english:
+        return 'Privacy Policy';
+      case AppLanguage.thai:
+        return 'นโยบายความเป็นส่วนตัว';
+    }
+  }
+
+  String get myPageSettings {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Cài đặt';
+      case AppLanguage.japanese:
+        return '設定';
+      case AppLanguage.korean:
+        return '설정';
+      case AppLanguage.russian:
+        return 'Настройки';
+      case AppLanguage.chinese:
+        return '设置';
+      case AppLanguage.english:
+        return 'Settings';
+      case AppLanguage.thai:
+        return 'ตั้งค่า';
+    }
+  }
+
+  String get myPageBirthDateLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Ngày sinh';
+      case AppLanguage.japanese:
+        return '生年月日';
+      case AppLanguage.korean:
+        return '생년월일';
+      case AppLanguage.russian:
+        return 'Дата рождения';
+      case AppLanguage.chinese:
+        return '出生日期';
+      case AppLanguage.english:
+        return 'Birth date';
+      case AppLanguage.thai:
+        return 'วันเกิด';
+    }
+  }
+
+  String get myPageGenderLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Giới tính';
+      case AppLanguage.japanese:
+        return '性別';
+      case AppLanguage.korean:
+        return '성별';
+      case AppLanguage.russian:
+        return 'Пол';
+      case AppLanguage.chinese:
+        return '性别';
+      case AppLanguage.english:
+        return 'Gender';
+      case AppLanguage.thai:
+        return 'เพศ';
+    }
+  }
+
+  String get myPageEmptyPlaceholder {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Màn hình này đang được chuẩn bị.';
+      case AppLanguage.japanese:
+        return 'この画面は準備中です。';
+      case AppLanguage.korean:
+        return '이 화면은 준비 중입니다.';
+      case AppLanguage.russian:
+        return 'Этот экран пока готовится.';
+      case AppLanguage.chinese:
+        return '该页面正在准备中。';
+      case AppLanguage.english:
+        return 'This screen is being prepared.';
+      case AppLanguage.thai:
+        return 'หน้าจอนี้กำลังอยู่ระหว่างเตรียมการ';
+    }
+  }
+
+  String get myPageLogoutConfirmTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Xác nhận đăng xuất';
+      case AppLanguage.japanese:
+        return 'ログアウト確認';
+      case AppLanguage.korean:
+        return '로그아웃 확인';
+      case AppLanguage.russian:
+        return 'Подтвердите выход';
+      case AppLanguage.chinese:
+        return '确认登出';
+      case AppLanguage.english:
+        return 'Confirm logout';
+      case AppLanguage.thai:
+        return 'ยืนยันการออกจากระบบ';
+    }
+  }
+
+  String get myPageLogoutConfirmMessage {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Bạn có chắc muốn đăng xuất không?';
+      case AppLanguage.japanese:
+        return 'ログアウトしてもよろしいですか？';
+      case AppLanguage.korean:
+        return '로그아웃하시겠습니까?';
+      case AppLanguage.russian:
+        return 'Вы уверены, что хотите выйти?';
+      case AppLanguage.chinese:
+        return '确定要登出吗？';
+      case AppLanguage.english:
+        return 'Are you sure you want to log out?';
+      case AppLanguage.thai:
+        return 'คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ';
+    }
+  }
+
+  String get cancelLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Hủy';
+      case AppLanguage.japanese:
+        return 'キャンセル';
+      case AppLanguage.korean:
+        return '취소';
+      case AppLanguage.russian:
+        return 'Отмена';
+      case AppLanguage.chinese:
+        return '取消';
+      case AppLanguage.english:
+        return 'Cancel';
+      case AppLanguage.thai:
+        return 'ยกเลิก';
+    }
+  }
+
+  String get notSetLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chưa thiết lập';
+      case AppLanguage.japanese:
+        return '未設定';
+      case AppLanguage.korean:
+        return '미설정';
+      case AppLanguage.russian:
+        return 'Не задано';
+      case AppLanguage.chinese:
+        return '未设置';
+      case AppLanguage.english:
+        return 'Not set';
+      case AppLanguage.thai:
+        return 'ยังไม่ได้ตั้งค่า';
+    }
+  }
+
   String get noUserChatRooms {
     switch (language) {
       case AppLanguage.vietnamese:

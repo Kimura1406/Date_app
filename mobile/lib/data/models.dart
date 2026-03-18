@@ -251,6 +251,8 @@ class AppUser {
     required this.role,
     required this.name,
     required this.age,
+    required this.birthDate,
+    required this.gender,
     required this.job,
     required this.bio,
     required this.distance,
@@ -262,6 +264,8 @@ class AppUser {
   final String role;
   final String name;
   final int age;
+  final String birthDate;
+  final String gender;
   final String job;
   final String bio;
   final String distance;
@@ -274,6 +278,8 @@ class AppUser {
       role: json['role'] as String? ?? 'user',
       name: json['name'] as String? ?? '',
       age: json['age'] as int? ?? 0,
+      birthDate: json['birthDate'] as String? ?? '',
+      gender: json['gender'] as String? ?? '',
       job: json['job'] as String? ?? '',
       bio: json['bio'] as String? ?? '',
       distance: json['distance'] as String? ?? '',
@@ -290,6 +296,8 @@ class AppUser {
       'role': role,
       'name': name,
       'age': age,
+      'birthDate': birthDate,
+      'gender': gender,
       'job': job,
       'bio': bio,
       'distance': distance,
