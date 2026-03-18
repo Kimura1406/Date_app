@@ -132,6 +132,118 @@ class MatchItem {
   }
 }
 
+class ChatParticipant {
+  ChatParticipant({
+    required this.userId,
+    required this.name,
+    required this.role,
+    required this.isSender,
+  });
+
+  final String userId;
+  final String name;
+  final String role;
+  final bool isSender;
+
+  factory ChatParticipant.fromJson(Map<String, dynamic> json) {
+    return ChatParticipant(
+      userId: json['userId'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      role: json['role'] as String? ?? '',
+      isSender: json['isSender'] as bool? ?? false,
+    );
+  }
+}
+
+class ChatRoomSummary {
+  ChatRoomSummary({
+    required this.roomId,
+    required this.roomType,
+    required this.participants,
+    required this.lastMessage,
+    required this.lastMessageAt,
+  });
+
+  final String roomId;
+  final String roomType;
+  final List<ChatParticipant> participants;
+  final String lastMessage;
+  final String lastMessageAt;
+
+  factory ChatRoomSummary.fromJson(Map<String, dynamic> json) {
+    return ChatRoomSummary(
+      roomId: json['roomId'] as String? ?? '',
+      roomType: json['roomType'] as String? ?? '',
+      participants: (json['participants'] as List<dynamic>? ?? [])
+          .map((item) => ChatParticipant.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      lastMessage: json['lastMessage'] as String? ?? '',
+      lastMessageAt: json['lastMessageAt'] as String? ?? '',
+    );
+  }
+}
+
+class ChatMessageItem {
+  ChatMessageItem({
+    required this.id,
+    required this.roomId,
+    required this.senderId,
+    required this.senderName,
+    required this.body,
+    required this.sentAt,
+    required this.participant,
+  });
+
+  final String id;
+  final String roomId;
+  final String senderId;
+  final String senderName;
+  final String body;
+  final String sentAt;
+  final ChatParticipant participant;
+
+  factory ChatMessageItem.fromJson(Map<String, dynamic> json) {
+    return ChatMessageItem(
+      id: json['id'] as String? ?? '',
+      roomId: json['roomId'] as String? ?? '',
+      senderId: json['senderId'] as String? ?? '',
+      senderName: json['senderName'] as String? ?? '',
+      body: json['body'] as String? ?? '',
+      sentAt: json['sentAt'] as String? ?? '',
+      participant: ChatParticipant.fromJson(
+        json['participant'] as Map<String, dynamic>? ?? const {},
+      ),
+    );
+  }
+}
+
+class ChatRoomDetail {
+  ChatRoomDetail({
+    required this.roomId,
+    required this.roomType,
+    required this.participants,
+    required this.messages,
+  });
+
+  final String roomId;
+  final String roomType;
+  final List<ChatParticipant> participants;
+  final List<ChatMessageItem> messages;
+
+  factory ChatRoomDetail.fromJson(Map<String, dynamic> json) {
+    return ChatRoomDetail(
+      roomId: json['roomId'] as String? ?? '',
+      roomType: json['roomType'] as String? ?? '',
+      participants: (json['participants'] as List<dynamic>? ?? [])
+          .map((item) => ChatParticipant.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      messages: (json['messages'] as List<dynamic>? ?? [])
+          .map((item) => ChatMessageItem.fromJson(item as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
 class AppUser {
   AppUser({
     required this.id,

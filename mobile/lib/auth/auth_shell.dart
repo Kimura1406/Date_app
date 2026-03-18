@@ -421,7 +421,10 @@ class _AuthShellState extends State<AuthShell> {
 
     final screens = [
       DiscoverScreen(currentUser: currentUser!),
-      const MatchesScreen(),
+      MatchesScreen(
+        currentUser: currentUser!,
+        authToken: authToken,
+      ),
       AccountScreen(
         currentUser: currentUser!,
         selectedLanguage: context.languageController.language,

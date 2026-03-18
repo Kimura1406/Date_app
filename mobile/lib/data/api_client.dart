@@ -41,6 +41,66 @@ class ApiClient {
         .toList();
   }
 
+  Future<List<ChatRoomSummary>> fetchChatRooms({
+    required String token,
+    required String roomType,
+  }) async {
+    final response = await _client.get(
+      Uri.parse('$apiBaseUrl/api/v1/chat-rooms?type=$roomType'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Chat rooms request failed'));
+    }
+
+    final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+    final items = jsonMap['items'] as List<dynamic>? ?? [];
+    return items
+        .map((item) => ChatRoomSummary.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<ChatRoomDetail> fetchChatRoomDetail({
+    required String token,
+    required String roomId,
+  }) async {
+    final response = await _client.get(
+      Uri.parse('$apiBaseUrl/api/v1/chat-rooms/$roomId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(
+        _extractError(response.body, 'Chat room detail request failed'),
+      );
+    }
+
+    return ChatRoomDetail.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  Future<ChatMessageItem> sendChatMessage({
+    required String token,
+    required String roomId,
+    required String body,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$apiBaseUrl/api/v1/chat-rooms/$roomId/messages'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'body': body.trim()}),
+    );
+    if (response.statusCode != 201) {
+      throw Exception(_extractError(response.body, 'Send message failed'));
+    }
+
+    return ChatMessageItem.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
   Future<AppUser> updateUser(
     String userId,
     String token,

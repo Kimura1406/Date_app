@@ -770,6 +770,177 @@ class AppStrings {
     }
   }
 
+  String get chatRoomsTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Phòng chat';
+      case AppLanguage.japanese:
+        return 'チャットルーム';
+      case AppLanguage.korean:
+        return '채팅방';
+      case AppLanguage.russian:
+        return 'Чаты';
+      case AppLanguage.chinese:
+        return '聊天室';
+      case AppLanguage.english:
+        return 'Chat rooms';
+      case AppLanguage.thai:
+        return 'ห้องแชต';
+    }
+  }
+
+  String get chatRoomsSubtitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Theo dõi phòng hỗ trợ và các cuộc trò chuyện khác của bạn.';
+      case AppLanguage.japanese:
+        return '運営業者ルームと他のチャットルームをここで確認できます。';
+      case AppLanguage.korean:
+        return '운영자 방과 다른 대화를 여기에서 확인할 수 있습니다.';
+      case AppLanguage.russian:
+        return 'Здесь можно открыть комнату с оператором и другие чаты.';
+      case AppLanguage.chinese:
+        return '你可以在这里查看运营方聊天室和其他聊天。';
+      case AppLanguage.english:
+        return 'Open your operator room and other conversations here.';
+      case AppLanguage.thai:
+        return 'ดูห้องแชตกับทีมงานและห้องสนทนาอื่นได้ที่นี่';
+    }
+  }
+
+  String get operatorRoomName {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Vận hành';
+      case AppLanguage.japanese:
+        return '運営業者';
+      case AppLanguage.korean:
+        return '운영자';
+      case AppLanguage.russian:
+        return 'Оператор';
+      case AppLanguage.chinese:
+        return '运营方';
+      case AppLanguage.english:
+        return 'Operator';
+      case AppLanguage.thai:
+        return 'ทีมงาน';
+    }
+  }
+
+  String get operatorRoomSubtitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Hỗ trợ tài khoản và phản hồi nhanh từ admin.';
+      case AppLanguage.japanese:
+        return 'アカウントサポートと運営からのお知らせを確認できます。';
+      case AppLanguage.korean:
+        return '계정 지원과 운영진 안내를 여기서 확인할 수 있습니다.';
+      case AppLanguage.russian:
+        return 'Поддержка аккаунта и сообщения от оператора.';
+      case AppLanguage.chinese:
+        return '在这里查看账号支持和运营消息。';
+      case AppLanguage.english:
+        return 'Account support and direct replies from the admin team.';
+      case AppLanguage.thai:
+        return 'ติดต่อทีมงานเพื่อรับการช่วยเหลือเกี่ยวกับบัญชีได้ที่นี่';
+    }
+  }
+
+  String get operatorRoomDescription {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Nhấn để mở phòng chat cố định với admin.';
+      case AppLanguage.japanese:
+        return 'タップすると運営業者との固定チャットを開きます。';
+      case AppLanguage.korean:
+        return '탭하면 운영자와의 고정 채팅방이 열립니다.';
+      case AppLanguage.russian:
+        return 'Нажмите, чтобы открыть закреплённый чат с оператором.';
+      case AppLanguage.chinese:
+        return '点击即可打开与运营方的固定聊天室。';
+      case AppLanguage.english:
+        return 'Tap to open your pinned chat room with the operator.';
+      case AppLanguage.thai:
+        return 'แตะเพื่อเปิดห้องแชตที่ปักหมุดไว้กับทีมงาน';
+    }
+  }
+
+  String get noUserChatRooms {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chưa có phòng chat nào khác.';
+      case AppLanguage.japanese:
+        return '他のチャットルームはまだありません。';
+      case AppLanguage.korean:
+        return '다른 채팅방이 아직 없습니다.';
+      case AppLanguage.russian:
+        return 'Других чатов пока нет.';
+      case AppLanguage.chinese:
+        return '暂无其他聊天室。';
+      case AppLanguage.english:
+        return 'No other chat rooms yet.';
+      case AppLanguage.thai:
+        return 'ยังไม่มีห้องแชตอื่น';
+    }
+  }
+
+  String get noMessagesYet {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chưa có tin nhắn nào.';
+      case AppLanguage.japanese:
+        return 'まだメッセージはありません。';
+      case AppLanguage.korean:
+        return '아직 메시지가 없습니다.';
+      case AppLanguage.russian:
+        return 'Сообщений пока нет.';
+      case AppLanguage.chinese:
+        return '还没有消息。';
+      case AppLanguage.english:
+        return 'No messages yet.';
+      case AppLanguage.thai:
+        return 'ยังไม่มีข้อความ';
+    }
+  }
+
+  String get unknownUserLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Người dùng';
+      case AppLanguage.japanese:
+        return 'ユーザー';
+      case AppLanguage.korean:
+        return '사용자';
+      case AppLanguage.russian:
+        return 'Пользователь';
+      case AppLanguage.chinese:
+        return '用户';
+      case AppLanguage.english:
+        return 'User';
+      case AppLanguage.thai:
+        return 'ผู้ใช้';
+    }
+  }
+
+  String chatRoomDetailTitle(String name) {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chat với $name';
+      case AppLanguage.japanese:
+        return '$nameとのチャット';
+      case AppLanguage.korean:
+        return '$name 채팅';
+      case AppLanguage.russian:
+        return 'Чат с $name';
+      case AppLanguage.chinese:
+        return '与$name聊天';
+      case AppLanguage.english:
+        return 'Chat with $name';
+      case AppLanguage.thai:
+        return 'แชตกับ $name';
+    }
+  }
+
   String get loginSuccessful => _text('loginSuccessful');
   String get noRefreshToken => _text('noRefreshToken');
   String get sessionRefreshed => _text('sessionRefreshed');
