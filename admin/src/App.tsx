@@ -150,6 +150,22 @@ function App() {
   const [sendingChatMessage, setSendingChatMessage] = useState(false);
   const [chatMessageDraft, setChatMessageDraft] = useState('');
 
+  function clearAdminSession(sessionMessage: string) {
+    window.localStorage.removeItem(adminAuthStorageKey);
+    setAuthToken('');
+    setRefreshToken('');
+    setAdminUser(null);
+    setUsers([]);
+    setChatRooms([]);
+    setSelectedChatRoom(null);
+    setActiveMenu('user-list');
+    setMessage(sessionMessage);
+  }
+
+  function isInvalidTokenResponse(response: Response, data: { error?: string }) {
+    return response.status === 401 && data.error === 'invalid token';
+  }
+
   useEffect(() => {
     fetch(`${apiBaseUrl}/health`)
       .then((response) => response.json())
@@ -216,6 +232,10 @@ function App() {
         },
       });
       const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
       if (!response.ok) {
         throw new Error(data.error ?? 'Failed to load users');
       }
@@ -242,6 +262,10 @@ function App() {
         },
       });
       const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
       if (!response.ok) {
         throw new Error(data.error ?? 'Failed to load chat rooms');
       }
@@ -267,6 +291,10 @@ function App() {
         },
       });
       const data = (await response.json()) as ChatRoom & { error?: string };
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
       if (!response.ok) {
         throw new Error(data.error ?? 'Failed to load chat detail');
       }
@@ -296,6 +324,10 @@ function App() {
         body: JSON.stringify({ body: chatMessageDraft.trim() }),
       });
       const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
       if (!response.ok) {
         throw new Error(data.error ?? 'Failed to send message');
       }
@@ -463,6 +495,10 @@ function App() {
         body: JSON.stringify(payload),
       });
       const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
       if (!response.ok) {
         throw new Error(data.error ?? 'Failed to save user');
       }
@@ -489,6 +525,10 @@ function App() {
         },
       });
       const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
       if (!response.ok) {
         throw new Error(data.error ?? 'Failed to delete user');
       }
