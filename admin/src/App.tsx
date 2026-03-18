@@ -650,11 +650,13 @@ function App() {
             <h1>{viewMeta[activeMenu].title}</h1>
             <p className="subcopy">{viewMeta[activeMenu].description}</p>
           </div>
-          <div className="server-card">
-            <span>Backend</span>
-            <strong>{health?.status ?? 'offline'}</strong>
-            <small>{health ? `Environment: ${health.env}` : 'Cannot reach API'}</small>
-          </div>
+          {activeMenu !== 'chat' ? (
+            <div className="server-card">
+              <span>Backend</span>
+              <strong>{health?.status ?? 'offline'}</strong>
+              <small>{health ? `Environment: ${health.env}` : 'Cannot reach API'}</small>
+            </div>
+          ) : null}
         </section>
 
         {activeMenu === 'user-list' ? (
@@ -885,32 +887,9 @@ function App() {
           </>
         ) : activeMenu === 'chat' ? (
           <>
-            <section className="stats-grid">
-              <StatCard label="Total rooms" value={String(chatRooms.length)} accent="rose" />
-              <StatCard
-                label="Latest message"
-                value={chatRooms[0]?.lastMessage ?? '-'}
-                accent="gold"
-              />
-              <StatCard
-                label="Participants"
-                value={String(chatRooms.reduce((sum, room) => sum + room.participants.length, 0))}
-                accent="ink"
-              />
-              <StatCard label="Monitoring state" value={loadingChatRooms ? 'Syncing' : 'Ready'} accent="mint" />
-            </section>
-
             <section className="content-grid user-list-layout">
               <div className="panel">
-                <div className="panel-header">
-                  <div>
-                    <h2>{'\u30c1\u30e3\u30c3\u30c8\u7ba1\u7406'}</h2>
-                    <p className="muted">
-                      {
-                        '\u30eb\u30fc\u30e0\u3068\u6700\u7d42\u30e1\u30c3\u30bb\u30fc\u30b8\u3092\u4e00\u89a7\u3067\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002'
-                      }
-                    </p>
-                  </div>
+                <div className="panel-header panel-header-right">
                   <div className="inline-actions">
                     <div className="chat-segmented">
                       <button
@@ -928,9 +907,6 @@ function App() {
                         {'\u904b\u55b6\u696d\u8005'}
                       </button>
                     </div>
-                    <button onClick={() => void loadChatRooms(chatTab)} type="button">
-                      Refresh rooms
-                    </button>
                   </div>
                 </div>
 

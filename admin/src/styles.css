@@ -264,6 +264,10 @@ button:disabled {
   margin-bottom: 16px;
 }
 
+.panel-header-right {
+  justify-content: flex-end;
+}
+
 .panel-header h2 {
   margin: 0;
 }
