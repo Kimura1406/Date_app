@@ -150,6 +150,34 @@ func Seed(db *sql.DB) error {
 		return fmt.Errorf("seed users: %w", err)
 	}
 
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO users (id, email, password_hash, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		ON CONFLICT (email) DO UPDATE SET
+			role = EXCLUDED.role,
+			birth_date = EXCLUDED.birth_date,
+			country = EXCLUDED.country,
+			prefecture = EXCLUDED.prefecture,
+			dating_reason = EXCLUDED.dating_reason
+	`,
+		"472MARYA",
+		"mary@example.com",
+		string(passwordHash),
+		"user",
+		"Mary",
+		27,
+		"Fitness Coach",
+		"Looking for a kind person who loves staying active and trying new cafes.",
+		"1 km away",
+		[]string{"Workout", "Travel", "Coffee"},
+		"1998-07-22",
+		"Thailand",
+		"Bangkok",
+		"Meet new people and see where the connection goes.",
+	); err != nil {
+		return fmt.Errorf("seed users: %w", err)
+	}
+
 	adminPasswordHash, err := bcrypt.GenerateFromPassword([]byte("admin12345"), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("hash seed admin password: %w", err)
@@ -181,6 +209,31 @@ func Seed(db *sql.DB) error {
 		"Admin account for moderation and customer support.",
 	); err != nil {
 		return fmt.Errorf("seed admin user: %w", err)
+	}
+
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO chat_rooms (id, room_type, user_one_id, user_two_id)
+		VALUES
+			('admin-281LINAQ-913ADMIN', 'admin', LEAST('281LINAQ', '913ADMIN'), GREATEST('281LINAQ', '913ADMIN')),
+			('admin-472MARYA-913ADMIN', 'admin', LEAST('472MARYA', '913ADMIN'), GREATEST('472MARYA', '913ADMIN')),
+			('user-281LINAQ-472MARYA', 'user', LEAST('281LINAQ', '472MARYA'), GREATEST('281LINAQ', '472MARYA'))
+		ON CONFLICT DO NOTHING
+	`); err != nil {
+		return fmt.Errorf("seed chat rooms: %w", err)
+	}
+
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO chat_messages (id, room_id, sender_user_id, body, created_at)
+		VALUES
+			('msg_seed_001', 'admin-281LINAQ-913ADMIN', '281LINAQ', 'サポートに相談したいことがあります。', NOW() - INTERVAL '40 minutes'),
+			('msg_seed_002', 'admin-281LINAQ-913ADMIN', '913ADMIN', 'もちろんです。ご不明点を教えてください。', NOW() - INTERVAL '36 minutes'),
+			('msg_seed_003', 'admin-472MARYA-913ADMIN', '472MARYA', '登録できたので、まずは使い方を知りたいです。', NOW() - INTERVAL '28 minutes'),
+			('msg_seed_004', 'admin-472MARYA-913ADMIN', '913ADMIN', 'プロフィール設定から始めるのがおすすめです。', NOW() - INTERVAL '21 minutes'),
+			('msg_seed_005', 'user-281LINAQ-472MARYA', '281LINAQ', '週末に新しいカフェへ行ってみない？', NOW() - INTERVAL '18 minutes'),
+			('msg_seed_006', 'user-281LINAQ-472MARYA', '472MARYA', 'いいね、午後なら時間あるよ。', NOW() - INTERVAL '12 minutes')
+		ON CONFLICT DO NOTHING
+	`); err != nil {
+		return fmt.Errorf("seed chat messages: %w", err)
 	}
 
 	return nil

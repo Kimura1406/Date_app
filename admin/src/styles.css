@@ -396,6 +396,19 @@ button:disabled {
   border: 1px solid var(--admin-border);
 }
 
+.chat-segmented {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.chat-segmented button {
+  padding: 0.7rem 1rem;
+}
+
 .chat-detail-message p {
   margin: 10px 0 0;
   color: #f5efec;
@@ -408,6 +421,21 @@ button:disabled {
   justify-content: space-between;
   gap: 12px;
   color: #b8aeb1;
+}
+
+.chat-detail-compose {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.chat-detail-compose textarea {
+  width: 100%;
+  border: 1px solid var(--admin-border);
+  border-radius: 18px;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f5efec;
 }
 
 .field-note {

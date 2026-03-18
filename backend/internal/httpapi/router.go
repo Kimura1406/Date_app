@@ -12,6 +12,7 @@ func NewRouter(
 	cfg config.Config,
 	profileService *service.ProfileService,
 	matchService *service.MatchService,
+	chatService *service.ChatService,
 	userService *service.UserService,
 	tokenManager *backendauth.TokenManager,
 ) http.Handler {
@@ -20,6 +21,7 @@ func NewRouter(
 	healthHandler := NewHealthHandler(cfg)
 	discoveryHandler := NewDiscoveryHandler(profileService)
 	matchHandler := NewMatchHandler(matchService)
+	chatHandler := NewChatHandler(chatService)
 	userHandler := NewUserHandler(userService, tokenManager)
 
 	mux.HandleFunc("GET /health", healthHandler.Handle)
@@ -32,11 +34,17 @@ func NewRouter(
 	mux.HandleFunc("GET /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.GetUser)))
 	mux.HandleFunc("PUT /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.UpdateUser)))
 	mux.HandleFunc("DELETE /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.DeleteUser)))
+	mux.HandleFunc("GET /api/v1/admin/chat-rooms", withAuth(tokenManager, requireRole("admin", chatHandler.ListAdminRooms)))
+	mux.HandleFunc("GET /api/v1/admin/chat-rooms/{id}", withAuth(tokenManager, requireRole("admin", chatHandler.GetRoomDetail)))
+	mux.HandleFunc("POST /api/v1/admin/chat-rooms/{id}/messages", withAuth(tokenManager, requireRole("admin", chatHandler.CreateMessage)))
 	mux.HandleFunc("POST /api/v1/users", userHandler.CreateUser)
 	mux.HandleFunc("GET /api/v1/users/me", withAuth(tokenManager, userHandler.Me))
 	mux.HandleFunc("GET /api/v1/users/{id}", withAuth(tokenManager, userHandler.GetUser))
 	mux.HandleFunc("PUT /api/v1/users/{id}", withAuth(tokenManager, userHandler.UpdateUser))
 	mux.HandleFunc("DELETE /api/v1/users/{id}", withAuth(tokenManager, userHandler.DeleteUser))
+	mux.HandleFunc("GET /api/v1/chat-rooms", withAuth(tokenManager, chatHandler.ListUserRooms))
+	mux.HandleFunc("GET /api/v1/chat-rooms/{id}", withAuth(tokenManager, chatHandler.GetRoomDetail))
+	mux.HandleFunc("POST /api/v1/chat-rooms/{id}/messages", withAuth(tokenManager, chatHandler.CreateMessage))
 	mux.HandleFunc("POST /api/v1/auth/login", userHandler.Login)
 	mux.HandleFunc("POST /api/v1/auth/refresh", userHandler.Refresh)
 	mux.HandleFunc("POST /api/v1/auth/logout", userHandler.Logout)

@@ -48,15 +48,22 @@ type UserFormState = {
 
 type ChatMessage = {
   id: string;
+  senderId: string;
   senderName: string;
-  text: string;
+  body: string;
   sentAt: string;
 };
 
 type ChatRoom = {
   roomId: string;
-  participants: [User, User];
+  roomType: 'user' | 'admin';
+  participants: Array<{
+    userId: string;
+    name: string;
+    role: string;
+  }>;
   lastMessage: string;
+  lastMessageAt: string;
   messages: ChatMessage[];
 };
 
@@ -86,7 +93,7 @@ const viewMeta: Record<MenuKey, { title: string; description: string }> = {
   chat: {
     title: '\u30c1\u30e3\u30c3\u30c8\u7ba1\u7406',
     description:
-      '\u3053\u306e\u753b\u9762\u306f\u307e\u3060\u6e96\u5099\u4e2d\u3067\u3059\u3002\u6b21\u306e\u30ea\u30ea\u30fc\u30b9\u3067\u30c1\u30e3\u30c3\u30c8\u76e3\u8996\u3092\u8ffd\u52a0\u3067\u304d\u307e\u3059\u3002',
+      '\u30e6\u30fc\u30b6\u30fc\u30c1\u30e3\u30c3\u30c8\u3068\u904b\u55b6\u696d\u8005\u30c1\u30e3\u30c3\u30c8\u3092\u5207\u308a\u66ff\u3048\u3066\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002',
   },
   gift: {
     title: '\u30ae\u30d5\u30c8\u7ba1\u7406',
@@ -115,61 +122,6 @@ const emptyForm: UserFormState = {
   datingReason: '',
 };
 
-const sampleChatMessages = [
-  '\u4eca\u65e5\u306f\u3069\u3093\u306a\u4e00\u65e5\u3060\u3063\u305f\uff1f',
-  '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u898b\u3066\u8a71\u3057\u3066\u307f\u305f\u304f\u306a\u3063\u305f\u3088\u3002',
-  '\u9031\u672b\u306b\u30ab\u30d5\u30a7\u3067\u3082\u3069\u3046\uff1f',
-  '\u7b11\u9854\u304c\u7d20\u6575\u3060\u306d\u3002',
-  '\u3053\u3093\u3069\u304a\u3059\u3059\u3081\u306e\u304a\u5e97\u6559\u3048\u3066\u3002',
-  '\u3042\u3068\u3067\u3086\u3063\u304f\u308a\u8fd4\u4e8b\u3059\u308b\u306d\u3002',
-];
-
-const sampleRoomReplies = [
-  '\u305d\u308c\u3044\u3044\u306d\uff01',
-  '\u79c1\u3082\u6c17\u306b\u306a\u3063\u3066\u305f\u3002',
-  '\u3088\u304b\u3063\u305f\u3089\u8a71\u305d\u3046\u3002',
-  '\u3042\u308a\u304c\u3068\u3046\uff0c\u3046\u308c\u3057\u3044\u3002',
-  '\u305d\u308c\u306f\u697d\u3057\u307f\u304b\u3082\u3002',
-];
-
-function buildMockChatRooms(users: User[]): ChatRoom[] {
-  if (users.length < 2) {
-    return [];
-  }
-
-  const rooms: ChatRoom[] = [];
-
-  for (let index = 0; index < users.length - 1; index += 1) {
-    const first = users[index];
-    const second = users[index + 1];
-    const roomId = `ROOM-${String(index + 1).padStart(4, '0')}`;
-    const leadMessage = sampleChatMessages[index % sampleChatMessages.length];
-    const replyMessage = sampleRoomReplies[index % sampleRoomReplies.length];
-
-    rooms.push({
-      roomId,
-      participants: [first, second],
-      lastMessage: replyMessage,
-      messages: [
-        {
-          id: `${roomId}-1`,
-          senderName: first.name,
-          text: leadMessage,
-          sentAt: `2026-03-${String(10 + index).padStart(2, '0')} 20:15`,
-        },
-        {
-          id: `${roomId}-2`,
-          senderName: second.name,
-          text: replyMessage,
-          sentAt: `2026-03-${String(10 + index).padStart(2, '0')} 20:21`,
-        },
-      ],
-    });
-  }
-
-  return rooms;
-}
-
 function App() {
   const pageSizeOptions = [10, 20, 50, 100];
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -191,6 +143,12 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoom | null>(null);
+  const [chatTab, setChatTab] = useState<'user' | 'admin'>('user');
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
+  const [loadingChatRooms, setLoadingChatRooms] = useState(false);
+  const [chatDetailLoading, setChatDetailLoading] = useState(false);
+  const [sendingChatMessage, setSendingChatMessage] = useState(false);
+  const [chatMessageDraft, setChatMessageDraft] = useState('');
 
   useEffect(() => {
     fetch(`${apiBaseUrl}/health`)
@@ -239,6 +197,12 @@ function App() {
     }
   }, [authToken]);
 
+  useEffect(() => {
+    if (authToken && activeMenu === 'chat') {
+      void loadChatRooms(chatTab, authToken);
+    }
+  }, [activeMenu, authToken, chatTab]);
+
   async function loadUsers(token: string = authToken) {
     if (!token) return;
 
@@ -262,6 +226,86 @@ function App() {
       setMessage(error instanceof Error ? error.message : 'Failed to load users');
     } finally {
       setLoadingUsers(false);
+    }
+  }
+
+  async function loadChatRooms(type: 'user' | 'admin', token: string = authToken) {
+    if (!token) return;
+
+    setLoadingChatRooms(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/admin/chat-rooms?type=${type}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to load chat rooms');
+      }
+
+      setChatRooms(data.items ?? []);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to load chat rooms');
+    } finally {
+      setLoadingChatRooms(false);
+    }
+  }
+
+  async function openChatRoomDetail(roomId: string) {
+    if (!authToken) return;
+
+    setChatDetailLoading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/admin/chat-rooms/${roomId}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      const data = (await response.json()) as ChatRoom & { error?: string };
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to load chat detail');
+      }
+
+      setSelectedChatRoom(data);
+      setChatMessageDraft('');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to load chat detail');
+    } finally {
+      setChatDetailLoading(false);
+    }
+  }
+
+  async function handleSendChatMessage() {
+    if (!authToken || !selectedChatRoom || !chatMessageDraft.trim()) return;
+
+    setSendingChatMessage(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/admin/chat-rooms/${selectedChatRoom.roomId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ body: chatMessageDraft.trim() }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to send message');
+      }
+
+      setChatMessageDraft('');
+      await Promise.all([openChatRoomDetail(selectedChatRoom.roomId), loadChatRooms(chatTab)]);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to send message');
+    } finally {
+      setSendingChatMessage(false);
     }
   }
 
@@ -522,7 +566,6 @@ function App() {
   }
 
   const activeUserCount = users.length;
-  const chatRooms = buildMockChatRooms(users);
   const totalPages = Math.max(1, Math.ceil(users.length / pageSize));
   const normalizedPage = Math.min(currentPage, totalPages);
   const pagedUsers = users.slice((normalizedPage - 1) * pageSize, normalizedPage * pageSize);
@@ -854,7 +897,7 @@ function App() {
                 value={String(chatRooms.reduce((sum, room) => sum + room.participants.length, 0))}
                 accent="ink"
               />
-              <StatCard label="Monitoring state" value="Ready" accent="mint" />
+              <StatCard label="Monitoring state" value={loadingChatRooms ? 'Syncing' : 'Ready'} accent="mint" />
             </section>
 
             <section className="content-grid user-list-layout">
@@ -869,7 +912,23 @@ function App() {
                     </p>
                   </div>
                   <div className="inline-actions">
-                    <button onClick={() => void loadUsers()} type="button">
+                    <div className="chat-segmented">
+                      <button
+                        className={chatTab === 'user' ? 'active' : 'ghost'}
+                        onClick={() => setChatTab('user')}
+                        type="button"
+                      >
+                        {'\u30e6\u30fc\u30b6\u30fc\u30c1\u30e3\u30c3\u30c8'}
+                      </button>
+                      <button
+                        className={chatTab === 'admin' ? 'active' : 'ghost'}
+                        onClick={() => setChatTab('admin')}
+                        type="button"
+                      >
+                        {'\u904b\u55b6\u696d\u8005'}
+                      </button>
+                    </div>
+                    <button onClick={() => void loadChatRooms(chatTab)} type="button">
                       Refresh rooms
                     </button>
                   </div>
@@ -877,7 +936,7 @@ function App() {
 
                 {message ? <div className="notice">{message}</div> : null}
 
-                {loadingUsers ? (
+                {loadingChatRooms ? (
                   <p className="muted">Loading chat rooms...</p>
                 ) : chatRooms.length === 0 ? (
                   <p className="muted">No chat rooms found yet.</p>
@@ -900,14 +959,14 @@ function App() {
                             </td>
                             <td>
                               <div className="chat-participants">
-                                <span>{room.participants[0].name}</span>
+                                <span>{room.participants[0]?.name ?? '-'}</span>
                                 <span className="chat-participant-sep">/</span>
-                                <span>{room.participants[1].name}</span>
+                                <span>{room.participants[1]?.name ?? '-'}</span>
                               </div>
                             </td>
                             <td className="chat-last-message">{room.lastMessage}</td>
                             <td>
-                              <button onClick={() => setSelectedChatRoom(room)} type="button">
+                              <button onClick={() => void openChatRoomDetail(room.roomId)} type="button">
                                 {'\u8a73\u7d30\u3078'}
                               </button>
                             </td>
@@ -927,13 +986,15 @@ function App() {
                     <div>
                       <h2>{selectedChatRoom.roomId}</h2>
                       <p className="muted">
-                        {selectedChatRoom.participants[0].name} / {selectedChatRoom.participants[1].name}
+                        {selectedChatRoom.participants[0]?.name ?? '-'} / {selectedChatRoom.participants[1]?.name ?? '-'}
                       </p>
                     </div>
                     <button className="ghost" onClick={() => setSelectedChatRoom(null)} type="button">
                       Close
                     </button>
                   </div>
+
+                  {chatDetailLoading ? <p className="muted">Loading chat detail...</p> : null}
 
                   <div className="chat-detail-thread">
                     {selectedChatRoom.messages.map((chat) => (
@@ -942,9 +1003,27 @@ function App() {
                           <strong>{chat.senderName}</strong>
                           <span>{chat.sentAt}</span>
                         </div>
-                        <p>{chat.text}</p>
+                        <p>{chat.body}</p>
                       </article>
                     ))}
+                  </div>
+
+                  <div className="chat-detail-compose">
+                    <textarea
+                      onChange={(event) => setChatMessageDraft(event.target.value)}
+                      placeholder="Type a reply..."
+                      rows={3}
+                      value={chatMessageDraft}
+                    />
+                    <div className="form-actions">
+                      <button
+                        disabled={sendingChatMessage || !chatMessageDraft.trim()}
+                        onClick={() => void handleSendChatMessage()}
+                        type="button"
+                      >
+                        {sendingChatMessage ? 'Sending...' : 'Send message'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

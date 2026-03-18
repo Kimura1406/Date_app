@@ -33,9 +33,14 @@ type sessionRepository interface {
 	RevokeSessionByTokenHash(ctx context.Context, tokenHash string) error
 }
 
+type userChatRepository interface {
+	EnsureAdminRoomForUser(ctx context.Context, userID string) error
+}
+
 type UserService struct {
 	repo            userRepository
 	sessionRepo     sessionRepository
+	chatRepo        userChatRepository
 	tokenManager    *backendauth.TokenManager
 	refreshTokenTTL time.Duration
 }
@@ -43,12 +48,14 @@ type UserService struct {
 func NewUserService(
 	repo userRepository,
 	sessionRepo sessionRepository,
+	chatRepo userChatRepository,
 	tokenManager *backendauth.TokenManager,
 	refreshTokenTTL time.Duration,
 ) *UserService {
 	return &UserService{
 		repo:            repo,
 		sessionRepo:     sessionRepo,
+		chatRepo:        chatRepo,
 		tokenManager:    tokenManager,
 		refreshTokenTTL: refreshTokenTTL,
 	}
@@ -80,6 +87,11 @@ func (s *UserService) CreateUser(ctx context.Context, input domain.CreateUserInp
 	for range 10 {
 		user, createErr := s.repo.CreateUser(ctx, generateUserID(), normalized, string(passwordHash))
 		if createErr == nil {
+			if s.chatRepo != nil {
+				if err := s.chatRepo.EnsureAdminRoomForUser(ctx, user.ID); err != nil {
+					return domain.User{}, err
+				}
+			}
 			return user, nil
 		}
 		if !isDuplicateKeyError(createErr) {

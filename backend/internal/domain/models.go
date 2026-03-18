@@ -32,6 +32,38 @@ type Match struct {
 	Status      string `json:"status"`
 }
 
+type ChatParticipant struct {
+	UserID   string `json:"userId"`
+	Name     string `json:"name"`
+	Role     string `json:"role"`
+	IsSender bool   `json:"isSender,omitempty"`
+}
+
+type ChatMessage struct {
+	ID          string          `json:"id"`
+	RoomID      string          `json:"roomId"`
+	SenderID    string          `json:"senderId"`
+	SenderName  string          `json:"senderName"`
+	Body        string          `json:"body"`
+	SentAt      string          `json:"sentAt"`
+	Participant ChatParticipant `json:"participant"`
+}
+
+type ChatRoomSummary struct {
+	RoomID        string            `json:"roomId"`
+	RoomType      string            `json:"roomType"`
+	Participants  []ChatParticipant `json:"participants"`
+	LastMessage   string            `json:"lastMessage"`
+	LastMessageAt string            `json:"lastMessageAt"`
+}
+
+type ChatRoomDetail struct {
+	RoomID       string            `json:"roomId"`
+	RoomType     string            `json:"roomType"`
+	Participants []ChatParticipant `json:"participants"`
+	Messages     []ChatMessage     `json:"messages"`
+}
+
 type User struct {
 	ID           string   `json:"id"`
 	Email        string   `json:"email"`
