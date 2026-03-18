@@ -133,14 +133,14 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   strings.chatRoomsTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF4A2330),
+                        color: Colors.white,
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   strings.chatRoomsSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF7A6770),
+                        color: Colors.white.withValues(alpha: 0.74),
                       ),
                 ),
                 const SizedBox(height: 18),

@@ -150,7 +150,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               strings.feedSectionTitle,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF4A2330),
+                    color: Colors.white,
                   ),
             ),
             const SizedBox(height: 12),

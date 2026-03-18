@@ -60,20 +60,21 @@ class AccountScreen extends StatelessWidget {
               strings.myPageTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
               '${strings.myPageSubtitle}: ${currentUser.name} (${currentUser.email})',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF6E5960),
+                    color: Colors.white.withValues(alpha: 0.74),
                   ),
             ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.white.withValues(alpha: 0.95),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Column(

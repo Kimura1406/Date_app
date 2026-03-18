@@ -12,6 +12,7 @@ import '../screens/account_screen.dart';
 import '../screens/discover_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/matches_screen.dart';
+import '../widgets/app_scene_background.dart';
 
 class AuthShell extends StatefulWidget {
   const AuthShell({super.key});
@@ -364,7 +365,8 @@ class _AuthShellState extends State<AuthShell> {
 
     if (restoringSession) {
       return const Scaffold(
-        body: SafeArea(
+        backgroundColor: Colors.black,
+        body: AppSceneBackground(
           child: Center(child: CircularProgressIndicator()),
         ),
       );
@@ -447,8 +449,20 @@ class _AuthShellState extends State<AuthShell> {
     ];
 
     return Scaffold(
-      body: screens[currentTab],
+      backgroundColor: Colors.black,
+      body: AppSceneBackground(
+        child: screens[currentTab],
+      ),
       bottomNavigationBar: NavigationBar(
+        backgroundColor: const Color(0xFF101010),
+        indicatorColor: const Color(0xFF2C2C2C),
+        surfaceTintColor: Colors.transparent,
+        labelTextStyle: WidgetStatePropertyAll(
+          Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Colors.white.withValues(alpha: 0.88),
+                fontWeight: FontWeight.w600,
+              ),
+        ),
         selectedIndex: currentTab,
         onDestinationSelected: (index) {
           setState(() {

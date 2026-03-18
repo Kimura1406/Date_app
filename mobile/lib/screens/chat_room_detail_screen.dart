@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/api_client.dart';
 import '../data/models.dart';
 import '../localization/app_localizations.dart';
+import '../widgets/app_scene_background.dart';
 import '../widgets/error_state.dart';
 
 class ChatRoomDetailScreen extends StatefulWidget {
@@ -139,11 +140,11 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
     final strings = context.strings;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F6),
+      backgroundColor: Colors.black,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF4A2330),
+        foregroundColor: Colors.white,
         titleSpacing: 0,
         title: FutureBuilder<ChatRoomDetail>(
           future: _detailFuture,
@@ -171,13 +172,13 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                       widget.roomDisplayName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF4A2330),
+                            color: Colors.white,
                           ),
                     ),
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF7A6770),
+                            color: Colors.white.withValues(alpha: 0.7),
                           ),
                     ),
                   ],
@@ -187,9 +188,10 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
           },
         ),
       ),
-      body: FutureBuilder<ChatRoomDetail>(
-        future: _detailFuture,
-        builder: (context, snapshot) {
+      body: AppSceneBackground(
+        child: FutureBuilder<ChatRoomDetail>(
+          future: _detailFuture,
+          builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -292,7 +294,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                           decoration: InputDecoration(
                             hintText: strings.chatInputPlaceholder,
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Colors.white.withValues(alpha: 0.95),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 14,
@@ -323,6 +325,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
             ],
           );
         },
+        ),
       ),
     );
   }

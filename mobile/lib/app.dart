@@ -5,6 +5,7 @@ import 'auth/auth_shell.dart';
 import 'localization/app_language.dart';
 import 'localization/app_language_controller.dart';
 import 'localization/app_localizations.dart';
+import 'widgets/app_scene_background.dart';
 
 class KimuraApp extends StatefulWidget {
   const KimuraApp({super.key});
@@ -54,13 +55,14 @@ class _KimuraAppState extends State<KimuraApp> {
                 seedColor: const Color(0xFFE85D75),
                 brightness: Brightness.light,
               ),
-              scaffoldBackgroundColor: const Color(0xFFFFF8F6),
+              scaffoldBackgroundColor: Colors.black,
               useMaterial3: true,
             ),
             home: _languageController.loaded
                 ? const AuthShell()
                 : const Scaffold(
-                    body: SafeArea(
+                    backgroundColor: Colors.black,
+                    body: AppSceneBackground(
                       child: Center(
                         child: CircularProgressIndicator(),
                       ),

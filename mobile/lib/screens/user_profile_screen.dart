@@ -4,6 +4,7 @@ import '../data/models.dart';
 import '../data/profile_post_factory.dart';
 import '../localization/app_localizations.dart';
 import '../localization/discovery_strings.dart';
+import '../widgets/app_scene_background.dart';
 import 'chat_room_screen.dart';
 
 const _defaultProfileCoverImage =
@@ -27,8 +28,8 @@ class UserProfileScreen extends StatelessWidget {
     final birthYear = DateTime.now().year - profile.age;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F6),
-      body: SafeArea(
+      backgroundColor: Colors.black,
+      body: AppSceneBackground(
         child: Column(
           children: [
             _ProfileHeader(
@@ -45,7 +46,7 @@ class UserProfileScreen extends StatelessWidget {
                     strings.postsSectionTitle,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF4A2330),
+                          color: Colors.white,
                         ),
                   ),
                   const Spacer(),

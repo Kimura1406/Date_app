@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../localization/app_language.dart';
 import '../localization/app_localizations.dart';
+import '../widgets/app_scene_background.dart';
 import '../widgets/language_selector_field.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -54,7 +55,8 @@ class LoginScreen extends StatelessWidget {
     final strings = context.strings;
 
     return Scaffold(
-      body: SafeArea(
+      backgroundColor: Colors.black,
+      body: AppSceneBackground(
         child: Stack(
           children: [
             SingleChildScrollView(
@@ -70,21 +72,21 @@ class LoginScreen extends StatelessWidget {
                         style:
                             Theme.of(context).textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF4A2330),
+                                  color: Colors.white,
                                 ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         strings.loginSubtitle,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: const Color(0xFF6E5960),
+                              color: Colors.white.withValues(alpha: 0.72),
                             ),
                       ),
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Colors.white.withValues(alpha: 0.95),
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: Column(
@@ -99,7 +101,7 @@ class LoginScreen extends StatelessWidget {
                               strings.emailLabel,
                               style:
                                   Theme.of(context).textTheme.labelLarge?.copyWith(
-                                        color: const Color(0xFF7A6D72),
+                                        color: const Color(0xFF6A5D62),
                                       ),
                             ),
                             const SizedBox(height: 6),
@@ -125,7 +127,7 @@ class LoginScreen extends StatelessWidget {
                               strings.passwordLabel,
                               style:
                                   Theme.of(context).textTheme.labelLarge?.copyWith(
-                                        color: const Color(0xFF7A6D72),
+                                        color: const Color(0xFF6A5D62),
                                       ),
                             ),
                             const SizedBox(height: 6),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/models.dart';
 import '../localization/app_localizations.dart';
+import '../widgets/app_scene_background.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   const ChatRoomScreen({
@@ -97,11 +98,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     final strings = context.strings;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F6),
+      backgroundColor: Colors.black,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF4A2330),
+        foregroundColor: Colors.white,
         titleSpacing: 0,
         title: Row(
           children: [
@@ -125,13 +126,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   widget.profile.name,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF4A2330),
-                      ),
+                      color: Colors.white,
+                    ),
                 ),
                 Text(
                   strings.chatOnlineStatus,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF7A6770),
+                        color: Colors.white.withValues(alpha: 0.7),
                       ),
                 ),
               ],
@@ -139,10 +140,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
+      body: AppSceneBackground(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               itemCount: _messages.length,
@@ -200,9 +202,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               },
             ),
           ),
-          SafeArea(
-            top: false,
-            child: Padding(
+            SafeArea(
+              top: false,
+              child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Row(
                 children: [
@@ -214,7 +216,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       decoration: InputDecoration(
                         hintText: strings.chatInputPlaceholder,
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Colors.white.withValues(alpha: 0.95),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 14,
@@ -239,8 +241,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 ],
               ),
             ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
