@@ -357,6 +357,59 @@ button:disabled {
   color: #e9dfe2;
 }
 
+.chat-table {
+  min-width: 760px;
+}
+
+.chat-participants {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: #f5efec;
+  font-weight: 600;
+}
+
+.chat-participant-sep {
+  color: #b8aeb1;
+}
+
+.chat-last-message {
+  max-width: 420px;
+  color: #e9dfe2;
+  line-height: 1.5;
+}
+
+.chat-detail-modal {
+  width: min(720px, 100%);
+}
+
+.chat-detail-thread {
+  display: grid;
+  gap: 14px;
+}
+
+.chat-detail-message {
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--admin-border);
+}
+
+.chat-detail-message p {
+  margin: 10px 0 0;
+  color: #f5efec;
+  line-height: 1.6;
+}
+
+.chat-detail-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #b8aeb1;
+}
+
 .field-note {
   color: #b8aeb1;
   font-size: 0.85rem;

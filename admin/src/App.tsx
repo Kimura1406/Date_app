@@ -46,6 +46,20 @@ type UserFormState = {
   datingReason: string;
 };
 
+type ChatMessage = {
+  id: string;
+  senderName: string;
+  text: string;
+  sentAt: string;
+};
+
+type ChatRoom = {
+  roomId: string;
+  participants: [User, User];
+  lastMessage: string;
+  messages: ChatMessage[];
+};
+
 type MenuKey = 'user-list' | 'chat' | 'gift' | 'sales' | 'revenue';
 
 const menuSections: Array<{
@@ -101,6 +115,61 @@ const emptyForm: UserFormState = {
   datingReason: '',
 };
 
+const sampleChatMessages = [
+  '\u4eca\u65e5\u306f\u3069\u3093\u306a\u4e00\u65e5\u3060\u3063\u305f\uff1f',
+  '\u30d7\u30ed\u30d5\u30a3\u30fc\u30eb\u3092\u898b\u3066\u8a71\u3057\u3066\u307f\u305f\u304f\u306a\u3063\u305f\u3088\u3002',
+  '\u9031\u672b\u306b\u30ab\u30d5\u30a7\u3067\u3082\u3069\u3046\uff1f',
+  '\u7b11\u9854\u304c\u7d20\u6575\u3060\u306d\u3002',
+  '\u3053\u3093\u3069\u304a\u3059\u3059\u3081\u306e\u304a\u5e97\u6559\u3048\u3066\u3002',
+  '\u3042\u3068\u3067\u3086\u3063\u304f\u308a\u8fd4\u4e8b\u3059\u308b\u306d\u3002',
+];
+
+const sampleRoomReplies = [
+  '\u305d\u308c\u3044\u3044\u306d\uff01',
+  '\u79c1\u3082\u6c17\u306b\u306a\u3063\u3066\u305f\u3002',
+  '\u3088\u304b\u3063\u305f\u3089\u8a71\u305d\u3046\u3002',
+  '\u3042\u308a\u304c\u3068\u3046\uff0c\u3046\u308c\u3057\u3044\u3002',
+  '\u305d\u308c\u306f\u697d\u3057\u307f\u304b\u3082\u3002',
+];
+
+function buildMockChatRooms(users: User[]): ChatRoom[] {
+  if (users.length < 2) {
+    return [];
+  }
+
+  const rooms: ChatRoom[] = [];
+
+  for (let index = 0; index < users.length - 1; index += 1) {
+    const first = users[index];
+    const second = users[index + 1];
+    const roomId = `ROOM-${String(index + 1).padStart(4, '0')}`;
+    const leadMessage = sampleChatMessages[index % sampleChatMessages.length];
+    const replyMessage = sampleRoomReplies[index % sampleRoomReplies.length];
+
+    rooms.push({
+      roomId,
+      participants: [first, second],
+      lastMessage: replyMessage,
+      messages: [
+        {
+          id: `${roomId}-1`,
+          senderName: first.name,
+          text: leadMessage,
+          sentAt: `2026-03-${String(10 + index).padStart(2, '0')} 20:15`,
+        },
+        {
+          id: `${roomId}-2`,
+          senderName: second.name,
+          text: replyMessage,
+          sentAt: `2026-03-${String(10 + index).padStart(2, '0')} 20:21`,
+        },
+      ],
+    });
+  }
+
+  return rooms;
+}
+
 function App() {
   const pageSizeOptions = [10, 20, 50, 100];
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -121,6 +190,7 @@ function App() {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoom | null>(null);
 
   useEffect(() => {
     fetch(`${apiBaseUrl}/health`)
@@ -452,6 +522,7 @@ function App() {
   }
 
   const activeUserCount = users.length;
+  const chatRooms = buildMockChatRooms(users);
   const totalPages = Math.max(1, Math.ceil(users.length / pageSize));
   const normalizedPage = Math.min(currentPage, totalPages);
   const pagedUsers = users.slice((normalizedPage - 1) * pageSize, normalizedPage * pageSize);
@@ -765,6 +836,116 @@ function App() {
                       </button>
                     </div>
                   </form>
+                </div>
+              </div>
+            ) : null}
+          </>
+        ) : activeMenu === 'chat' ? (
+          <>
+            <section className="stats-grid">
+              <StatCard label="Total rooms" value={String(chatRooms.length)} accent="rose" />
+              <StatCard
+                label="Latest message"
+                value={chatRooms[0]?.lastMessage ?? '-'}
+                accent="gold"
+              />
+              <StatCard
+                label="Participants"
+                value={String(chatRooms.reduce((sum, room) => sum + room.participants.length, 0))}
+                accent="ink"
+              />
+              <StatCard label="Monitoring state" value="Ready" accent="mint" />
+            </section>
+
+            <section className="content-grid user-list-layout">
+              <div className="panel">
+                <div className="panel-header">
+                  <div>
+                    <h2>{'\u30c1\u30e3\u30c3\u30c8\u7ba1\u7406'}</h2>
+                    <p className="muted">
+                      {
+                        '\u30eb\u30fc\u30e0\u3068\u6700\u7d42\u30e1\u30c3\u30bb\u30fc\u30b8\u3092\u4e00\u89a7\u3067\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002'
+                      }
+                    </p>
+                  </div>
+                  <div className="inline-actions">
+                    <button onClick={() => void loadUsers()} type="button">
+                      Refresh rooms
+                    </button>
+                  </div>
+                </div>
+
+                {message ? <div className="notice">{message}</div> : null}
+
+                {loadingUsers ? (
+                  <p className="muted">Loading chat rooms...</p>
+                ) : chatRooms.length === 0 ? (
+                  <p className="muted">No chat rooms found yet.</p>
+                ) : (
+                  <div className="table-wrap">
+                    <table className="user-table chat-table">
+                      <thead>
+                        <tr>
+                          <th>{'\u30eb\u30fc\u30e0ID'}</th>
+                          <th>{'\u53c2\u52a0\u8005'}</th>
+                          <th>{'\u6700\u7d42\u30e1\u30c3\u30bb\u30fc\u30b8'}</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {chatRooms.map((room) => (
+                          <tr key={room.roomId}>
+                            <td>
+                              <code>{room.roomId}</code>
+                            </td>
+                            <td>
+                              <div className="chat-participants">
+                                <span>{room.participants[0].name}</span>
+                                <span className="chat-participant-sep">/</span>
+                                <span>{room.participants[1].name}</span>
+                              </div>
+                            </td>
+                            <td className="chat-last-message">{room.lastMessage}</td>
+                            <td>
+                              <button onClick={() => setSelectedChatRoom(room)} type="button">
+                                {'\u8a73\u7d30\u3078'}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {selectedChatRoom ? (
+              <div className="modal-backdrop" onClick={() => setSelectedChatRoom(null)} role="presentation">
+                <div className="modal-panel chat-detail-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+                  <div className="panel-header">
+                    <div>
+                      <h2>{selectedChatRoom.roomId}</h2>
+                      <p className="muted">
+                        {selectedChatRoom.participants[0].name} / {selectedChatRoom.participants[1].name}
+                      </p>
+                    </div>
+                    <button className="ghost" onClick={() => setSelectedChatRoom(null)} type="button">
+                      Close
+                    </button>
+                  </div>
+
+                  <div className="chat-detail-thread">
+                    {selectedChatRoom.messages.map((chat) => (
+                      <article className="chat-detail-message" key={chat.id}>
+                        <div className="chat-detail-meta">
+                          <strong>{chat.senderName}</strong>
+                          <span>{chat.sentAt}</span>
+                        </div>
+                        <p>{chat.text}</p>
+                      </article>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : null}
