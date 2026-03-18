@@ -7,6 +7,11 @@ class DatingProfile {
     required this.bio,
     required this.distance,
     required this.interests,
+    required this.country,
+    required this.gender,
+    required this.location,
+    required this.imageUrl,
+    required this.isNew,
   });
 
   final String id;
@@ -16,6 +21,11 @@ class DatingProfile {
   final String bio;
   final String distance;
   final List<String> interests;
+  final String country;
+  final String gender;
+  final String location;
+  final String imageUrl;
+  final bool isNew;
 
   factory DatingProfile.fromJson(Map<String, dynamic> json) {
     return DatingProfile(
@@ -28,7 +38,71 @@ class DatingProfile {
       interests: (json['interests'] as List<dynamic>? ?? [])
           .map((item) => item.toString())
           .toList(),
+      country: json['country'] as String? ?? '',
+      gender: json['gender'] as String? ?? '',
+      location: json['location'] as String? ?? '',
+      imageUrl: json['imageUrl'] as String? ?? '',
+      isNew: json['isNew'] as bool? ?? false,
     );
+  }
+}
+
+class ProfilePost {
+  const ProfilePost({
+    required this.id,
+    required this.imageUrls,
+    required this.caption,
+    required this.likeCount,
+    required this.commentCount,
+    required this.giftCount,
+  });
+
+  final String id;
+  final List<String> imageUrls;
+  final String caption;
+  final int likeCount;
+  final int commentCount;
+  final int giftCount;
+}
+
+class DiscoveryFilter {
+  const DiscoveryFilter({
+    this.country,
+    this.job,
+    this.minAge,
+    this.maxAge,
+    this.gender,
+    this.location,
+  });
+
+  final String? country;
+  final String? job;
+  final int? minAge;
+  final int? maxAge;
+  final String? gender;
+  final String? location;
+
+  Map<String, String> toQueryParameters() {
+    final params = <String, String>{};
+    if (country != null && country!.isNotEmpty) {
+      params['country'] = country!;
+    }
+    if (job != null && job!.isNotEmpty) {
+      params['job'] = job!;
+    }
+    if (minAge != null) {
+      params['minAge'] = minAge!.toString();
+    }
+    if (maxAge != null) {
+      params['maxAge'] = maxAge!.toString();
+    }
+    if (gender != null && gender!.isNotEmpty) {
+      params['gender'] = gender!;
+    }
+    if (location != null && location!.isNotEmpty) {
+      params['location'] = location!;
+    }
+    return params;
   }
 }
 

@@ -2,7 +2,10 @@ package httpapi
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
 
+	"github.com/kimura/dating/backend/internal/domain"
 	"github.com/kimura/dating/backend/internal/service"
 )
 
@@ -15,7 +18,20 @@ func NewDiscoveryHandler(profileService *service.ProfileService) *DiscoveryHandl
 }
 
 func (h *DiscoveryHandler) ListProfiles(w http.ResponseWriter, r *http.Request) {
-	items, err := h.profileService.ListDiscoveryProfiles(r.Context())
+	filter := domain.DiscoveryFilter{
+		Country:  strings.TrimSpace(r.URL.Query().Get("country")),
+		Job:      strings.TrimSpace(r.URL.Query().Get("job")),
+		Gender:   strings.TrimSpace(r.URL.Query().Get("gender")),
+		Location: strings.TrimSpace(r.URL.Query().Get("location")),
+	}
+	if minAge, err := strconv.Atoi(strings.TrimSpace(r.URL.Query().Get("minAge"))); err == nil {
+		filter.MinAge = minAge
+	}
+	if maxAge, err := strconv.Atoi(strings.TrimSpace(r.URL.Query().Get("maxAge"))); err == nil {
+		filter.MaxAge = maxAge
+	}
+
+	items, err := h.profileService.ListDiscoveryProfiles(r.Context(), filter)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]any{
 			"error": "failed to load discovery profiles",

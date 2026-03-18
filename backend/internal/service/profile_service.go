@@ -7,7 +7,7 @@ import (
 )
 
 type profileRepository interface {
-	ListDiscoveryProfiles(ctx context.Context) ([]domain.Profile, error)
+	ListDiscoveryProfiles(ctx context.Context, filter domain.DiscoveryFilter) ([]domain.Profile, error)
 }
 
 type ProfileService struct {
@@ -18,6 +18,6 @@ func NewProfileService(repo profileRepository) *ProfileService {
 	return &ProfileService{repo: repo}
 }
 
-func (s *ProfileService) ListDiscoveryProfiles(ctx context.Context) ([]domain.Profile, error) {
-	return s.repo.ListDiscoveryProfiles(ctx)
+func (s *ProfileService) ListDiscoveryProfiles(ctx context.Context, filter domain.DiscoveryFilter) ([]domain.Profile, error) {
+	return s.repo.ListDiscoveryProfiles(ctx, filter)
 }

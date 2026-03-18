@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../localization/app_localizations.dart';
+
 class ErrorState extends StatelessWidget {
   const ErrorState({
     super.key,
@@ -14,6 +16,8 @@ class ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
+
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -22,7 +26,7 @@ class ErrorState extends StatelessWidget {
           const SizedBox(height: 8),
           Text(message, textAlign: TextAlign.center),
           const SizedBox(height: 16),
-          FilledButton(onPressed: onRetry, child: const Text('Retry')),
+          FilledButton(onPressed: onRetry, child: Text(strings.retry)),
         ],
       ),
     );

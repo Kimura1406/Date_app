@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/kimura/dating/backend/internal/domain"
 )
@@ -16,12 +17,49 @@ func NewProfileRepository(db *sql.DB) *ProfileRepository {
 	return &ProfileRepository{db: db}
 }
 
-func (r *ProfileRepository) ListDiscoveryProfiles(ctx context.Context) ([]domain.Profile, error) {
-	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, name, age, job, bio, distance, interests
+func (r *ProfileRepository) ListDiscoveryProfiles(ctx context.Context, filter domain.DiscoveryFilter) ([]domain.Profile, error) {
+	query := `
+		SELECT id, name, age, job, bio, distance, interests, country, gender, location, image_url, is_new
 		FROM profiles
-		ORDER BY created_at ASC, id ASC
-	`)
+		WHERE 1 = 1
+	`
+	args := make([]any, 0, 6)
+	argIndex := 1
+
+	if value := strings.TrimSpace(filter.Country); value != "" {
+		query += fmt.Sprintf(" AND lower(country) = lower($%d)", argIndex)
+		args = append(args, value)
+		argIndex++
+	}
+	if value := strings.TrimSpace(filter.Job); value != "" {
+		query += fmt.Sprintf(" AND lower(job) = lower($%d)", argIndex)
+		args = append(args, value)
+		argIndex++
+	}
+	if value := strings.TrimSpace(filter.Gender); value != "" {
+		query += fmt.Sprintf(" AND lower(gender) = lower($%d)", argIndex)
+		args = append(args, value)
+		argIndex++
+	}
+	if value := strings.TrimSpace(filter.Location); value != "" {
+		query += fmt.Sprintf(" AND lower(location) LIKE lower($%d)", argIndex)
+		args = append(args, "%"+value+"%")
+		argIndex++
+	}
+	if filter.MinAge > 0 {
+		query += fmt.Sprintf(" AND age >= $%d", argIndex)
+		args = append(args, filter.MinAge)
+		argIndex++
+	}
+	if filter.MaxAge > 0 {
+		query += fmt.Sprintf(" AND age <= $%d", argIndex)
+		args = append(args, filter.MaxAge)
+		argIndex++
+	}
+
+	query += " ORDER BY is_new DESC, created_at ASC, id ASC"
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("query profiles: %w", err)
 	}
@@ -39,6 +77,11 @@ func (r *ProfileRepository) ListDiscoveryProfiles(ctx context.Context) ([]domain
 			&profile.Bio,
 			&profile.Distance,
 			&interestsRaw,
+			&profile.Country,
+			&profile.Gender,
+			&profile.Location,
+			&profile.ImageURL,
+			&profile.IsNew,
 		); err != nil {
 			return nil, fmt.Errorf("scan profile: %w", err)
 		}

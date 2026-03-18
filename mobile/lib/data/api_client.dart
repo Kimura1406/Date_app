@@ -10,9 +10,13 @@ class ApiClient {
 
   final http.Client _client;
 
-  Future<List<DatingProfile>> fetchProfiles() async {
-    final response =
-        await _client.get(Uri.parse('$apiBaseUrl/api/v1/discovery'));
+  Future<List<DatingProfile>> fetchProfiles({
+    DiscoveryFilter filter = const DiscoveryFilter(),
+  }) async {
+    final uri = Uri.parse('$apiBaseUrl/api/v1/discovery').replace(
+      queryParameters: filter.toQueryParameters(),
+    );
+    final response = await _client.get(uri);
     if (response.statusCode != 200) {
       throw Exception('Discovery request failed: ${response.statusCode}');
     }

@@ -5,3 +5,4 @@ const apiBaseUrl = String.fromEnvironment(
 
 const authStorageKey = 'kimura_mobile_auth';
 const rememberedLoginStorageKey = 'kimura_mobile_login_form';
+const languageStorageKey = 'kimura_app_language';
