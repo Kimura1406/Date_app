@@ -1003,59 +1003,60 @@ function App() {
               </div>
             </section>
 
-            {selectedChatRoom ? (
-              <div className="modal-backdrop" onClick={() => setSelectedChatRoom(null)} role="presentation">
-                <div className="modal-panel chat-detail-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
-                  <div className="panel-header">
-                    <div>
-                      <h2>{selectedChatRoom.roomId}</h2>
-                      <p className="muted">
-                        {selectedChatRoom.participants[0]?.name ?? '-'} / {selectedChatRoom.participants[1]?.name ?? '-'}
-                      </p>
-                    </div>
-                    <button className="ghost" onClick={() => setSelectedChatRoom(null)} type="button">
-                      Close
-                    </button>
-                  </div>
-
-                  {chatDetailLoading ? <p className="muted">Loading chat detail...</p> : null}
-
-                  <div className="chat-detail-thread">
-                    {selectedChatRoom.messages.map((chat) => (
-                      <article className="chat-detail-message" key={chat.id}>
-                        <div className="chat-detail-meta">
-                          <strong>{chat.senderName}</strong>
-                          <span>{chat.sentAt}</span>
-                        </div>
-                        <p>{chat.body}</p>
-                      </article>
-                    ))}
-                  </div>
-
-                  <div className="chat-detail-compose">
-                    <textarea
-                      onChange={(event) => setChatMessageDraft(event.target.value)}
-                      placeholder="Type a reply..."
-                      rows={3}
-                      value={chatMessageDraft}
-                    />
-                    <div className="form-actions">
-                      <button
-                        disabled={sendingChatMessage || !chatMessageDraft.trim()}
-                        onClick={() => void handleSendChatMessage()}
-                        type="button"
-                      >
-                        {sendingChatMessage ? 'Sending...' : 'Send message'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : null}
           </>
         ) : (
           renderPlaceholderView(activeMenu)
         )}
+
+        {selectedChatRoom ? (
+          <div className="modal-backdrop" onClick={() => setSelectedChatRoom(null)} role="presentation">
+            <div className="modal-panel chat-detail-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+              <div className="panel-header">
+                <div>
+                  <h2>{selectedChatRoom.roomId}</h2>
+                  <p className="muted">
+                    {selectedChatRoom.participants[0]?.name ?? '-'} / {selectedChatRoom.participants[1]?.name ?? '-'}
+                  </p>
+                </div>
+                <button className="ghost" onClick={() => setSelectedChatRoom(null)} type="button">
+                  Close
+                </button>
+              </div>
+
+              {chatDetailLoading ? <p className="muted">Loading chat detail...</p> : null}
+
+              <div className="chat-detail-thread">
+                {selectedChatRoom.messages.map((chat) => (
+                  <article className="chat-detail-message" key={chat.id}>
+                    <div className="chat-detail-meta">
+                      <strong>{chat.senderName}</strong>
+                      <span>{chat.sentAt}</span>
+                    </div>
+                    <p>{chat.body}</p>
+                  </article>
+                ))}
+              </div>
+
+              <div className="chat-detail-compose">
+                <textarea
+                  onChange={(event) => setChatMessageDraft(event.target.value)}
+                  placeholder="Type a reply..."
+                  rows={3}
+                  value={chatMessageDraft}
+                />
+                <div className="form-actions">
+                  <button
+                    disabled={sendingChatMessage || !chatMessageDraft.trim()}
+                    onClick={() => void handleSendChatMessage()}
+                    type="button"
+                  >
+                    {sendingChatMessage ? 'Sending...' : 'Send message'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </section>
     </main>
   );
