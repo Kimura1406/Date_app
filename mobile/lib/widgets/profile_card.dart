@@ -54,9 +54,9 @@ class ProfileCard extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withValues(alpha: 0.04),
-                        Colors.black.withValues(alpha: 0.12),
-                        Colors.black.withValues(alpha: 0.72),
+                        Colors.white.withValues(alpha: 0.0),
+                        Colors.white.withValues(alpha: 0.08),
+                        Colors.white.withValues(alpha: 0.84),
                       ],
                     ),
                   ),
@@ -96,7 +96,7 @@ class ProfileCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                            color: const Color(0xFF2F2323),
                           ),
                     ),
                     const SizedBox(height: 4),
@@ -117,7 +117,7 @@ class ProfileCard extends StatelessWidget {
                                 .textTheme
                                 .bodySmall
                                 ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.92),
+                                  color: const Color(0xFF5C4545),
                                   fontWeight: FontWeight.w500,
                                 ),
                           ),
@@ -130,7 +130,7 @@ class ProfileCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.84),
+                            color: const Color(0xFF6D5A5A),
                           ),
                     ),
                   ],
@@ -165,7 +165,7 @@ class _ProfileImageFallback extends StatelessWidget {
         child: Text(
           profile.name.isNotEmpty ? profile.name[0] : '?',
           style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: Colors.white,
+                color: const Color(0xFF4A2330),
                 fontWeight: FontWeight.w700,
               ),
         ),

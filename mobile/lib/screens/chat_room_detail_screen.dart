@@ -167,7 +167,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        foregroundColor: const Color(0xFF2F2323),
         titleSpacing: 0,
         title: FutureBuilder<ChatRoomDetail>(
           future: _detailFuture,
@@ -195,13 +195,13 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                       widget.roomDisplayName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                            color: const Color(0xFF2F2323),
                           ),
                     ),
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: const Color(0xFF6D5A5A),
                           ),
                     ),
                   ],
@@ -256,9 +256,8 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color: isMe
-                                ? const Color(0xFF9E4E5D)
-                                : Colors.white,
+                            color:
+                                isMe ? const Color(0xFFF0D7D0) : Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
@@ -277,9 +276,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                                     .textTheme
                                     .bodyMedium
                                     ?.copyWith(
-                                      color: isMe
-                                          ? Colors.white
-                                          : const Color(0xFF4A2330),
+                                      color: const Color(0xFF4A2330),
                                       height: 1.45,
                                     ),
                               ),
@@ -290,9 +287,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: isMe
-                                          ? Colors.white.withValues(alpha: 0.8)
-                                          : const Color(0xFF7A6770),
+                                      color: const Color(0xFF7A6770),
                                     ),
                               ),
                             ],
@@ -339,10 +334,11 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                         style: FilledButton.styleFrom(
                           shape: const CircleBorder(),
                           padding: const EdgeInsets.all(16),
-                          backgroundColor: const Color(0xFF9E4E5D),
+                          backgroundColor: const Color(0xFFF0D7D0),
                         ),
                         child: Icon(
                           _sending ? Icons.hourglass_top_rounded : Icons.send_rounded,
+                          color: const Color(0xFF4A2330),
                         ),
                       ),
                     ],

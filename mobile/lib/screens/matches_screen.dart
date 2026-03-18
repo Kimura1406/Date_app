@@ -133,14 +133,14 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   strings.chatRoomsTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: const Color(0xFF2F2323),
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   strings.chatRoomsSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.74),
+                        color: const Color(0xFF6D5A5A),
                       ),
                 ),
                 const SizedBox(height: 18),
@@ -236,11 +236,11 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: const Color(0xFF9E4E5D),
+            color: const Color(0xFFF0D7D0),
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF9E4E5D).withValues(alpha: 0.18),
+                color: const Color(0xFFE0B9AF).withValues(alpha: 0.22),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -252,12 +252,12 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: Colors.white.withValues(alpha: 0.7),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.support_agent_rounded,
-                  color: Colors.white,
+                  color: Color(0xFF4A2330),
                 ),
               ),
               const SizedBox(width: 14),
@@ -268,7 +268,7 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
                     Text(
                       strings.operatorRoomName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
+                            color: const Color(0xFF2F2323),
                             fontWeight: FontWeight.w800,
                           ),
                     ),
@@ -280,7 +280,7 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.88),
+                            color: const Color(0xFF5C4545),
                             height: 1.4,
                           ),
                     ),
@@ -290,7 +290,7 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
               const SizedBox(width: 12),
               const Icon(
                 Icons.chevron_right_rounded,
-                color: Colors.white,
+                color: Color(0xFF4A2330),
               ),
             ],
           ),

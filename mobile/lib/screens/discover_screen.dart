@@ -150,7 +150,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               strings.feedSectionTitle,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: const Color(0xFF2F2323),
                   ),
             ),
             const SizedBox(height: 12),
@@ -170,7 +170,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   }
                   final profiles = snapshot.data ?? [];
                   if (profiles.isEmpty) {
-                    return Center(child: Text(strings.noProfilesYet));
+                    return Center(
+                      child: Text(
+                        strings.noProfilesYet,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: const Color(0xFF6D5A5A),
+                            ),
+                      ),
+                    );
                   }
                   return GridView.builder(
                     itemCount: profiles.length,

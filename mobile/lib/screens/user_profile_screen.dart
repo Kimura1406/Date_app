@@ -46,7 +46,7 @@ class UserProfileScreen extends StatelessWidget {
                     strings.postsSectionTitle,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: const Color(0xFF2F2323),
                         ),
                   ),
                   const Spacer(),
@@ -140,9 +140,9 @@ class _ProfileHeader extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withValues(alpha: 0.08),
-                        Colors.black.withValues(alpha: 0.24),
-                        Colors.black.withValues(alpha: 0.62),
+                        Colors.white.withValues(alpha: 0.08),
+                        Colors.white.withValues(alpha: 0.34),
+                        Colors.white.withValues(alpha: 0.82),
                       ],
                     ),
                   ),
@@ -185,7 +185,7 @@ class _ProfileHeader extends StatelessWidget {
                                     .textTheme
                                     .headlineMedium
                                     ?.copyWith(
-                                      color: Colors.white,
+                                      color: const Color(0xFF4A2330),
                                       fontWeight: FontWeight.w700,
                                     ),
                               )
@@ -204,7 +204,7 @@ class _ProfileHeader extends StatelessWidget {
                                 .headlineSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.white,
+                                  color: const Color(0xFF2F2323),
                                 ),
                           ),
                           const SizedBox(height: 8),
@@ -274,7 +274,7 @@ class _ChatHeaderButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF9E4E5D),
+            color: const Color(0xFFF0D7D0),
             borderRadius: BorderRadius.circular(999),
             boxShadow: [
               BoxShadow(
@@ -290,13 +290,13 @@ class _ChatHeaderButton extends StatelessWidget {
               const Icon(
                 Icons.chat_bubble_rounded,
                 size: 18,
-                color: Colors.white,
+                color: Color(0xFF4A2330),
               ),
               const SizedBox(width: 8),
               Text(
                 strings.chatButtonLabel,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
+                      color: const Color(0xFF4A2330),
                       fontWeight: FontWeight.w700,
                     ),
               ),
@@ -322,19 +322,19 @@ class _ProfileInfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.18),
+        color: Colors.white.withValues(alpha: 0.82),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: Colors.white),
+          Icon(icon, size: 16, color: const Color(0xFF4A2330)),
           const SizedBox(width: 6),
           Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
+                  color: const Color(0xFF4A2330),
                   fontWeight: FontWeight.w700,
                 ),
           ),
@@ -424,10 +424,10 @@ class _ProfilePostFeedCardState extends State<_ProfilePostFeedCard> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.04),
-                    Colors.black.withValues(alpha: 0.12),
-                    Colors.black.withValues(alpha: 0.26),
-                    Colors.black.withValues(alpha: 0.78),
+                    Colors.white.withValues(alpha: 0.02),
+                    Colors.white.withValues(alpha: 0.14),
+                    Colors.white.withValues(alpha: 0.48),
+                    Colors.white.withValues(alpha: 0.92),
                   ],
                   stops: const [0.0, 0.22, 0.55, 1.0],
                 ),
@@ -449,8 +449,8 @@ class _ProfilePostFeedCardState extends State<_ProfilePostFeedCard> {
                     ),
                     decoration: BoxDecoration(
                       color: active
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.35),
+                          ? const Color(0xFF4A2330)
+                          : const Color(0xFFB7928E),
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
@@ -493,7 +493,7 @@ class _ProfilePostFeedCardState extends State<_ProfilePostFeedCard> {
                 Text(
                   '${widget.profile.name}, ${widget.profile.age}',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
+                        color: const Color(0xFF2F2323),
                         fontWeight: FontWeight.w800,
                       ),
                 ),
@@ -503,7 +503,7 @@ class _ProfilePostFeedCardState extends State<_ProfilePostFeedCard> {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.96),
+                        color: const Color(0xFF5C4545),
                         height: 1.45,
                         fontWeight: FontWeight.w500,
                       ),
@@ -536,17 +536,17 @@ class _OverlayActionButton extends StatelessWidget {
           width: 52,
           height: 52,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.18),
+            color: Colors.white.withValues(alpha: 0.82),
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
           ),
-          child: Icon(icon, color: Colors.white, size: 24),
+          child: Icon(icon, color: const Color(0xFF4A2330), size: 24),
         ),
         const SizedBox(height: 6),
         Text(
           '$value',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
+                color: const Color(0xFF4A2330),
                 fontWeight: FontWeight.w700,
               ),
         ),
@@ -554,7 +554,7 @@ class _OverlayActionButton extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.88),
+                color: const Color(0xFF6D5A5A),
                 fontWeight: FontWeight.w500,
               ),
         ),

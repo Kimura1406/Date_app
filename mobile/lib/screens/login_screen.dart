@@ -72,14 +72,14 @@ class LoginScreen extends StatelessWidget {
                         style:
                             Theme.of(context).textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.white,
+                                  color: const Color(0xFF2F2323),
                                 ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         strings.loginSubtitle,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.72),
+                              color: const Color(0xFF6D5A5A),
                             ),
                       ),
                       const SizedBox(height: 16),
@@ -224,7 +224,7 @@ class LoginScreen extends StatelessWidget {
             if (busy)
               Positioned.fill(
                 child: ColoredBox(
-                  color: Colors.black.withValues(alpha: 0.28),
+                  color: Colors.white.withValues(alpha: 0.3),
                   child: const Center(
                     child: CircularProgressIndicator(),
                   ),
