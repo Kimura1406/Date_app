@@ -25,114 +25,168 @@ class UserProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8F6),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            pinned: true,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            expandedHeight: 260,
-            leading: IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.white.withValues(alpha: 0.88),
-                foregroundColor: const Color(0xFF4A2330),
-              ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _ProfileHeader(
+              profile: profile,
+              birthYear: birthYear,
+              likeCount: likeCount,
             ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              child: Row(
                 children: [
-                  Image.network(
-                    _defaultProfileCoverImage,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFFF6D7DF), Color(0xFFE6D8FF)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                  Text(
+                    strings.postsSectionTitle,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF4A2330),
                         ),
-                      ),
-                    ),
                   ),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withValues(alpha: 0.08),
-                          Colors.black.withValues(alpha: 0.24),
-                          Colors.black.withValues(alpha: 0.58),
-                        ],
-                      ),
-                    ),
+                  const Spacer(),
+                  Text(
+                    '${posts.length}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF9E4E5D),
+                        ),
                   ),
                 ],
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Transform.translate(
-              offset: const Offset(0, -46),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 4),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 18,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: CircleAvatar(
-                          radius: 56,
-                          backgroundColor: const Color(0xFFF3D6DF),
-                          backgroundImage: profile.imageUrl.isNotEmpty
-                              ? NetworkImage(profile.imageUrl)
-                              : null,
-                          child: profile.imageUrl.isEmpty
-                              ? Text(
-                                  profile.name.isNotEmpty
-                                      ? profile.name[0]
-                                      : '?',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                )
-                              : null,
-                        ),
+            Expanded(
+              child: PageView.builder(
+                scrollDirection: Axis.vertical,
+                itemCount: posts.length,
+                padEnds: false,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: _ProfilePostFeedCard(
+                      profile: profile,
+                      post: posts[index],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader({
+    required this.profile,
+    required this.birthYear,
+    required this.likeCount,
+  });
+
+  final DatingProfile profile;
+  final int birthYear;
+  final int likeCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: Stack(
+            children: [
+              AspectRatio(
+                aspectRatio: 1.5,
+                child: Image.network(
+                  _defaultProfileCoverImage,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFF6D7DF), Color(0xFFE6D8FF)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
                     ),
-                    const SizedBox(height: 18),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.08),
+                        Colors.black.withValues(alpha: 0.24),
+                        Colors.black.withValues(alpha: 0.62),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 14,
+                left: 14,
+                child: IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.white.withValues(alpha: 0.9),
+                    foregroundColor: const Color(0xFF4A2330),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 18,
+                right: 18,
+                bottom: 18,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
                     Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 18,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 4),
                       ),
+                      child: CircleAvatar(
+                        radius: 42,
+                        backgroundColor: const Color(0xFFF3D6DF),
+                        backgroundImage: profile.imageUrl.isNotEmpty
+                            ? NetworkImage(profile.imageUrl)
+                            : null,
+                        child: profile.imageUrl.isEmpty
+                            ? Text(
+                                profile.name.isNotEmpty ? profile.name[0] : '?',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              )
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -143,74 +197,37 @@ class UserProfileScreen extends StatelessWidget {
                                 .headlineSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF4A2330),
+                                  color: Colors.white,
                                 ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 8),
                           Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
+                            spacing: 8,
+                            runSpacing: 8,
                             children: [
                               _ProfileInfoChip(
                                 icon: Icons.cake_outlined,
-                                label: '${strings.birthYearLabel}: $birthYear',
+                                label: '$birthYear',
                               ),
                               _ProfileInfoChip(
                                 icon: Icons.wc_outlined,
-                                label:
-                                    '${strings.genderProfileLabel}: ${strings.genderName(profile.gender)}',
+                                label: strings.genderName(profile.gender),
                               ),
                               _ProfileInfoChip(
                                 icon: Icons.favorite_border_rounded,
-                                label: '${strings.likesCountLabel}: $likeCount',
+                                label: '$likeCount',
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            profile.bio,
-                            style:
-                                Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      height: 1.45,
-                                      color: const Color(0xFF6E5960),
-                                    ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      strings.postsSectionTitle,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF4A2330),
-                          ),
-                    ),
-                    const SizedBox(height: 12),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-            sliver: SliverGrid(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final post = posts[index];
-                  return _ProfilePostCard(post: post);
-                },
-                childCount: posts.length,
-              ),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.72,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -228,21 +245,22 @@ class _ProfileInfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF1F4),
+        color: Colors.white.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: const Color(0xFF9E4E5D)),
-          const SizedBox(width: 8),
+          Icon(icon, size: 16, color: Colors.white),
+          const SizedBox(width: 6),
           Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF6E5960),
-                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
                 ),
           ),
         ],
@@ -251,68 +269,169 @@ class _ProfileInfoChip extends StatelessWidget {
   }
 }
 
-class _ProfilePostCard extends StatelessWidget {
-  const _ProfilePostCard({
+class _ProfilePostFeedCard extends StatefulWidget {
+  const _ProfilePostFeedCard({
+    required this.profile,
     required this.post,
   });
 
+  final DatingProfile profile;
   final ProfilePost post;
+
+  @override
+  State<_ProfilePostFeedCard> createState() => _ProfilePostFeedCardState();
+}
+
+class _ProfilePostFeedCardState extends State<_ProfilePostFeedCard> {
+  late final PageController _pageController;
+  int _currentImage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final post = widget.post;
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          Expanded(
-            child: Image.network(
-              post.imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFFF6D7DF), Color(0xFFE5C5FF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+          PageView.builder(
+            controller: _pageController,
+            itemCount: post.imageUrls.length,
+            onPageChanged: (value) {
+              setState(() {
+                _currentImage = value;
+              });
+            },
+            itemBuilder: (context, index) {
+              return Image.network(
+                post.imageUrls[index],
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFF6D7DF), Color(0xFFE5C5FF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                   ),
+                ),
+              );
+            },
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.04),
+                    Colors.black.withValues(alpha: 0.12),
+                    Colors.black.withValues(alpha: 0.26),
+                    Colors.black.withValues(alpha: 0.78),
+                  ],
+                  stops: const [0.0, 0.22, 0.55, 1.0],
                 ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12),
+          Positioned(
+            top: 16,
+            left: 16,
+            right: 16,
+            child: Row(
+              children: List.generate(post.imageUrls.length, (index) {
+                final active = index == _currentImage;
+                return Expanded(
+                  child: Container(
+                    height: 4,
+                    margin: EdgeInsets.only(
+                      right: index == post.imageUrls.length - 1 ? 0 : 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: active
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+          Positioned(
+            right: 14,
+            bottom: 110,
             child: Column(
               children: [
-                _PostMetricRow(
+                _OverlayActionButton(
                   icon: Icons.favorite_rounded,
-                  label: strings.like,
                   value: post.likeCount,
+                  label: strings.like,
                 ),
-                const SizedBox(height: 8),
-                _PostMetricRow(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  label: strings.commentsLabel,
+                const SizedBox(height: 12),
+                _OverlayActionButton(
+                  icon: Icons.chat_bubble_rounded,
                   value: post.commentCount,
+                  label: strings.commentsLabel,
+                ),
+                const SizedBox(height: 12),
+                _OverlayActionButton(
+                  icon: Icons.card_giftcard_rounded,
+                  value: post.giftCount,
+                  label: strings.giftsLabel,
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            left: 18,
+            right: 86,
+            bottom: 24,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${widget.profile.name}, ${widget.profile.age}',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
                 ),
                 const SizedBox(height: 8),
-                _PostMetricRow(
-                  icon: Icons.card_giftcard_rounded,
-                  label: strings.giftsLabel,
-                  value: post.giftCount,
+                Text(
+                  post.caption,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.96),
+                        height: 1.45,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
               ],
             ),
@@ -323,37 +442,45 @@ class _ProfilePostCard extends StatelessWidget {
   }
 }
 
-class _PostMetricRow extends StatelessWidget {
-  const _PostMetricRow({
+class _OverlayActionButton extends StatelessWidget {
+  const _OverlayActionButton({
     required this.icon,
-    required this.label,
     required this.value,
+    required this.label,
   });
 
   final IconData icon;
-  final String label;
   final int value;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF9E4E5D)),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFF6E5960),
-                  fontWeight: FontWeight.w600,
-                ),
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.18),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
           ),
+          child: Icon(icon, color: Colors.white, size: 24),
         ),
+        const SizedBox(height: 6),
         Text(
           '$value',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF4A2330),
+                color: Colors.white,
                 fontWeight: FontWeight.w700,
+              ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.white.withValues(alpha: 0.88),
+                fontWeight: FontWeight.w500,
               ),
         ),
       ],

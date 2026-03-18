@@ -50,14 +50,16 @@ class DatingProfile {
 class ProfilePost {
   const ProfilePost({
     required this.id,
-    required this.imageUrl,
+    required this.imageUrls,
+    required this.caption,
     required this.likeCount,
     required this.commentCount,
     required this.giftCount,
   });
 
   final String id;
-  final String imageUrl;
+  final List<String> imageUrls;
+  final String caption;
   final int likeCount;
   final int commentCount;
   final int giftCount;
