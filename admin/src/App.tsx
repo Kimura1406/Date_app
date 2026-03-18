@@ -942,7 +942,7 @@ function App() {
           <>
             <section className="content-grid user-list-layout">
               <div className="panel">
-                <div className="panel-header panel-header-right">
+                <div className="panel-header">
                   <div className="inline-actions">
                     <div className="chat-segmented">
                       <button
