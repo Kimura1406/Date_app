@@ -107,6 +107,10 @@ class LoginScreen extends StatelessWidget {
                             const SizedBox(height: 6),
                             TextFormField(
                               controller: emailController,
+                              style: const TextStyle(
+                                color: Color(0xFF20181B),
+                              ),
+                              cursorColor: const Color(0xFF9E4E5D),
                               keyboardType: TextInputType.emailAddress,
                               textInputAction: TextInputAction.next,
                               maxLength: 50,
@@ -134,6 +138,10 @@ class LoginScreen extends StatelessWidget {
                             TextFormField(
                               controller: passwordController,
                               focusNode: passwordFocusNode,
+                              style: const TextStyle(
+                                color: Color(0xFF20181B),
+                              ),
+                              cursorColor: const Color(0xFF9E4E5D),
                               obscureText: obscurePassword,
                               textInputAction: TextInputAction.done,
                               decoration: InputDecoration(

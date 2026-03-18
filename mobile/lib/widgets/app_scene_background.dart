@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AppSceneBackground extends StatelessWidget {
@@ -96,7 +97,10 @@ class _WireframeHeartsBackgroundPainter extends CustomPainter {
   void _paintDust(Canvas canvas, Size size) {
     final random = math.Random(44);
     final dustPaint = Paint()..style = PaintingStyle.fill;
-    final dustCount = (size.width * size.height / 240).round();
+    const mobileDensityDivisor = 300.0;
+    const webDensityDivisor = 420.0;
+    const densityDivisor = kIsWeb ? webDensityDivisor : mobileDensityDivisor;
+    final dustCount = (size.width * size.height / densityDivisor).round();
 
     for (var index = 0; index < dustCount; index++) {
       final dx = random.nextDouble() * size.width;
@@ -143,7 +147,11 @@ class _WireframeHeartsBackgroundPainter extends CustomPainter {
     for (var index = 0; index < points.length; index++) {
       final start = points[index];
       final linked = <int>{};
-      while (linked.length < 4) {
+      const mobileTargetLinkCount = 4;
+      const webTargetLinkCount = 3;
+      const targetLinkCount =
+          kIsWeb ? webTargetLinkCount : mobileTargetLinkCount;
+      while (linked.length < targetLinkCount) {
         final target = random.nextInt(points.length);
         if (target == index) continue;
         linked.add(target);
@@ -169,8 +177,11 @@ class _WireframeHeartsBackgroundPainter extends CustomPainter {
   List<Offset> _buildHeartPoints(double size) {
     final points = <Offset>[];
     final scale = size * 0.07;
+    const mobileStep = 10;
+    const webStep = 12;
+    const step = kIsWeb ? webStep : mobileStep;
 
-    for (var degree = 0; degree < 360; degree += 8) {
+    for (var degree = 0; degree < 360; degree += step) {
       final t = degree * math.pi / 180;
       final x = 16 * math.pow(math.sin(t), 3);
       final y = 13 * math.cos(t) -

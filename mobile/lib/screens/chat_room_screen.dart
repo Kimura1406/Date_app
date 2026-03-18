@@ -211,6 +211,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   Expanded(
                     child: TextField(
                       controller: _messageController,
+                      style: const TextStyle(
+                        color: Color(0xFF20181B),
+                      ),
+                      cursorColor: const Color(0xFF9E4E5D),
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _sendMessage(),
                       decoration: InputDecoration(

@@ -34,6 +34,10 @@ class ProfileField extends StatelessWidget {
           const SizedBox(height: 6),
           TextFormField(
             controller: controller,
+            style: const TextStyle(
+              color: Color(0xFF20181B),
+            ),
+            cursorColor: const Color(0xFF9E4E5D),
             keyboardType: keyboardType,
             maxLines: maxLines,
             obscureText: obscureText,

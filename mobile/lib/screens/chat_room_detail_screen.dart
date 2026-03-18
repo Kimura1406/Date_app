@@ -29,6 +29,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
   late Future<ChatRoomDetail> _detailFuture;
+  ChatRoomDetail? _cachedDetail;
   bool _sending = false;
 
   @override
@@ -48,7 +49,10 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
     return _apiClient.fetchChatRoomDetail(
       token: widget.authToken,
       roomId: widget.initialRoom.roomId,
-    );
+    ).then((detail) {
+      _cachedDetail = detail;
+      return detail;
+    });
   }
 
   Future<void> _refreshDetail() async {
@@ -71,13 +75,32 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
     });
 
     try {
-      await _apiClient.sendChatMessage(
+      final sentMessage = await _apiClient.sendChatMessage(
         token: widget.authToken,
         roomId: widget.initialRoom.roomId,
         body: text,
       );
       _messageController.clear();
-      await _refreshDetail();
+      if (!mounted) {
+        return;
+      }
+
+      final currentDetail = _cachedDetail;
+      if (currentDetail != null) {
+        final updatedDetail = ChatRoomDetail(
+          roomId: currentDetail.roomId,
+          roomType: currentDetail.roomType,
+          participants: currentDetail.participants,
+          messages: [...currentDetail.messages, sentMessage],
+        );
+        setState(() {
+          _cachedDetail = updatedDetail;
+          _detailFuture = Future.value(updatedDetail);
+        });
+        _scrollToBottom();
+      } else {
+        await _refreshDetail();
+      }
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -208,7 +231,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
           }
 
           final detail = snapshot.data!;
-          _scrollToBottom();
+          _cachedDetail = detail;
 
           return Column(
             children: [
@@ -289,6 +312,10 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                       Expanded(
                         child: TextField(
                           controller: _messageController,
+                          style: const TextStyle(
+                            color: Color(0xFF20181B),
+                          ),
+                          cursorColor: const Color(0xFF9E4E5D),
                           textInputAction: TextInputAction.send,
                           onSubmitted: (_) => _sendMessage(),
                           decoration: InputDecoration(
