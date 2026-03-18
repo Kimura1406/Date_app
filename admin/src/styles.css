@@ -249,7 +249,8 @@ button:disabled {
 }
 
 .chat-hero {
-  margin-bottom: -4px;
+  margin-top: 6px;
+  margin-bottom: 8px;
 }
 
 .chat-hero h1 {
