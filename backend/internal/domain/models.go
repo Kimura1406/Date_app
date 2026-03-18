@@ -79,6 +79,7 @@ type User struct {
 	Prefecture   string   `json:"prefecture"`
 	DatingReason string   `json:"datingReason"`
 	CreatedAt    string   `json:"createdAt"`
+	LastLoginAt  string   `json:"lastLoginAt"`
 	UpdatedAt    string   `json:"updatedAt"`
 }
 

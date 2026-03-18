@@ -19,7 +19,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 
 func (r *UserRepository) ListUsers(ctx context.Context) ([]domain.User, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, created_at, updated_at
+		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, created_at, last_login_at, updated_at
 		FROM users
 		ORDER BY created_at DESC, id DESC
 	`)
@@ -46,7 +46,7 @@ func (r *UserRepository) ListUsers(ctx context.Context) ([]domain.User, error) {
 
 func (r *UserRepository) GetUserByID(ctx context.Context, id string) (domain.User, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, created_at, updated_at
+		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, created_at, last_login_at, updated_at
 		FROM users
 		WHERE id = $1
 	`, id)
@@ -175,6 +175,28 @@ func (r *UserRepository) DeleteUser(ctx context.Context, id string) error {
 	return nil
 }
 
+func (r *UserRepository) UpdateLastLogin(ctx context.Context, id string, loggedInAt time.Time) error {
+	result, err := r.db.ExecContext(ctx, `
+		UPDATE users
+		SET last_login_at = $2,
+			updated_at = NOW()
+		WHERE id = $1
+	`, id, loggedInAt.UTC())
+	if err != nil {
+		return fmt.Errorf("update last login: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("last login update result: %w", err)
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
+
 type userScanner interface {
 	Scan(dest ...any) error
 }
@@ -182,6 +204,7 @@ type userScanner interface {
 func scanUser(scanner userScanner) (domain.User, error) {
 	var user domain.User
 	var createdAt time.Time
+	var lastLoginAt sql.NullTime
 	var updatedAt time.Time
 	var interestsRaw sql.NullString
 	var birthDate time.Time
@@ -201,6 +224,7 @@ func scanUser(scanner userScanner) (domain.User, error) {
 		&user.Prefecture,
 		&user.DatingReason,
 		&createdAt,
+		&lastLoginAt,
 		&updatedAt,
 	)
 	if err != nil {
@@ -220,6 +244,9 @@ func scanUser(scanner userScanner) (domain.User, error) {
 	}
 
 	user.CreatedAt = createdAt.Format(time.RFC3339)
+	if lastLoginAt.Valid {
+		user.LastLoginAt = lastLoginAt.Time.Format(time.RFC3339)
+	}
 	user.UpdatedAt = updatedAt.Format(time.RFC3339)
 	user.BirthDate = birthDate.Format("2006-01-02")
 	return user, nil

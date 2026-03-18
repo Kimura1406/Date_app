@@ -23,6 +23,7 @@ type User = {
   prefecture: string;
   datingReason: string;
   createdAt: string;
+  lastLoginAt: string;
   updatedAt: string;
 };
 
@@ -759,6 +760,8 @@ function App() {
                             <th>{'\u56fd'}</th>
                             <th>{'\u90fd\u9053\u5e9c\u770c'}</th>
                             <th>{'\u4ed8\u304d\u5408\u3046\u7406\u7531'}</th>
+                            <th>{'\u65b0\u898f\u767b\u9332\u65e5'}</th>
+                            <th>{'\u6700\u7d42\u30ed\u30b0\u30a4\u30f3\u65e5\u6642'}</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -778,6 +781,8 @@ function App() {
                               <td className="reason-cell" title={user.datingReason}>
                                 {truncateReason(user.datingReason)}
                               </td>
+                              <td>{formatDateTime(user.createdAt)}</td>
+                              <td>{formatDateTime(user.lastLoginAt)}</td>
                               <td>
                                 <div className="user-actions">
                                   <button onClick={() => openEditUserModal(user)} type="button">
@@ -1074,6 +1079,25 @@ function formatDate(value: string) {
     return '-';
   }
   return value;
+}
+
+function formatDateTime(value: string) {
+  if (!value) {
+    return '-';
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return parsed.toLocaleString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 function StatCard({

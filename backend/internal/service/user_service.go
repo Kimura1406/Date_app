@@ -24,6 +24,7 @@ type userRepository interface {
 	GetCredentialsByEmail(ctx context.Context, email string) (domain.UserCredentials, error)
 	CreateUser(ctx context.Context, id string, input domain.CreateUserInput, passwordHash string) (domain.User, error)
 	UpdateUser(ctx context.Context, id string, input domain.UpdateUserInput, passwordHash *string) (domain.User, error)
+	UpdateLastLogin(ctx context.Context, id string, loggedInAt time.Time) error
 	DeleteUser(ctx context.Context, id string) error
 }
 
@@ -207,6 +208,15 @@ func (s *UserService) loginWithRole(ctx context.Context, input domain.LoginInput
 	}
 
 	user, err := s.repo.GetUserByID(ctx, credentials.ID)
+	if err != nil {
+		return domain.AuthResponse{}, err
+	}
+
+	if err := s.repo.UpdateLastLogin(ctx, user.ID, time.Now()); err != nil {
+		return domain.AuthResponse{}, err
+	}
+
+	user, err = s.repo.GetUserByID(ctx, credentials.ID)
 	if err != nil {
 		return domain.AuthResponse{}, err
 	}
