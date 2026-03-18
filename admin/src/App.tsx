@@ -722,11 +722,11 @@ function App() {
       </aside>
 
       <section className="admin-main">
-        <section className="hero compact-hero">
+        <section className={`hero compact-hero ${activeMenu === 'chat' ? 'chat-hero' : ''}`}>
           <div>
-            <p className="eyebrow">{viewMeta[activeMenu].title}</p>
+            {activeMenu !== 'chat' ? <p className="eyebrow">{viewMeta[activeMenu].title}</p> : null}
             <h1>{viewMeta[activeMenu].title}</h1>
-            <p className="subcopy">{viewMeta[activeMenu].description}</p>
+            {activeMenu !== 'chat' ? <p className="subcopy">{viewMeta[activeMenu].description}</p> : null}
           </div>
         </section>
 

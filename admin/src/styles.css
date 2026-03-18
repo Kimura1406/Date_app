@@ -248,6 +248,15 @@ button:disabled {
   max-width: none;
 }
 
+.chat-hero {
+  margin-bottom: -4px;
+}
+
+.chat-hero h1 {
+  font-size: clamp(1.8rem, 3vw, 3rem);
+  max-width: none;
+}
+
 .panel {
   padding: 24px;
 }
