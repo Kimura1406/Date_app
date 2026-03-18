@@ -308,6 +308,51 @@ function App() {
     }
   }
 
+  async function openAdminChatForUser(user: User) {
+    if (!authToken || !adminUser) return;
+    if (user.id === adminUser.id || user.role === 'admin') {
+      setMessage('Admin account chat is not available here.');
+      return;
+    }
+
+    setChatDetailLoading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/admin/chat-rooms?type=admin`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      const data = (await response.json()) as { items?: ChatRoom[]; error?: string };
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to load operator chat rooms');
+      }
+
+      const targetRoom = (data.items ?? []).find((room) =>
+        room.participants.some(
+          (participant) => participant.userId === user.id && participant.role !== 'admin',
+        ),
+      );
+
+      if (!targetRoom) {
+        throw new Error('Operator chat room not found for this user');
+      }
+
+      await openChatRoomDetail(targetRoom.roomId);
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : 'Failed to open operator chat room',
+      );
+    } finally {
+      setChatDetailLoading(false);
+    }
+  }
+
   async function handleSendChatMessage() {
     if (!authToken || !selectedChatRoom || !chatMessageDraft.trim()) return;
 
@@ -745,6 +790,13 @@ function App() {
                                 <div className="user-actions">
                                   <button onClick={() => openEditUserModal(user)} type="button">
                                     Edit
+                                  </button>
+                                  <button
+                                    className="ghost"
+                                    onClick={() => void openAdminChatForUser(user)}
+                                    type="button"
+                                  >
+                                    Chat
                                   </button>
                                   <button className="ghost" onClick={() => void handleDelete(user.id)} type="button">
                                     Delete
