@@ -365,7 +365,7 @@ class _AuthShellState extends State<AuthShell> {
 
     if (restoringSession) {
       return const Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
         body: AppSceneBackground(
           child: Center(child: CircularProgressIndicator()),
         ),
@@ -449,17 +449,17 @@ class _AuthShellState extends State<AuthShell> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       body: AppSceneBackground(
         child: screens[currentTab],
       ),
       bottomNavigationBar: NavigationBar(
-        backgroundColor: const Color(0xFF101010),
-        indicatorColor: const Color(0xFF2C2C2C),
+        backgroundColor: const Color(0xFFF4E6E0),
+        indicatorColor: const Color(0xFFE7C4BC),
         surfaceTintColor: Colors.transparent,
         labelTextStyle: WidgetStatePropertyAll(
           Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Colors.white.withValues(alpha: 0.88),
+                color: const Color(0xFF6D4A4A),
                 fontWeight: FontWeight.w600,
               ),
         ),

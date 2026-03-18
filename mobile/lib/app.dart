@@ -55,13 +55,13 @@ class _KimuraAppState extends State<KimuraApp> {
                 seedColor: const Color(0xFFE85D75),
                 brightness: Brightness.light,
               ),
-              scaffoldBackgroundColor: Colors.black,
+              scaffoldBackgroundColor: const Color(0xFFF7F3EA),
               useMaterial3: true,
             ),
             home: _languageController.loaded
                 ? const AuthShell()
                 : const Scaffold(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Colors.transparent,
                     body: AppSceneBackground(
                       child: Center(
                         child: CircularProgressIndicator(),

@@ -55,7 +55,7 @@ class LoginScreen extends StatelessWidget {
     final strings = context.strings;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       body: AppSceneBackground(
         child: Stack(
           children: [

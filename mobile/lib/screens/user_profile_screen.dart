@@ -28,7 +28,7 @@ class UserProfileScreen extends StatelessWidget {
     final birthYear = DateTime.now().year - profile.age;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       body: AppSceneBackground(
         child: Column(
           children: [

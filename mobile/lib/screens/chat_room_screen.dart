@@ -98,7 +98,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     final strings = context.strings;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
