@@ -47,6 +47,22 @@ class DatingProfile {
   }
 }
 
+class ProfilePost {
+  const ProfilePost({
+    required this.id,
+    required this.imageUrl,
+    required this.likeCount,
+    required this.commentCount,
+    required this.giftCount,
+  });
+
+  final String id;
+  final String imageUrl;
+  final int likeCount;
+  final int commentCount;
+  final int giftCount;
+}
+
 class DiscoveryFilter {
   const DiscoveryFilter({
     this.country,
@@ -66,12 +82,24 @@ class DiscoveryFilter {
 
   Map<String, String> toQueryParameters() {
     final params = <String, String>{};
-    if (country != null && country!.isNotEmpty) params['country'] = country!;
-    if (job != null && job!.isNotEmpty) params['job'] = job!;
-    if (minAge != null) params['minAge'] = minAge!.toString();
-    if (maxAge != null) params['maxAge'] = maxAge!.toString();
-    if (gender != null && gender!.isNotEmpty) params['gender'] = gender!;
-    if (location != null && location!.isNotEmpty) params['location'] = location!;
+    if (country != null && country!.isNotEmpty) {
+      params['country'] = country!;
+    }
+    if (job != null && job!.isNotEmpty) {
+      params['job'] = job!;
+    }
+    if (minAge != null) {
+      params['minAge'] = minAge!.toString();
+    }
+    if (maxAge != null) {
+      params['maxAge'] = maxAge!.toString();
+    }
+    if (gender != null && gender!.isNotEmpty) {
+      params['gender'] = gender!;
+    }
+    if (location != null && location!.isNotEmpty) {
+      params['location'] = location!;
+    }
     return params;
   }
 }

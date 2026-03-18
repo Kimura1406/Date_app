@@ -5,6 +5,7 @@ import '../data/discovery_filter_options.dart';
 import '../data/models.dart';
 import '../localization/app_localizations.dart';
 import '../localization/discovery_strings.dart';
+import 'user_profile_screen.dart';
 import '../widgets/discovery_filter_panel.dart';
 import '../widgets/error_state.dart';
 import '../widgets/profile_card.dart';
@@ -75,6 +76,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       _locationController.clear();
       profilesFuture = _loadProfiles();
     });
+  }
+
+  void _openProfile(DatingProfile profile) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfileScreen(profile: profile),
+      ),
+    );
   }
 
   @override
@@ -165,7 +174,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       childAspectRatio: 0.67,
                     ),
                     itemBuilder: (context, index) {
-                      return ProfileCard(profile: profiles[index]);
+                      return ProfileCard(
+                        profile: profiles[index],
+                        onTap: () => _openProfile(profiles[index]),
+                      );
                     },
                   );
                 },

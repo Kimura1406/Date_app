@@ -11,8 +11,8 @@ class AppLocalizationScope extends InheritedNotifier<AppLanguageController> {
   }) : super(notifier: controller);
 
   static AppLanguageController controllerOf(BuildContext context) {
-    final scope = context
-        .dependOnInheritedWidgetOfExactType<AppLocalizationScope>();
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<AppLocalizationScope>();
     assert(scope != null, 'AppLocalizationScope not found in context.');
     return scope!.notifier!;
   }
@@ -63,13 +63,14 @@ class AppStrings {
       AppLanguage.thai: 'เข้าสู่ระบบ',
     },
     'loginSubtitle': {
-      AppLanguage.vietnamese:
-          'Vui lòng đăng nhập bằng email và mật khẩu.',
+      AppLanguage.vietnamese: 'Vui lòng đăng nhập bằng email và mật khẩu.',
       AppLanguage.japanese: 'メールアドレスとパスワードでログインしてください',
       AppLanguage.korean: '이메일 주소와 비밀번호로 로그인해 주세요',
-      AppLanguage.russian: 'Войдите, используя адрес электронной почты и пароль',
+      AppLanguage.russian:
+          'Войдите, используя адрес электронной почты и пароль',
       AppLanguage.chinese: '请使用邮箱地址和密码登录',
-      AppLanguage.english: 'Please log in with your email address and password.',
+      AppLanguage.english:
+          'Please log in with your email address and password.',
       AppLanguage.thai: 'กรุณาเข้าสู่ระบบด้วยอีเมลและรหัสผ่าน',
     },
     'emailLabel': {
@@ -175,7 +176,8 @@ class AppStrings {
       AppLanguage.vietnamese: 'Tìm những người bạn thực sự muốn trò chuyện.',
       AppLanguage.japanese: '本当に話したい相手を見つけましょう。',
       AppLanguage.korean: '정말 대화하고 싶은 사람을 찾아보세요.',
-      AppLanguage.russian: 'Найдите людей, с которыми вам действительно хочется говорить.',
+      AppLanguage.russian:
+          'Найдите людей, с которыми вам действительно хочется говорить.',
       AppLanguage.chinese: '找到你真正想聊天的人。',
       AppLanguage.english: 'Find people you actually want to talk to.',
       AppLanguage.thai: 'พบคนที่คุณอยากคุยด้วยจริงๆ',
@@ -409,7 +411,8 @@ class AppStrings {
       AppLanguage.vietnamese: 'Không có refresh token. Vui lòng đăng nhập lại.',
       AppLanguage.japanese: 'リフレッシュトークンがありません。再度ログインしてください。',
       AppLanguage.korean: '리프레시 토큰이 없습니다. 다시 로그인해 주세요.',
-      AppLanguage.russian: 'Отсутствует refresh token. Пожалуйста, войдите снова.',
+      AppLanguage.russian:
+          'Отсутствует refresh token. Пожалуйста, войдите снова.',
       AppLanguage.chinese: '没有刷新令牌。请重新登录。',
       AppLanguage.english: 'No refresh token available. Please login again.',
       AppLanguage.thai: 'ไม่มีรีเฟรชโทเค็น กรุณาเข้าสู่ระบบอีกครั้ง',
@@ -539,6 +542,120 @@ class AppStrings {
   String get retry => _text('retry');
   String get skip => _text('skip');
   String get like => _text('like');
+  String get commentsLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Bình luận';
+      case AppLanguage.japanese:
+        return 'コメント';
+      case AppLanguage.korean:
+        return '댓글';
+      case AppLanguage.russian:
+        return 'Комментарии';
+      case AppLanguage.chinese:
+        return '评论';
+      case AppLanguage.english:
+        return 'Comments';
+      case AppLanguage.thai:
+        return 'ความคิดเห็น';
+    }
+  }
+
+  String get giftsLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Quà tặng';
+      case AppLanguage.japanese:
+        return 'ギフト';
+      case AppLanguage.korean:
+        return '선물';
+      case AppLanguage.russian:
+        return 'Подарки';
+      case AppLanguage.chinese:
+        return '礼物';
+      case AppLanguage.english:
+        return 'Gifts';
+      case AppLanguage.thai:
+        return 'ของขวัญ';
+    }
+  }
+
+  String get postsSectionTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Bài đăng';
+      case AppLanguage.japanese:
+        return '投稿';
+      case AppLanguage.korean:
+        return '게시물';
+      case AppLanguage.russian:
+        return 'Публикации';
+      case AppLanguage.chinese:
+        return '帖子';
+      case AppLanguage.english:
+        return 'Posts';
+      case AppLanguage.thai:
+        return 'โพสต์';
+    }
+  }
+
+  String get birthYearLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Năm sinh';
+      case AppLanguage.japanese:
+        return '生年';
+      case AppLanguage.korean:
+        return '출생 연도';
+      case AppLanguage.russian:
+        return 'Год рождения';
+      case AppLanguage.chinese:
+        return '出生年份';
+      case AppLanguage.english:
+        return 'Birth year';
+      case AppLanguage.thai:
+        return 'ปีเกิด';
+    }
+  }
+
+  String get genderProfileLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Giới tính';
+      case AppLanguage.japanese:
+        return '性別';
+      case AppLanguage.korean:
+        return '성별';
+      case AppLanguage.russian:
+        return 'Пол';
+      case AppLanguage.chinese:
+        return '性别';
+      case AppLanguage.english:
+        return 'Gender';
+      case AppLanguage.thai:
+        return 'เพศ';
+    }
+  }
+
+  String get likesCountLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Lượt thích';
+      case AppLanguage.japanese:
+        return 'いいね数';
+      case AppLanguage.korean:
+        return '좋아요 수';
+      case AppLanguage.russian:
+        return 'Лайки';
+      case AppLanguage.chinese:
+        return '点赞数';
+      case AppLanguage.english:
+        return 'Likes';
+      case AppLanguage.thai:
+        return 'จำนวนไลก์';
+    }
+  }
+
   String get loginSuccessful => _text('loginSuccessful');
   String get noRefreshToken => _text('noRefreshToken');
   String get sessionRefreshed => _text('sessionRefreshed');
