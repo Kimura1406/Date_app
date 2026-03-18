@@ -420,7 +420,7 @@ class _AuthShellState extends State<AuthShell> {
     }
 
     final screens = [
-      const DiscoverScreen(),
+      DiscoverScreen(currentUser: currentUser!),
       const MatchesScreen(),
       AccountScreen(
         currentUser: currentUser!,

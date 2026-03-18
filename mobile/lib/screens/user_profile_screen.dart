@@ -4,6 +4,7 @@ import '../data/models.dart';
 import '../data/profile_post_factory.dart';
 import '../localization/app_localizations.dart';
 import '../localization/discovery_strings.dart';
+import 'chat_room_screen.dart';
 
 const _defaultProfileCoverImage =
     'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80';
@@ -11,9 +12,11 @@ const _defaultProfileCoverImage =
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({
     super.key,
+    required this.currentUser,
     required this.profile,
   });
 
+  final AppUser currentUser;
   final DatingProfile profile;
 
   @override
@@ -29,6 +32,7 @@ class UserProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             _ProfileHeader(
+              currentUser: currentUser,
               profile: profile,
               birthYear: birthYear,
               likeCount: likeCount,
@@ -80,11 +84,13 @@ class UserProfileScreen extends StatelessWidget {
 
 class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader({
+    required this.currentUser,
     required this.profile,
     required this.birthYear,
     required this.likeCount,
   });
 
+  final AppUser currentUser;
   final DatingProfile profile;
   final int birthYear;
   final int likeCount;
@@ -217,6 +223,10 @@ class _ProfileHeader extends StatelessWidget {
                                 icon: Icons.favorite_border_rounded,
                                 label: '$likeCount',
                               ),
+                              _ChatHeaderButton(
+                                currentUser: currentUser,
+                                profile: profile,
+                              ),
                             ],
                           ),
                         ],
@@ -224,6 +234,70 @@ class _ProfileHeader extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatHeaderButton extends StatelessWidget {
+  const _ChatHeaderButton({
+    required this.currentUser,
+    required this.profile,
+  });
+
+  final AppUser currentUser;
+  final DatingProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ChatRoomScreen(
+                currentUser: currentUser,
+                profile: profile,
+              ),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF9E4E5D),
+            borderRadius: BorderRadius.circular(999),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.16),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.chat_bubble_rounded,
+                size: 18,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                strings.chatButtonLabel,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
               ),
             ],
           ),

@@ -656,6 +656,120 @@ class AppStrings {
     }
   }
 
+  String get chatButtonLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chat';
+      case AppLanguage.japanese:
+        return 'チャット';
+      case AppLanguage.korean:
+        return '채팅';
+      case AppLanguage.russian:
+        return 'Чат';
+      case AppLanguage.chinese:
+        return '聊天';
+      case AppLanguage.english:
+        return 'Chat';
+      case AppLanguage.thai:
+        return 'แชต';
+    }
+  }
+
+  String get chatOnlineStatus {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Đang hoạt động';
+      case AppLanguage.japanese:
+        return 'オンライン';
+      case AppLanguage.korean:
+        return '온라인';
+      case AppLanguage.russian:
+        return 'В сети';
+      case AppLanguage.chinese:
+        return '在线';
+      case AppLanguage.english:
+        return 'Online';
+      case AppLanguage.thai:
+        return 'ออนไลน์';
+    }
+  }
+
+  String get chatInputPlaceholder {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Nhập tin nhắn';
+      case AppLanguage.japanese:
+        return 'メッセージを入力';
+      case AppLanguage.korean:
+        return '메시지를 입력하세요';
+      case AppLanguage.russian:
+        return 'Введите сообщение';
+      case AppLanguage.chinese:
+        return '输入消息';
+      case AppLanguage.english:
+        return 'Type a message';
+      case AppLanguage.thai:
+        return 'พิมพ์ข้อความ';
+    }
+  }
+
+  String chatGreeting(String name) {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chào bạn, mình là $name. Rất vui được nói chuyện với bạn ở đây.';
+      case AppLanguage.japanese:
+        return 'こんにちは、$nameです。ここでお話しできてうれしいです。';
+      case AppLanguage.korean:
+        return '안녕하세요, 저는 $name예요. 여기서 이야기하게 되어 반가워요.';
+      case AppLanguage.russian:
+        return 'Привет, я $name. Рада познакомиться и пообщаться здесь.';
+      case AppLanguage.chinese:
+        return '你好，我是$name。很高兴能在这里和你聊天。';
+      case AppLanguage.english:
+        return 'Hi, I am $name. Happy to chat with you here.';
+      case AppLanguage.thai:
+        return 'สวัสดี เราชื่อ $name ดีใจที่ได้คุยกันที่นี่';
+    }
+  }
+
+  String chatReply(String name) {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chào $name, profile của bạn rất thú vị. Hôm nay bạn thế nào?';
+      case AppLanguage.japanese:
+        return '$nameさん、こんにちは。プロフィールがとても素敵ですね。今日はどうですか？';
+      case AppLanguage.korean:
+        return '$name님 안녕하세요. 프로필이 정말 멋져요. 오늘 하루는 어땠어요?';
+      case AppLanguage.russian:
+        return 'Привет, $name. У тебя очень интересный профиль. Как проходит твой день?';
+      case AppLanguage.chinese:
+        return '$name，你好。你的个人资料很有意思，今天过得怎么样？';
+      case AppLanguage.english:
+        return 'Hi $name, your profile looks great. How is your day going?';
+      case AppLanguage.thai:
+        return 'สวัสดี $name โปรไฟล์ของคุณน่าสนใจมาก วันนี้เป็นอย่างไรบ้าง';
+    }
+  }
+
+  String get chatInviteMessage {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Nếu hợp thì cuối tuần mình có thể đi cà phê hoặc dạo phố cùng nhau.';
+      case AppLanguage.japanese:
+        return '気が合えば、週末にカフェやお散歩でもどうですか。';
+      case AppLanguage.korean:
+        return '잘 맞는다면 주말에 커피나 산책 같이 해도 좋을 것 같아요.';
+      case AppLanguage.russian:
+        return 'Если нам будет комфортно, на выходных можно сходить на кофе или прогуляться.';
+      case AppLanguage.chinese:
+        return '如果聊得合适，周末我们可以一起喝咖啡或者散步。';
+      case AppLanguage.english:
+        return 'If we click, maybe we can grab coffee or take a walk this weekend.';
+      case AppLanguage.thai:
+        return 'ถ้าเราคุยกันเข้ากันได้ สุดสัปดาห์นี้อาจไปกาแฟหรือเดินเล่นด้วยกันก็ได้';
+    }
+  }
+
   String get loginSuccessful => _text('loginSuccessful');
   String get noRefreshToken => _text('noRefreshToken');
   String get sessionRefreshed => _text('sessionRefreshed');

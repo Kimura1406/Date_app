@@ -11,7 +11,12 @@ import '../widgets/error_state.dart';
 import '../widgets/profile_card.dart';
 
 class DiscoverScreen extends StatefulWidget {
-  const DiscoverScreen({super.key});
+  const DiscoverScreen({
+    super.key,
+    required this.currentUser,
+  });
+
+  final AppUser currentUser;
 
   @override
   State<DiscoverScreen> createState() => _DiscoverScreenState();
@@ -81,7 +86,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   void _openProfile(DatingProfile profile) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => UserProfileScreen(profile: profile),
+        builder: (_) => UserProfileScreen(
+          currentUser: widget.currentUser,
+          profile: profile,
+        ),
       ),
     );
   }
