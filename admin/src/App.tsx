@@ -1014,7 +1014,7 @@ function App() {
         {selectedChatRoom ? (
           <div className="modal-backdrop" onClick={() => setSelectedChatRoom(null)} role="presentation">
             <div className="modal-panel chat-detail-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
-              <div className="panel-header">
+              <div className="panel-header chat-detail-header">
                 <div>
                   <h2>{selectedChatRoom.roomId}</h2>
                   <p className="muted">
@@ -1028,16 +1028,18 @@ function App() {
 
               {chatDetailLoading ? <p className="muted">Loading chat detail...</p> : null}
 
-              <div className="chat-detail-thread">
-                {selectedChatRoom.messages.map((chat) => (
-                  <article className="chat-detail-message" key={chat.id}>
-                    <div className="chat-detail-meta">
-                      <strong>{chat.senderName}</strong>
-                      <span>{chat.sentAt}</span>
-                    </div>
-                    <p>{chat.body}</p>
-                  </article>
-                ))}
+              <div className="chat-detail-thread-wrap">
+                <div className="chat-detail-thread">
+                  {selectedChatRoom.messages.map((chat) => (
+                    <article className="chat-detail-message" key={chat.id}>
+                      <div className="chat-detail-meta">
+                        <strong>{chat.senderName}</strong>
+                        <span>{chat.sentAt}</span>
+                      </div>
+                      <p>{chat.body}</p>
+                    </article>
+                  ))}
+                </div>
               </div>
 
               <div className="chat-detail-compose">
@@ -1047,7 +1049,7 @@ function App() {
                   rows={3}
                   value={chatMessageDraft}
                 />
-                <div className="form-actions">
+                <div className="chat-detail-compose-actions">
                   <button
                     disabled={sendingChatMessage || !chatMessageDraft.trim()}
                     onClick={() => void handleSendChatMessage()}
