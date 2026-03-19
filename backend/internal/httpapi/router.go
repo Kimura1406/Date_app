@@ -44,7 +44,7 @@ func NewRouter(
 	mux.HandleFunc("PUT /api/v1/users/{id}", withAuth(tokenManager, userHandler.UpdateUser))
 	mux.HandleFunc("DELETE /api/v1/users/{id}", withAuth(tokenManager, userHandler.DeleteUser))
 	mux.HandleFunc("GET /api/v1/chat-rooms", withAuth(tokenManager, chatHandler.ListUserRooms))
-	mux.HandleFunc("POST /api/v1/chat-rooms/direct/{id}", withAuth(tokenManager, chatHandler.EnsureDirectRoom))
+	mux.HandleFunc("POST /api/v1/chat-direct/{id}", withAuth(tokenManager, chatHandler.EnsureDirectRoom))
 	mux.HandleFunc("GET /api/v1/chat-rooms/{id}", withAuth(tokenManager, chatHandler.GetRoomDetail))
 	mux.HandleFunc("POST /api/v1/chat-rooms/{id}/messages", withAuth(tokenManager, chatHandler.CreateMessage))
 	mux.HandleFunc("POST /api/v1/auth/login", userHandler.Login)

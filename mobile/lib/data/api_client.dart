@@ -84,7 +84,7 @@ class ApiClient {
     required String targetUserId,
   }) async {
     final response = await _client.post(
-      Uri.parse('$apiBaseUrl/api/v1/chat-rooms/direct/$targetUserId'),
+      Uri.parse('$apiBaseUrl/api/v1/chat-direct/$targetUserId'),
       headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode != 200) {
