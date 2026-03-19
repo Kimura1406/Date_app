@@ -1172,19 +1172,19 @@ class AppStrings {
   String get timelineFeaturedTitle {
     switch (language) {
       case AppLanguage.vietnamese:
-        return 'Bài đăng nổi bật';
+        return 'Bài đăng của tôi';
       case AppLanguage.japanese:
-        return '注目の投稿';
+        return '自分の投稿';
       case AppLanguage.korean:
-        return '추천 게시물';
+        return '내 게시물';
       case AppLanguage.russian:
-        return 'Популярные посты';
+        return 'Мои посты';
       case AppLanguage.chinese:
-        return '热门动态';
+        return '我的动态';
       case AppLanguage.english:
-        return 'Featured posts';
+        return 'My posts';
       case AppLanguage.thai:
-        return 'โพสต์เด่น';
+        return 'โพสต์ของฉัน';
     }
   }
 

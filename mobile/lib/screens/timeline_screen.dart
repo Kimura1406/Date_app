@@ -22,15 +22,15 @@ class _TimelineScreenState extends State<TimelineScreen> {
   void initState() {
     super.initState();
     _posts = List<_TimelinePost>.generate(
-      50,
+      3,
       (index) => _TimelinePost(
-        id: 'featured_$index',
-        authorName: _featuredNames[index % _featuredNames.length],
-        authorHandle: '@kimura${index + 1}',
-        body: _featuredBodies[index % _featuredBodies.length],
+        id: 'mine_$index',
+        authorName: widget.currentUser.name,
+        authorHandle: '@me',
+        body: _myPostBodies[index % _myPostBodies.length],
         imageUrl: _featuredImages[index % _featuredImages.length],
         publishedAtLabel: _buildPublishedAtLabel(index),
-        isMine: false,
+        isMine: true,
       ),
     );
   }
@@ -404,28 +404,16 @@ class _TimelinePost {
   final bool isMine;
 }
 
-const _featuredNames = <String>[
-  'Mary',
-  'Lina',
-  'Vi',
-  'Minji',
-  'Aiko',
-  'Mira',
-];
-
-const _featuredBodies = <String>[
-  'Coffee first, then a long walk and a good conversation.',
-  'Small moments can become the best kind of memory.',
-  'Looking for a calm connection that feels easy and honest.',
-  'If the vibe is right, I would love to talk more tonight.',
-  'Fresh flowers, city lights, and someone kind would be nice.',
-  'Let us start with one message and see where it goes.',
-];
-
 const _featuredImages = <String>[
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80',
   'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=900&q=80',
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80',
   'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80',
   'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80',
+];
+
+const _myPostBodies = <String>[
+  'Today I want to keep things simple, calm, and honest.',
+  'A warm drink, a little music, and a good conversation would be perfect.',
+  'Posting a small update here before I start chatting tonight.',
 ];
