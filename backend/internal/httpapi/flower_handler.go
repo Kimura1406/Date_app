@@ -26,6 +26,16 @@ func (h *FlowerHandler) ListFlowers(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"items": items})
 }
 
+func (h *FlowerHandler) ListPublicFlowers(w http.ResponseWriter, r *http.Request) {
+	items, err := h.flowerService.ListPublishedFlowers(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to load flowers")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
 func (h *FlowerHandler) CreateFlower(w http.ResponseWriter, r *http.Request) {
 	var input domain.CreateFlowerInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {

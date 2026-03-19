@@ -137,6 +137,32 @@ class MatchItem {
   }
 }
 
+class FlowerShopItem {
+  FlowerShopItem({
+    required this.id,
+    required this.name,
+    required this.imageUrl,
+    required this.description,
+    required this.pricePoints,
+  });
+
+  final String id;
+  final String name;
+  final String imageUrl;
+  final String description;
+  final int pricePoints;
+
+  factory FlowerShopItem.fromJson(Map<String, dynamic> json) {
+    return FlowerShopItem(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      imageUrl: json['imageUrl'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      pricePoints: json['pricePoints'] as int? ?? 0,
+    );
+  }
+}
+
 class ChatParticipant {
   ChatParticipant({
     required this.userId,

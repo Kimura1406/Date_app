@@ -18,11 +18,24 @@ func NewFlowerRepository(db *sql.DB) *FlowerRepository {
 }
 
 func (r *FlowerRepository) ListFlowers(ctx context.Context) ([]domain.Flower, error) {
-	rows, err := r.db.QueryContext(ctx, `
+	return r.listFlowersByQuery(ctx, `
 		SELECT id, name, image_url, description, price_points, purchaser_count, purchase_count, published, created_at, updated_at
 		FROM flowers
 		ORDER BY created_at DESC, id DESC
 	`)
+}
+
+func (r *FlowerRepository) ListPublishedFlowers(ctx context.Context) ([]domain.Flower, error) {
+	return r.listFlowersByQuery(ctx, `
+		SELECT id, name, image_url, description, price_points, purchaser_count, purchase_count, published, created_at, updated_at
+		FROM flowers
+		WHERE published = TRUE
+		ORDER BY created_at DESC, id DESC
+	`)
+}
+
+func (r *FlowerRepository) listFlowersByQuery(ctx context.Context, query string) ([]domain.Flower, error) {
+	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("query flowers: %w", err)
 	}

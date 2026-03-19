@@ -1036,6 +1036,44 @@ class AppStrings {
     }
   }
 
+  String get flowerShopLoadError {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Không thể tải danh sách hoa';
+      case AppLanguage.japanese:
+        return 'お花一覧を読み込めません';
+      case AppLanguage.korean:
+        return '꽃 목록을 불러올 수 없습니다';
+      case AppLanguage.russian:
+        return 'Не удалось загрузить список цветов';
+      case AppLanguage.chinese:
+        return '无法加载鲜花列表';
+      case AppLanguage.english:
+        return 'Cannot load flowers';
+      case AppLanguage.thai:
+        return 'ไม่สามารถโหลดรายการดอกไม้ได้';
+    }
+  }
+
+  String get flowerShopEmpty {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chưa có hoa nào được đăng.';
+      case AppLanguage.japanese:
+        return '公開中のお花はまだありません。';
+      case AppLanguage.korean:
+        return '공개된 꽃이 아직 없습니다.';
+      case AppLanguage.russian:
+        return 'Пока нет опубликованных цветов.';
+      case AppLanguage.chinese:
+        return '暂时还没有已发布的鲜花。';
+      case AppLanguage.english:
+        return 'No flowers published yet.';
+      case AppLanguage.thai:
+        return 'ยังไม่มีดอกไม้ที่เผยแพร่อยู่';
+    }
+  }
+
   String get timelineTab {
     switch (language) {
       case AppLanguage.vietnamese:

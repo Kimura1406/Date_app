@@ -41,6 +41,19 @@ class ApiClient {
         .toList();
   }
 
+  Future<List<FlowerShopItem>> fetchFlowers() async {
+    final response = await _client.get(Uri.parse('$apiBaseUrl/api/v1/flowers'));
+    if (response.statusCode != 200) {
+      throw Exception('Flowers request failed: ${response.statusCode}');
+    }
+
+    final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+    final items = jsonMap['items'] as List<dynamic>? ?? [];
+    return items
+        .map((item) => FlowerShopItem.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<List<ChatRoomSummary>> fetchChatRooms({
     required String token,
     required String roomType,
@@ -50,7 +63,8 @@ class ApiClient {
       headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode != 200) {
-      throw Exception(_extractError(response.body, 'Chat rooms request failed'));
+      throw Exception(
+          _extractError(response.body, 'Chat rooms request failed'));
     }
 
     final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;

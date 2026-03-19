@@ -13,6 +13,7 @@ import (
 
 type flowerRepository interface {
 	ListFlowers(ctx context.Context) ([]domain.Flower, error)
+	ListPublishedFlowers(ctx context.Context) ([]domain.Flower, error)
 	GetFlowerByID(ctx context.Context, id string) (domain.Flower, error)
 	CreateFlower(ctx context.Context, id string, input domain.CreateFlowerInput) (domain.Flower, error)
 	UpdateFlower(ctx context.Context, id string, input domain.UpdateFlowerInput) (domain.Flower, error)
@@ -28,6 +29,10 @@ func NewFlowerService(repo flowerRepository) *FlowerService {
 
 func (s *FlowerService) ListFlowers(ctx context.Context) ([]domain.Flower, error) {
 	return s.repo.ListFlowers(ctx)
+}
+
+func (s *FlowerService) ListPublishedFlowers(ctx context.Context) ([]domain.Flower, error) {
+	return s.repo.ListPublishedFlowers(ctx)
 }
 
 func (s *FlowerService) CreateFlower(ctx context.Context, input domain.CreateFlowerInput) (domain.Flower, error) {
