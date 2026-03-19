@@ -234,6 +234,8 @@ button:disabled {
 .user-list-layout > .panel {
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0;
+  overflow: hidden;
 }
 
 .single-panel {
@@ -265,6 +267,22 @@ button:disabled {
 
 .panel {
   padding: 24px;
+}
+
+.user-list-layout > .panel .panel-header {
+  padding: 24px 24px 0;
+  margin-bottom: 12px;
+}
+
+.user-list-layout > .panel > .notice,
+.user-list-layout > .panel > .muted {
+  margin: 0 24px 16px;
+}
+
+.user-list-layout > .panel > .pagination-bar,
+.user-list-layout > .panel > .banner-pagination {
+  padding: 16px 24px 24px;
+  margin-top: 0;
 }
 
 .placeholder-panel {
@@ -327,7 +345,7 @@ button:disabled {
 .table-wrap {
   overflow-x: auto;
   border: 1px solid var(--admin-border);
-  border-radius: 22px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.35);
 }
 
