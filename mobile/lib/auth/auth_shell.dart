@@ -423,7 +423,10 @@ class _AuthShellState extends State<AuthShell> {
     }
 
     final screens = [
-      DiscoverScreen(currentUser: currentUser!),
+      DiscoverScreen(
+        currentUser: currentUser!,
+        authToken: authToken,
+      ),
       MatchesScreen(
         currentUser: currentUser!,
         authToken: authToken,

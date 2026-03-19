@@ -79,6 +79,25 @@ class ApiClient {
     );
   }
 
+  Future<ChatRoomDetail> ensureDirectChatRoom({
+    required String token,
+    required String targetUserId,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$apiBaseUrl/api/v1/chat-rooms/direct/$targetUserId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(
+        _extractError(response.body, 'Ensure direct chat room request failed'),
+      );
+    }
+
+    return ChatRoomDetail.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
   Future<ChatMessageItem> sendChatMessage({
     required String token,
     required String roomId,

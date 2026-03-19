@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../data/api_client.dart';
 import '../data/models.dart';
 import '../data/profile_post_factory.dart';
 import '../localization/app_localizations.dart';
 import '../localization/discovery_strings.dart';
 import '../widgets/app_scene_background.dart';
-import 'chat_room_screen.dart';
+import 'chat_room_detail_screen.dart';
 
 const _defaultProfileCoverImage =
     'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80';
@@ -14,10 +15,12 @@ class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({
     super.key,
     required this.currentUser,
+    required this.authToken,
     required this.profile,
   });
 
   final AppUser currentUser;
+  final String authToken;
   final DatingProfile profile;
 
   @override
@@ -34,6 +37,7 @@ class UserProfileScreen extends StatelessWidget {
           children: [
             _ProfileHeader(
               currentUser: currentUser,
+              authToken: authToken,
               profile: profile,
               birthYear: birthYear,
               likeCount: likeCount,
@@ -86,12 +90,14 @@ class UserProfileScreen extends StatelessWidget {
 class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader({
     required this.currentUser,
+    required this.authToken,
     required this.profile,
     required this.birthYear,
     required this.likeCount,
   });
 
   final AppUser currentUser;
+  final String authToken;
   final DatingProfile profile;
   final int birthYear;
   final int likeCount;
@@ -226,6 +232,7 @@ class _ProfileHeader extends StatelessWidget {
                               ),
                               _ChatHeaderButton(
                                 currentUser: currentUser,
+                                authToken: authToken,
                                 profile: profile,
                               ),
                             ],
@@ -247,10 +254,12 @@ class _ProfileHeader extends StatelessWidget {
 class _ChatHeaderButton extends StatelessWidget {
   const _ChatHeaderButton({
     required this.currentUser,
+    required this.authToken,
     required this.profile,
   });
 
   final AppUser currentUser;
+  final String authToken;
   final DatingProfile profile;
 
   @override
@@ -260,15 +269,43 @@ class _ChatHeaderButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => ChatRoomScreen(
-                currentUser: currentUser,
-                profile: profile,
+        onTap: () async {
+          final messenger = ScaffoldMessenger.of(context);
+          try {
+            final detail = await ApiClient().ensureDirectChatRoom(
+              token: authToken,
+              targetUserId: profile.id,
+            );
+            if (!context.mounted) return;
+
+            final lastMessage = detail.messages.isNotEmpty ? detail.messages.last : null;
+            final initialRoom = ChatRoomSummary(
+              roomId: detail.roomId,
+              roomType: detail.roomType,
+              participants: detail.participants,
+              lastMessage: lastMessage?.body ?? '',
+              lastMessageAt: lastMessage?.sentAt ?? '',
+            );
+
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ChatRoomDetailScreen(
+                  currentUser: currentUser,
+                  authToken: authToken,
+                  initialRoom: initialRoom,
+                  roomDisplayName: profile.name,
+                ),
               ),
-            ),
-          );
+            );
+          } catch (error) {
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text(
+                  error.toString().replaceFirst('Exception: ', ''),
+                ),
+              ),
+            );
+          }
         },
         borderRadius: BorderRadius.circular(999),
         child: Container(

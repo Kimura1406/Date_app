@@ -14,9 +14,11 @@ class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({
     super.key,
     required this.currentUser,
+    required this.authToken,
   });
 
   final AppUser currentUser;
+  final String authToken;
 
   @override
   State<DiscoverScreen> createState() => _DiscoverScreenState();
@@ -89,6 +91,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       MaterialPageRoute(
         builder: (_) => UserProfileScreen(
           currentUser: widget.currentUser,
+          authToken: widget.authToken,
           profile: profile,
         ),
       ),

@@ -15,6 +15,8 @@ var ErrForbiddenChatRoom = errors.New("forbidden chat room")
 type chatRepository interface {
 	EnsureAdminRoomForUser(ctx context.Context, userID string) error
 	GetAdminRoomIDForUser(ctx context.Context, userID string) (string, error)
+	EnsureDirectRoomForUsers(ctx context.Context, firstUserID, secondUserID string) error
+	GetDirectRoomIDForUsers(ctx context.Context, firstUserID, secondUserID string) (string, error)
 	ListRooms(ctx context.Context, roomType string) ([]domain.ChatRoomSummary, error)
 	ListRoomsForUser(ctx context.Context, userID, roomType string) ([]domain.ChatRoomSummary, error)
 	GetRoomDetail(ctx context.Context, roomID string) (domain.ChatRoomDetail, error)
@@ -40,6 +42,23 @@ func (s *ChatService) EnsureAndGetAdminRoom(ctx context.Context, userID string) 
 	}
 
 	roomID, err := s.repo.GetAdminRoomIDForUser(ctx, userID)
+	if err != nil {
+		return domain.ChatRoomDetail{}, err
+	}
+
+	return s.repo.GetRoomDetail(ctx, roomID)
+}
+
+func (s *ChatService) EnsureAndGetDirectRoom(ctx context.Context, requesterUserID, targetUserID string) (domain.ChatRoomDetail, error) {
+	if requesterUserID == "" || targetUserID == "" || requesterUserID == targetUserID {
+		return domain.ChatRoomDetail{}, fmt.Errorf("invalid direct chat participants")
+	}
+
+	if err := s.repo.EnsureDirectRoomForUsers(ctx, requesterUserID, targetUserID); err != nil {
+		return domain.ChatRoomDetail{}, err
+	}
+
+	roomID, err := s.repo.GetDirectRoomIDForUsers(ctx, requesterUserID, targetUserID)
 	if err != nil {
 		return domain.ChatRoomDetail{}, err
 	}

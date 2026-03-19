@@ -69,6 +69,27 @@ func (h *ChatHandler) EnsureAdminRoomForUser(w http.ResponseWriter, r *http.Requ
 	writeJSON(w, http.StatusOK, room)
 }
 
+func (h *ChatHandler) EnsureDirectRoom(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	room, err := h.chatService.EnsureAndGetDirectRoom(r.Context(), claims.Subject, r.PathValue("id"))
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			writeError(w, http.StatusNotFound, "chat room not found")
+		default:
+			writeDomainError(w, err, "failed to ensure direct chat room")
+		}
+		return
+	}
+
+	writeJSON(w, http.StatusOK, room)
+}
+
 func (h *ChatHandler) GetRoomDetail(w http.ResponseWriter, r *http.Request) {
 	claims, ok := authClaimsFromContext(r.Context())
 	if !ok {

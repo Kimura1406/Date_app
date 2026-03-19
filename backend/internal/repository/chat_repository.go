@@ -69,6 +69,32 @@ func (r *ChatRepository) GetAdminRoomIDForUser(ctx context.Context, userID strin
 	return buildDeterministicRoomID("admin", adminID, userID), nil
 }
 
+func (r *ChatRepository) EnsureDirectRoomForUsers(ctx context.Context, firstUserID, secondUserID string) error {
+	if firstUserID == secondUserID {
+		return nil
+	}
+
+	roomID := buildDeterministicRoomID("user", firstUserID, secondUserID)
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO chat_rooms (id, room_type, user_one_id, user_two_id)
+		VALUES ($1, 'user', LEAST($2, $3), GREATEST($2, $3))
+		ON CONFLICT DO NOTHING
+	`, roomID, firstUserID, secondUserID)
+	if err != nil {
+		return fmt.Errorf("ensure direct room: %w", err)
+	}
+
+	return nil
+}
+
+func (r *ChatRepository) GetDirectRoomIDForUsers(ctx context.Context, firstUserID, secondUserID string) (string, error) {
+	if firstUserID == secondUserID {
+		return "", sql.ErrNoRows
+	}
+
+	return buildDeterministicRoomID("user", firstUserID, secondUserID), nil
+}
+
 func (r *ChatRepository) ListRooms(ctx context.Context, roomType string) ([]domain.ChatRoomSummary, error) {
 	return r.listRoomsByQuery(ctx, `
 		SELECT
