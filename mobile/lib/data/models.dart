@@ -189,6 +189,26 @@ class DiscoverBannerItem {
   }
 }
 
+class UserLikeSummary {
+  UserLikeSummary({
+    required this.targetUserId,
+    required this.likeCount,
+    required this.likedByMe,
+  });
+
+  final String targetUserId;
+  final int likeCount;
+  final bool likedByMe;
+
+  factory UserLikeSummary.fromJson(Map<String, dynamic> json) {
+    return UserLikeSummary(
+      targetUserId: json['targetUserId'] as String? ?? '',
+      likeCount: json['likeCount'] as int? ?? 0,
+      likedByMe: json['likedByMe'] as bool? ?? false,
+    );
+  }
+}
+
 class ChatParticipant {
   ChatParticipant({
     required this.userId,

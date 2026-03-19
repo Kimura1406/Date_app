@@ -197,6 +197,84 @@ func (r *UserRepository) UpdateLastLogin(ctx context.Context, id string, loggedI
 	return nil
 }
 
+func (r *UserRepository) GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error) {
+	var summary domain.UserLikeSummary
+	summary.TargetUserID = targetUserID
+
+	err := r.db.QueryRowContext(ctx, `
+		SELECT
+			(SELECT COUNT(*) FROM user_likes WHERE target_user_id = $1) AS like_count,
+			EXISTS(
+				SELECT 1
+				FROM user_likes
+				WHERE target_user_id = $1 AND liker_user_id = $2
+			) AS liked_by_me
+	`, targetUserID, viewerUserID).Scan(&summary.LikeCount, &summary.LikedByMe)
+	if err != nil {
+		return domain.UserLikeSummary{}, fmt.Errorf("query user like summary: %w", err)
+	}
+
+	return summary, nil
+}
+
+func (r *UserRepository) ToggleLike(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return domain.UserLikeSummary{}, fmt.Errorf("begin toggle like: %w", err)
+	}
+
+	var exists bool
+	if err := tx.QueryRowContext(ctx, `
+		SELECT EXISTS(
+			SELECT 1
+			FROM user_likes
+			WHERE target_user_id = $1 AND liker_user_id = $2
+		)
+	`, targetUserID, viewerUserID).Scan(&exists); err != nil {
+		_ = tx.Rollback()
+		return domain.UserLikeSummary{}, fmt.Errorf("check existing like: %w", err)
+	}
+
+	if exists {
+		if _, err := tx.ExecContext(ctx, `
+			DELETE FROM user_likes
+			WHERE target_user_id = $1 AND liker_user_id = $2
+		`, targetUserID, viewerUserID); err != nil {
+			_ = tx.Rollback()
+			return domain.UserLikeSummary{}, fmt.Errorf("delete like: %w", err)
+		}
+	} else {
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO user_likes (target_user_id, liker_user_id)
+			VALUES ($1, $2)
+		`, targetUserID, viewerUserID); err != nil {
+			_ = tx.Rollback()
+			return domain.UserLikeSummary{}, fmt.Errorf("insert like: %w", err)
+		}
+	}
+
+	var summary domain.UserLikeSummary
+	summary.TargetUserID = targetUserID
+	if err := tx.QueryRowContext(ctx, `
+		SELECT
+			(SELECT COUNT(*) FROM user_likes WHERE target_user_id = $1) AS like_count,
+			EXISTS(
+				SELECT 1
+				FROM user_likes
+				WHERE target_user_id = $1 AND liker_user_id = $2
+			) AS liked_by_me
+	`, targetUserID, viewerUserID).Scan(&summary.LikeCount, &summary.LikedByMe); err != nil {
+		_ = tx.Rollback()
+		return domain.UserLikeSummary{}, fmt.Errorf("reload user like summary: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return domain.UserLikeSummary{}, fmt.Errorf("commit toggle like: %w", err)
+	}
+
+	return summary, nil
+}
+
 type userScanner interface {
 	Scan(dest ...any) error
 }

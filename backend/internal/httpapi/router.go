@@ -53,6 +53,8 @@ func NewRouter(
 	mux.HandleFunc("POST /api/v1/users", userHandler.CreateUser)
 	mux.HandleFunc("GET /api/v1/users/me", withAuth(tokenManager, userHandler.Me))
 	mux.HandleFunc("GET /api/v1/users/{id}", withAuth(tokenManager, userHandler.GetUser))
+	mux.HandleFunc("GET /api/v1/users/{id}/likes", withAuth(tokenManager, userHandler.GetLikeSummary))
+	mux.HandleFunc("POST /api/v1/users/{id}/likes/toggle", withAuth(tokenManager, userHandler.ToggleLike))
 	mux.HandleFunc("PUT /api/v1/users/{id}", withAuth(tokenManager, userHandler.UpdateUser))
 	mux.HandleFunc("DELETE /api/v1/users/{id}", withAuth(tokenManager, userHandler.DeleteUser))
 	mux.HandleFunc("GET /api/v1/chat-rooms", withAuth(tokenManager, chatHandler.ListUserRooms))

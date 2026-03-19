@@ -122,6 +122,46 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"deleted": true})
 }
 
+func (h *UserHandler) GetLikeSummary(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	summary, err := h.userService.GetLikeSummary(r.Context(), r.PathValue("id"), claims.Subject)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to load like summary")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, summary)
+}
+
+func (h *UserHandler) ToggleLike(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	summary, err := h.userService.ToggleLike(r.Context(), r.PathValue("id"), claims.Subject)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to toggle like")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, summary)
+}
+
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	h.login(w, r, false)
 }

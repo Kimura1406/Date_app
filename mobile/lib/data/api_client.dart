@@ -67,6 +67,40 @@ class ApiClient {
         .toList();
   }
 
+  Future<UserLikeSummary> fetchUserLikeSummary({
+    required String token,
+    required String userId,
+  }) async {
+    final response = await _client.get(
+      Uri.parse('$apiBaseUrl/api/v1/users/$userId/likes'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Load likes failed'));
+    }
+
+    return UserLikeSummary.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  Future<UserLikeSummary> toggleUserLike({
+    required String token,
+    required String userId,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$apiBaseUrl/api/v1/users/$userId/likes/toggle'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Toggle like failed'));
+    }
+
+    return UserLikeSummary.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
   Future<List<ChatRoomSummary>> fetchChatRooms({
     required String token,
     required String roomType,

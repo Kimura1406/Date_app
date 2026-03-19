@@ -91,6 +91,12 @@ type UserCredentials struct {
 	PasswordHash string
 }
 
+type UserLikeSummary struct {
+	TargetUserID string `json:"targetUserId"`
+	LikeCount    int    `json:"likeCount"`
+	LikedByMe    bool   `json:"likedByMe"`
+}
+
 type Flower struct {
 	ID             string `json:"id"`
 	Name           string `json:"name"`

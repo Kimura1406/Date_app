@@ -25,6 +25,8 @@ type userRepository interface {
 	CreateUser(ctx context.Context, id string, input domain.CreateUserInput, passwordHash string) (domain.User, error)
 	UpdateUser(ctx context.Context, id string, input domain.UpdateUserInput, passwordHash *string) (domain.User, error)
 	UpdateLastLogin(ctx context.Context, id string, loggedInAt time.Time) error
+	GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error)
+	ToggleLike(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error)
 	DeleteUser(ctx context.Context, id string) error
 }
 
@@ -127,6 +129,49 @@ func (s *UserService) UpdateUser(ctx context.Context, id string, input domain.Up
 
 func (s *UserService) DeleteUser(ctx context.Context, id string) error {
 	return s.repo.DeleteUser(ctx, id)
+}
+
+func (s *UserService) GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error) {
+	if strings.TrimSpace(targetUserID) == "" {
+		return domain.UserLikeSummary{}, fmt.Errorf("target user id is required")
+	}
+	if strings.TrimSpace(viewerUserID) == "" {
+		return domain.UserLikeSummary{}, fmt.Errorf("viewer user id is required")
+	}
+
+	if _, err := s.repo.GetUserByID(ctx, targetUserID); err != nil {
+		return domain.UserLikeSummary{}, err
+	}
+
+	return s.repo.GetLikeSummary(ctx, targetUserID, viewerUserID)
+}
+
+func (s *UserService) ToggleLike(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error) {
+	targetUserID = strings.TrimSpace(targetUserID)
+	viewerUserID = strings.TrimSpace(viewerUserID)
+	if targetUserID == "" {
+		return domain.UserLikeSummary{}, fmt.Errorf("target user id is required")
+	}
+	if viewerUserID == "" {
+		return domain.UserLikeSummary{}, fmt.Errorf("viewer user id is required")
+	}
+	if targetUserID == viewerUserID {
+		return domain.UserLikeSummary{}, fmt.Errorf("cannot like yourself")
+	}
+
+	targetUser, err := s.repo.GetUserByID(ctx, targetUserID)
+	if err != nil {
+		return domain.UserLikeSummary{}, err
+	}
+	if targetUser.Role != "user" {
+		return domain.UserLikeSummary{}, fmt.Errorf("likes are only available for users")
+	}
+
+	if _, err := s.repo.GetUserByID(ctx, viewerUserID); err != nil {
+		return domain.UserLikeSummary{}, err
+	}
+
+	return s.repo.ToggleLike(ctx, targetUserID, viewerUserID)
 }
 
 func (s *UserService) Login(ctx context.Context, input domain.LoginInput) (domain.AuthResponse, error) {

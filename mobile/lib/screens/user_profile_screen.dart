@@ -27,7 +27,6 @@ class UserProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = context.strings;
     final posts = buildProfilePosts(profile);
-    final likeCount = buildLikeCount(profile);
     final birthYear = DateTime.now().year - profile.age;
 
     return Scaffold(
@@ -40,7 +39,6 @@ class UserProfileScreen extends StatelessWidget {
               authToken: authToken,
               profile: profile,
               birthYear: birthYear,
-              likeCount: likeCount,
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
@@ -93,14 +91,12 @@ class _ProfileHeader extends StatelessWidget {
     required this.authToken,
     required this.profile,
     required this.birthYear,
-    required this.likeCount,
   });
 
   final AppUser currentUser;
   final String authToken;
   final DatingProfile profile;
   final int birthYear;
-  final int likeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -226,9 +222,10 @@ class _ProfileHeader extends StatelessWidget {
                                 icon: Icons.wc_outlined,
                                 label: strings.genderName(profile.gender),
                               ),
-                              _ProfileInfoChip(
-                                icon: Icons.favorite_border_rounded,
-                                label: '$likeCount',
+                              _LikeHeaderChip(
+                                currentUser: currentUser,
+                                authToken: authToken,
+                                profile: profile,
                               ),
                               _ChatHeaderButton(
                                 currentUser: currentUser,
@@ -376,6 +373,150 @@ class _ProfileInfoChip extends StatelessWidget {
                 ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LikeHeaderChip extends StatefulWidget {
+  const _LikeHeaderChip({
+    required this.currentUser,
+    required this.authToken,
+    required this.profile,
+  });
+
+  final AppUser currentUser;
+  final String authToken;
+  final DatingProfile profile;
+
+  @override
+  State<_LikeHeaderChip> createState() => _LikeHeaderChipState();
+}
+
+class _LikeHeaderChipState extends State<_LikeHeaderChip> {
+  final ApiClient _apiClient = ApiClient();
+  UserLikeSummary? _summary;
+  bool _loading = true;
+  bool _toggling = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSummary();
+  }
+
+  Future<void> _loadSummary() async {
+    try {
+      final summary = await _apiClient.fetchUserLikeSummary(
+        token: widget.authToken,
+        userId: widget.profile.id,
+      );
+      if (!mounted) return;
+      setState(() {
+        _summary = summary;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _summary = UserLikeSummary(
+          targetUserId: widget.profile.id,
+          likeCount: 0,
+          likedByMe: false,
+        );
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _toggleLike() async {
+    if (_toggling || widget.currentUser.id == widget.profile.id) {
+      return;
+    }
+
+    setState(() {
+      _toggling = true;
+    });
+
+    try {
+      final summary = await _apiClient.toggleUserLike(
+        token: widget.authToken,
+        userId: widget.profile.id,
+      );
+      if (!mounted) return;
+      setState(() {
+        _summary = summary;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString().replaceFirst('Exception: ', '')),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _toggling = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final summary = _summary;
+    final likedByMe = summary?.likedByMe ?? false;
+    final likeCount = summary?.likeCount ?? 0;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _loading ? null : _toggleLike,
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: likedByMe
+                ? const Color(0xFFFFEDF1)
+                : Colors.white.withValues(alpha: 0.82),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: likedByMe
+                  ? const Color(0xFFE8A9B7)
+                  : Colors.white.withValues(alpha: 0.9),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_toggling)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                Icon(
+                  likedByMe
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  size: 16,
+                  color: likedByMe
+                      ? const Color(0xFFD94162)
+                      : const Color(0xFF4A2330),
+                ),
+              const SizedBox(width: 6),
+              Text(
+                '$likeCount',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF4A2330),
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
