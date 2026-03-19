@@ -134,6 +134,22 @@ class _AuthShellState extends State<AuthShell> {
     });
   }
 
+  Future<void> _syncLatestUserSilently() async {
+    if (refreshToken.isEmpty) {
+      return;
+    }
+
+    try {
+      final loginResult = await _apiClient.refresh(refreshToken: refreshToken);
+      authToken = loginResult.accessToken;
+      refreshToken = loginResult.refreshToken;
+      _applyUser(loginResult.user);
+      await _persistSession();
+    } catch (_) {
+      // Best effort sync for point balance and latest profile state.
+    }
+  }
+
   Future<void> _update() async {
     final strings = context.strings;
     if (currentUser == null) {
@@ -248,11 +264,17 @@ class _AuthShellState extends State<AuthShell> {
     _passwordController.clear();
   }
 
+  void _applyUserAndPersist(AppUser user) {
+    _applyUser(user);
+    _persistSession();
+  }
+
   Future<void> _restoreSession() async {
     await _restoreRememberedLogin();
     final preferences = await SharedPreferences.getInstance();
     final raw = preferences.getString(authStorageKey);
     if (!mounted) return;
+    final restoredMessage = context.strings.sessionRestored;
 
     if (raw == null || raw.isEmpty) {
       setState(() {
@@ -272,7 +294,8 @@ class _AuthShellState extends State<AuthShell> {
         await preferences.remove(authStorageKey);
       } else {
         _applyUser(storedUser);
-        statusMessage = context.strings.sessionRestored;
+        await _syncLatestUserSilently();
+        statusMessage = restoredMessage;
       }
     } catch (_) {
       await preferences.remove(authStorageKey);
@@ -433,7 +456,7 @@ class _AuthShellState extends State<AuthShell> {
       FlowerShopScreen(
         currentUser: currentUser!,
         authToken: authToken,
-        onUserChanged: _applyUser,
+        onUserChanged: _applyUserAndPersist,
       ),
       TimelineScreen(
         currentUser: currentUser!,
@@ -483,6 +506,12 @@ class _AuthShellState extends State<AuthShell> {
           setState(() {
             currentTab = index;
           });
+          if (index == 1 || index == 4) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _syncLatestUserSilently();
+            });
+          }
         },
         destinations: [
           NavigationDestination(
