@@ -270,6 +270,14 @@ button:disabled {
   padding: 24px;
 }
 
+.subscreen-panel {
+  max-width: 880px;
+}
+
+.subscreen-panel .panel-header {
+  margin-bottom: 24px;
+}
+
 .user-list-layout > .panel .panel-header {
   padding: 24px 24px 0;
   margin-bottom: 12px;

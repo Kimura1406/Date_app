@@ -109,6 +109,15 @@ type ChatRoom = {
 };
 
 type MenuKey = 'user-list' | 'chat' | 'gift' | 'sales' | 'revenue';
+type AdminPath =
+  | 'user-list'
+  | 'user-list/new'
+  | 'chat'
+  | 'gift'
+  | 'gift/new'
+  | 'sales'
+  | 'sales/new'
+  | 'revenue';
 
 const menuSections: Array<{
   label: string;
@@ -176,6 +185,84 @@ const emptyBannerForm: BannerFormState = {
   published: true,
 };
 
+const defaultPath: AdminPath = 'user-list';
+
+function parseAdminPath(hash: string): AdminPath {
+  const raw = hash.replace(/^#/, '');
+  switch (raw) {
+    case '/users':
+      return 'user-list';
+    case '/users/new':
+      return 'user-list/new';
+    case '/chat':
+      return 'chat';
+    case '/flowers':
+      return 'gift';
+    case '/flowers/new':
+      return 'gift/new';
+    case '/banners':
+      return 'sales';
+    case '/banners/new':
+      return 'sales/new';
+    case '/revenue':
+      return 'revenue';
+    default:
+      return defaultPath;
+  }
+}
+
+function pathToHash(path: AdminPath) {
+  switch (path) {
+    case 'user-list':
+      return '#/users';
+    case 'user-list/new':
+      return '#/users/new';
+    case 'chat':
+      return '#/chat';
+    case 'gift':
+      return '#/flowers';
+    case 'gift/new':
+      return '#/flowers/new';
+    case 'sales':
+      return '#/banners';
+    case 'sales/new':
+      return '#/banners/new';
+    case 'revenue':
+      return '#/revenue';
+  }
+}
+
+function menuKeyFromPath(path: AdminPath): MenuKey {
+  switch (path) {
+    case 'user-list':
+    case 'user-list/new':
+      return 'user-list';
+    case 'gift':
+    case 'gift/new':
+      return 'gift';
+    case 'sales':
+    case 'sales/new':
+      return 'sales';
+    default:
+      return path;
+  }
+}
+
+function menuKeyToPath(menuKey: MenuKey): AdminPath {
+  switch (menuKey) {
+    case 'user-list':
+      return 'user-list';
+    case 'chat':
+      return 'chat';
+    case 'gift':
+      return 'gift';
+    case 'sales':
+      return 'sales';
+    case 'revenue':
+      return 'revenue';
+  }
+}
+
 function App() {
   const pageSizeOptions = [10, 20, 50, 100];
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -202,7 +289,8 @@ function App() {
   const [adminUser, setAdminUser] = useState<User | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<MenuKey>('user-list');
+  const [activePath, setActivePath] = useState<AdminPath>(() => parseAdminPath(window.location.hash));
+  const [activeMenu, setActiveMenu] = useState<MenuKey>(() => menuKeyFromPath(parseAdminPath(window.location.hash)));
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isFlowerModalOpen, setIsFlowerModalOpen] = useState(false);
   const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
@@ -233,8 +321,18 @@ function App() {
     setBanners([]);
     setChatRooms([]);
     setSelectedChatRoom(null);
-    setActiveMenu('user-list');
+    navigateToPath('user-list');
     setMessage(sessionMessage);
+  }
+
+  function navigateToPath(path: AdminPath) {
+    const nextHash = pathToHash(path);
+    if (window.location.hash !== nextHash) {
+      window.location.hash = nextHash;
+    } else {
+      setActivePath(path);
+      setActiveMenu(menuKeyFromPath(path));
+    }
   }
 
   function isInvalidTokenResponse(response: Response, data: { error?: string }) {
@@ -264,6 +362,18 @@ function App() {
     } catch {
       window.localStorage.removeItem(adminAuthStorageKey);
     }
+  }, []);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const nextPath = parseAdminPath(window.location.hash);
+      setActivePath(nextPath);
+      setActiveMenu(menuKeyFromPath(nextPath));
+    };
+
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   useEffect(() => {
@@ -548,7 +658,7 @@ function App() {
       setAuthToken(data.tokens.accessToken);
       setRefreshToken(data.tokens.refreshToken);
       setAdminUser(data.user);
-      setActiveMenu('user-list');
+      navigateToPath('user-list');
       setMessage('Admin login successful.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Admin login failed');
@@ -611,13 +721,13 @@ function App() {
     resetForm();
     resetFlowerForm();
     resetBannerForm();
-    setActiveMenu('user-list');
+    navigateToPath('user-list');
     setMessage('Logged out.');
     setLogoutLoading(false);
   }
 
   function openEditUserModal(user: User) {
-    setActiveMenu('user-list');
+    navigateToPath('user-list');
     setSelectedUserId(user.id);
     setForm({
       email: user.email,
@@ -635,13 +745,13 @@ function App() {
   function openCreateUserModal() {
     resetForm();
     setMessage('');
-    setIsUserModalOpen(true);
+    navigateToPath('user-list/new');
   }
 
   function openCreateFlowerModal() {
     resetFlowerForm();
     setMessage('');
-    setIsFlowerModalOpen(true);
+    navigateToPath('gift/new');
   }
 
   function closeUserModal() {
@@ -687,6 +797,7 @@ function App() {
   }
 
   function openEditFlowerModal(flower: Flower) {
+    navigateToPath('gift');
     setSelectedFlowerId(flower.id);
     setFlowerForm({
       imageUrl: flower.imageUrl,
@@ -702,10 +813,11 @@ function App() {
   function openCreateBannerModal() {
     resetBannerForm();
     setMessage('');
-    setIsBannerModalOpen(true);
+    navigateToPath('sales/new');
   }
 
   function openEditBannerModal(banner: Banner) {
+    navigateToPath('sales');
     setSelectedBannerId(banner.id);
     setBannerForm({
       imageUrl: banner.imageUrl,
@@ -759,7 +871,12 @@ function App() {
       }
 
       setMessage(selectedUserId ? 'User updated successfully.' : 'User created successfully.');
-      closeUserModal();
+      if (selectedUserId) {
+        closeUserModal();
+      } else {
+        resetForm();
+        navigateToPath('user-list');
+      }
       await loadUsers();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save user');
@@ -853,7 +970,12 @@ function App() {
       }
 
       setMessage(selectedFlowerId ? 'Flower updated successfully.' : 'Flower created successfully.');
-      closeFlowerModal();
+      if (selectedFlowerId) {
+        closeFlowerModal();
+      } else {
+        resetFlowerForm();
+        navigateToPath('gift');
+      }
       await loadFlowers();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save flower');
@@ -917,7 +1039,12 @@ function App() {
       }
 
       setMessage(selectedBannerId ? 'Banner updated successfully.' : 'Banner created successfully.');
-      closeBannerModal();
+      if (selectedBannerId) {
+        closeBannerModal();
+      } else {
+        resetBannerForm();
+        navigateToPath('sales');
+      }
       await loadBanners();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to save banner');
@@ -941,7 +1068,7 @@ function App() {
                     <button
                       className={`nav-item nav-subitem ${activeMenu === child.key ? 'active' : ''}`}
                       key={child.key}
-                      onClick={() => setActiveMenu(child.key)}
+                      onClick={() => navigateToPath(menuKeyToPath(child.key))}
                       type="button"
                     >
                       {child.label}
@@ -956,7 +1083,7 @@ function App() {
             <button
               className={`nav-item ${activeMenu === section.key ? 'active' : ''}`}
               key={section.label}
-              onClick={() => setActiveMenu(section.key!)}
+              onClick={() => navigateToPath(menuKeyToPath(section.key!))}
               type="button"
             >
               {section.label}
@@ -1003,6 +1130,206 @@ function App() {
   const chatPagination = paginateItems(chatRooms, chatCurrentPage, chatPageSize);
   const flowerPagination = paginateItems(flowers, flowerCurrentPage, flowerPageSize);
   const bannerPagination = paginateItems(filteredBanners, bannerCurrentPage, bannerPageSize);
+
+  function renderCreateUserPanel() {
+    return (
+      <div className="panel subscreen-panel">
+        <div className="panel-header">
+          <div>
+            <h2>Create new user</h2>
+          </div>
+        </div>
+        {message ? <div className="notice">{message}</div> : null}
+        <form className="user-form" onSubmit={(event) => void handleSubmit(event)}>
+          <label>
+            Email
+            <input onChange={(event) => updateField('email', event.target.value)} type="email" value={form.email} />
+          </label>
+          <label>
+            Password
+            <input onChange={(event) => updateField('password', event.target.value)} type="password" value={form.password} />
+          </label>
+          <label>
+            {'\u30e6\u30fc\u30b6\u30fc\u30cd\u30fc\u30e0'}
+            <input onChange={(event) => updateField('name', event.target.value)} type="text" value={form.name} />
+          </label>
+          <label>
+            {'\u751f\u5e74\u6708\u65e5'}
+            <input onChange={(event) => updateField('birthDate', event.target.value)} type="date" value={form.birthDate} />
+          </label>
+          <label>
+            {'\u56fd'}
+            <input onChange={(event) => updateField('country', event.target.value)} type="text" value={form.country} />
+          </label>
+          <label>
+            {'\u90fd\u9053\u5e9c\u770c'}
+            <input onChange={(event) => updateField('prefecture', event.target.value)} type="text" value={form.prefecture} />
+          </label>
+          <label className="full-span">
+            {'\u4ed8\u304d\u5408\u3046\u7406\u7531'}
+            <textarea
+              maxLength={100}
+              onChange={(event) => updateField('datingReason', event.target.value)}
+              rows={4}
+              value={form.datingReason}
+            />
+            <small className="field-note">{form.datingReason.length}/100</small>
+          </label>
+          <div className="form-actions full-span">
+            <button className="ghost" onClick={() => navigateToPath('user-list')} type="button">
+              Cancel
+            </button>
+            <button disabled={saving} type="submit">
+              {saving ? 'Saving...' : 'Create user'}
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  function renderCreateFlowerPanel() {
+    return (
+      <div className="panel subscreen-panel">
+        <div className="panel-header">
+          <div>
+            <h2>{'\u304a\u82b1\u6295\u7a3f'}</h2>
+          </div>
+        </div>
+        {message ? <div className="notice">{message}</div> : null}
+        <form className="user-form" onSubmit={(event) => void handleFlowerSubmit(event)}>
+          <label className="full-span">
+            {'\u753b\u50cf\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9'}
+            <input accept="image/*" onChange={(event) => void handleFlowerImageChange(event)} type="file" />
+            {flowerForm.imageUrl ? <img alt="Flower preview" className="flower-preview" src={flowerForm.imageUrl} /> : null}
+          </label>
+          <label className="full-span">
+            {'\u82b1\u306e\u540d\u524d'}
+            <input
+              maxLength={50}
+              onChange={(event) => updateFlowerField('name', event.target.value)}
+              type="text"
+              value={flowerForm.name}
+            />
+            <small className="field-note">{flowerForm.name.length}/50</small>
+          </label>
+          <label className="full-span">
+            {'\u82b1\u306b\u3064\u3044\u3066'}
+            <textarea
+              maxLength={100}
+              onChange={(event) => updateFlowerField('description', event.target.value)}
+              rows={4}
+              value={flowerForm.description}
+            />
+            <small className="field-note">{flowerForm.description.length}/100</small>
+          </label>
+          <label className="full-span">
+            {'\u4fa1\u683c'}
+            <div className="price-stepper">
+              <button className="ghost" onClick={() => updateFlowerField('pricePoints', Math.max(1, flowerForm.pricePoints - 1))} type="button">
+                -
+              </button>
+              <input
+                min={1}
+                onChange={(event) => updateFlowerField('pricePoints', Math.max(1, Number(event.target.value) || 1))}
+                type="number"
+                value={flowerForm.pricePoints}
+              />
+              <span>P</span>
+              <button className="ghost" onClick={() => updateFlowerField('pricePoints', flowerForm.pricePoints + 1)} type="button">
+                +
+              </button>
+            </div>
+          </label>
+          <fieldset className="full-span publish-fieldset">
+            <legend>{'\u516c\u958b\u72b6\u614b'}</legend>
+            <label className="radio-option">
+              <input checked={flowerForm.published} name="flower-publish" onChange={() => updateFlowerField('published', true)} type="radio" />
+              {'\u516c\u958b'}
+            </label>
+            <label className="radio-option">
+              <input checked={!flowerForm.published} name="flower-publish" onChange={() => updateFlowerField('published', false)} type="radio" />
+              {'\u975e\u516c\u958b'}
+            </label>
+          </fieldset>
+          <div className="form-actions full-span">
+            <button className="ghost" onClick={() => navigateToPath('gift')} type="button">
+              Cancel
+            </button>
+            <button disabled={savingFlower} type="submit">
+              {savingFlower ? 'Saving...' : '\u6295\u7a3f'}
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  function renderCreateBannerPanel() {
+    return (
+      <div className="panel subscreen-panel">
+        <div className="panel-header">
+          <div>
+            <h2>{'\u65b0\u898f\u4f5c\u6210'}</h2>
+          </div>
+        </div>
+        {message ? <div className="notice">{message}</div> : null}
+        <form className="user-form" onSubmit={(event) => void handleBannerSubmit(event)}>
+          <label className="full-span">
+            {'\u753b\u50cf\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9'}
+            <input accept="image/*" onChange={(event) => void handleBannerImageChange(event)} type="file" />
+            {bannerForm.imageUrl ? <img alt="Banner preview" className="banner-preview" src={bannerForm.imageUrl} /> : null}
+          </label>
+          <label>
+            {'\u30a4\u30d9\u30f3\u30c8\u540d'}
+            <input
+              maxLength={100}
+              onChange={(event) => updateBannerField('eventName', event.target.value)}
+              type="text"
+              value={bannerForm.eventName}
+            />
+          </label>
+          <label>
+            {'\u8868\u793a\u9806'}
+            <input
+              min={0}
+              onChange={(event) => updateBannerField('displayOrder', Math.max(0, Number(event.target.value) || 0))}
+              type="number"
+              value={bannerForm.displayOrder}
+            />
+          </label>
+          <label className="full-span">
+            {'\u518d\u7528\u30ea\u30f3\u30af'}
+            <input
+              onChange={(event) => updateBannerField('redirectLink', event.target.value)}
+              placeholder="https://example.com"
+              type="url"
+              value={bannerForm.redirectLink}
+            />
+          </label>
+          <fieldset className="full-span publish-fieldset">
+            <legend>{'\u72b6\u614b'}</legend>
+            <label className="radio-option">
+              <input checked={bannerForm.published} name="banner-publish" onChange={() => updateBannerField('published', true)} type="radio" />
+              {'\u516c\u958b'}
+            </label>
+            <label className="radio-option">
+              <input checked={!bannerForm.published} name="banner-publish" onChange={() => updateBannerField('published', false)} type="radio" />
+              {'\u672a\u516c\u958b'}
+            </label>
+          </fieldset>
+          <div className="form-actions full-span">
+            <button className="ghost" onClick={() => navigateToPath('sales')} type="button">
+              Cancel
+            </button>
+            <button disabled={savingBanner} type="submit">
+              {savingBanner ? 'Saving...' : '\u6295\u7a3f'}
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   if (!authToken) {
     return (
@@ -1087,7 +1414,8 @@ function App() {
         {activeMenu === 'user-list' ? (
           <>
             <section className="content-grid user-list-layout">
-              <div className="panel">
+              {activePath === 'user-list/new' ? renderCreateUserPanel() : (
+                <div className="panel">
                 <div className="panel-header panel-header-right">
                   <div className="inline-actions">
                     <button onClick={openCreateUserModal} type="button">
@@ -1208,7 +1536,8 @@ function App() {
                     </div>
                   </>
                 )}
-              </div>
+                </div>
+              )}
             </section>
 
             {isUserModalOpen ? (
@@ -1419,7 +1748,8 @@ function App() {
         ) : activeMenu === 'gift' ? (
           <>
             <section className="content-grid user-list-layout">
-              <div className="panel flower-panel">
+              {activePath === 'gift/new' ? renderCreateFlowerPanel() : (
+                <div className="panel flower-panel">
                 <div className="panel-header flower-panel-header">
                   <div className="flower-record-count">
                     {'件数'}: {flowers.length} {'件'}
@@ -1537,13 +1867,15 @@ function App() {
                     </div>
                   </div>
                 ) : null}
-              </div>
+                </div>
+              )}
             </section>
           </>
         ) : activeMenu === 'sales' ? (
           <>
             <section className="content-grid user-list-layout">
-              <div className="panel banner-panel">
+              {activePath === 'sales/new' ? renderCreateBannerPanel() : (
+                <div className="panel banner-panel">
                 <div className="panel-header panel-header-right banner-toolbar">
                   <div className="inline-actions banner-toolbar-actions">
                     <label className="banner-search">
@@ -1682,7 +2014,8 @@ function App() {
                     </div>
                   </>
                 )}
-              </div>
+                </div>
+              )}
             </section>
           </>
         ) : (
