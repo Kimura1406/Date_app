@@ -1074,6 +1074,44 @@ class AppStrings {
     }
   }
 
+  String get flowerShopSortLowToHigh {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Sắp xếp giá từ thấp đến cao';
+      case AppLanguage.japanese:
+        return 'ポイントが低い順に並び替え';
+      case AppLanguage.korean:
+        return '포인트 낮은 순 정렬';
+      case AppLanguage.russian:
+        return 'Сортировать по возрастанию поинтов';
+      case AppLanguage.chinese:
+        return '按积分从低到高排序';
+      case AppLanguage.english:
+        return 'Sort by lowest points';
+      case AppLanguage.thai:
+        return 'เรียงตามพอยต์จากน้อยไปมาก';
+    }
+  }
+
+  String get flowerShopSortHighToLow {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Sắp xếp giá từ cao đến thấp';
+      case AppLanguage.japanese:
+        return 'ポイントが高い順に並び替え';
+      case AppLanguage.korean:
+        return '포인트 높은 순 정렬';
+      case AppLanguage.russian:
+        return 'Сортировать по убыванию поинтов';
+      case AppLanguage.chinese:
+        return '按积分从高到低排序';
+      case AppLanguage.english:
+        return 'Sort by highest points';
+      case AppLanguage.thai:
+        return 'เรียงตามพอยต์จากมากไปน้อย';
+    }
+  }
+
   String get timelineTab {
     switch (language) {
       case AppLanguage.vietnamese:

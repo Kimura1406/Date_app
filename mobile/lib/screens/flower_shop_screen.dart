@@ -17,6 +17,7 @@ class FlowerShopScreen extends StatefulWidget {
 class _FlowerShopScreenState extends State<FlowerShopScreen> {
   late Future<List<FlowerShopItem>> _flowersFuture;
   final ApiClient _apiClient = ApiClient();
+  bool? _sortAscending;
 
   @override
   void initState() {
@@ -41,12 +42,37 @@ class _FlowerShopScreenState extends State<FlowerShopScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              strings.flowerShopTitle,
-              style: theme.textTheme.headlineMedium?.copyWith(
-                color: const Color(0xFF2F2424),
-                fontWeight: FontWeight.w800,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    strings.flowerShopTitle,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: const Color(0xFF2F2424),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                IconButton.filledTonal(
+                  onPressed: () {
+                    setState(() {
+                      _sortAscending = !(_sortAscending ?? false);
+                    });
+                  },
+                  tooltip: _sortAscending == true
+                      ? strings.flowerShopSortHighToLow
+                      : strings.flowerShopSortLowToHigh,
+                  style: IconButton.styleFrom(
+                    backgroundColor: const Color(0xFFF3E1DC),
+                    foregroundColor: const Color(0xFF6D4751),
+                  ),
+                  icon: Icon(
+                    _sortAscending == true
+                        ? Icons.arrow_upward_rounded
+                        : Icons.arrow_downward_rounded,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
@@ -77,6 +103,14 @@ class _FlowerShopScreenState extends State<FlowerShopScreen> {
                     return _FlowerShopEmpty(onRetry: _reload);
                   }
 
+                  final sortedItems = [...items];
+                  if (_sortAscending != null) {
+                    sortedItems.sort((a, b) => a.pricePoints.compareTo(b.pricePoints));
+                    if (_sortAscending == false) {
+                      sortedItems.setAll(0, sortedItems.reversed);
+                    }
+                  }
+
                   return GridView.builder(
                     physics: const BouncingScrollPhysics(),
                     gridDelegate:
@@ -86,9 +120,9 @@ class _FlowerShopScreenState extends State<FlowerShopScreen> {
                       crossAxisSpacing: 16,
                       childAspectRatio: 0.72,
                     ),
-                    itemCount: items.length,
+                    itemCount: sortedItems.length,
                     itemBuilder: (context, index) {
-                      return _FlowerGiftCard(item: items[index]);
+                      return _FlowerGiftCard(item: sortedItems[index]);
                     },
                   );
                 },
