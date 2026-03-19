@@ -8,7 +8,16 @@ import '../data/models.dart';
 import '../localization/app_localizations.dart';
 
 class FlowerShopScreen extends StatefulWidget {
-  const FlowerShopScreen({super.key});
+  const FlowerShopScreen({
+    super.key,
+    required this.currentUser,
+    required this.authToken,
+    required this.onUserChanged,
+  });
+
+  final AppUser currentUser;
+  final String authToken;
+  final ValueChanged<AppUser> onUserChanged;
 
   @override
   State<FlowerShopScreen> createState() => _FlowerShopScreenState();
@@ -18,6 +27,7 @@ class _FlowerShopScreenState extends State<FlowerShopScreen> {
   late Future<List<FlowerShopItem>> _flowersFuture;
   final ApiClient _apiClient = ApiClient();
   bool? _sortAscending;
+  String? _processingFlowerId;
 
   @override
   void initState() {
@@ -29,6 +39,72 @@ class _FlowerShopScreenState extends State<FlowerShopScreen> {
     setState(() {
       _flowersFuture = _apiClient.fetchFlowers();
     });
+  }
+
+  Future<void> _openInsufficientPointsGuide(FlowerShopItem item) async {
+    final strings = context.strings;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _FlowerGuideScreen(
+          title: strings.flowerShopInsufficientTitle,
+          message: strings.flowerShopInsufficientMessage(
+            item.pricePoints,
+            widget.currentUser.pointBalance,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _acquireFlower(FlowerShopItem item) async {
+    if (_processingFlowerId != null) {
+      return;
+    }
+
+    if (widget.currentUser.pointBalance < item.pricePoints) {
+      await _openInsufficientPointsGuide(item);
+      return;
+    }
+
+    setState(() {
+      _processingFlowerId = item.id;
+    });
+
+    try {
+      final result = await _apiClient.acquireFlower(
+        token: widget.authToken,
+        flowerId: item.id,
+      );
+      widget.onUserChanged(result.user);
+      _reload();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.strings.flowerShopAcquiredMessage(
+              result.flower.name,
+              result.user.pointBalance,
+            ),
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      final message = error.toString().replaceFirst('Exception: ', '');
+      if (message == 'insufficient points') {
+        await _openInsufficientPointsGuide(item);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _processingFlowerId = null;
+        });
+      }
+    }
   }
 
   @override
@@ -53,6 +129,8 @@ class _FlowerShopScreenState extends State<FlowerShopScreen> {
                     ),
                   ),
                 ),
+                _PointBalanceChip(points: widget.currentUser.pointBalance),
+                const SizedBox(width: 10),
                 IconButton.filledTonal(
                   onPressed: () {
                     setState(() {
@@ -118,11 +196,17 @@ class _FlowerShopScreenState extends State<FlowerShopScreen> {
                       crossAxisCount: 2,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
-                      childAspectRatio: 0.72,
+                      childAspectRatio: 0.8,
                     ),
                     itemCount: sortedItems.length,
                     itemBuilder: (context, index) {
-                      return _FlowerGiftCard(item: sortedItems[index]);
+                      final item = sortedItems[index];
+                      return _FlowerGiftCard(
+                        item: item,
+                        strings: strings,
+                        busy: _processingFlowerId == item.id,
+                        onAcquire: () => _acquireFlower(item),
+                      );
                     },
                   );
                 },
@@ -135,10 +219,43 @@ class _FlowerShopScreenState extends State<FlowerShopScreen> {
   }
 }
 
+class _PointBalanceChip extends StatelessWidget {
+  const _PointBalanceChip({required this.points});
+
+  final int points;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8E7E1),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFE1C3BD)),
+      ),
+      child: Text(
+        '${context.strings.flowerShopPointsLabel}: ${points}P',
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: const Color(0xFF6D4751),
+              fontWeight: FontWeight.w800,
+            ),
+      ),
+    );
+  }
+}
+
 class _FlowerGiftCard extends StatelessWidget {
-  const _FlowerGiftCard({required this.item});
+  const _FlowerGiftCard({
+    required this.item,
+    required this.strings,
+    required this.busy,
+    required this.onAcquire,
+  });
 
   final FlowerShopItem item;
+  final AppStrings strings;
+  final bool busy;
+  final VoidCallback onAcquire;
 
   @override
   Widget build(BuildContext context) {
@@ -193,20 +310,46 @@ class _FlowerGiftCard extends StatelessWidget {
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFB86A76),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                '${item.pricePoints}P',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFB86A76),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '${item.pricePoints}P',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
                 ),
-              ),
+                const Spacer(),
+                FilledButton(
+                  onPressed: busy ? null : onAcquire,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF6D4751),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    textStyle: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  child: busy
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(strings.flowerShopAcquireButton),
+                ),
+              ],
             ),
           ],
         ),
@@ -267,6 +410,61 @@ class _FlowerImage extends StatelessWidget {
     } catch (_) {
       return null;
     }
+  }
+}
+
+class _FlowerGuideScreen extends StatelessWidget {
+  const _FlowerGuideScreen({
+    required this.title,
+    required this.message,
+  });
+
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFFBFA),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFFFBFA),
+        foregroundColor: const Color(0xFF2F2424),
+        elevation: 0,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.info_outline_rounded,
+                size: 56,
+                color: Color(0xFFB86A76),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: const Color(0xFF2F2424),
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: const Color(0xFF6D5A5A),
+                      height: 1.5,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

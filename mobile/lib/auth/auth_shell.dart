@@ -428,7 +428,11 @@ class _AuthShellState extends State<AuthShell> {
         currentUser: currentUser!,
         authToken: authToken,
       ),
-      const FlowerShopScreen(),
+      FlowerShopScreen(
+        currentUser: currentUser!,
+        authToken: authToken,
+        onUserChanged: _applyUser,
+      ),
       TimelineScreen(
         currentUser: currentUser!,
       ),

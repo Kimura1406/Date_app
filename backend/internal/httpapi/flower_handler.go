@@ -1,7 +1,9 @@
 package httpapi
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/kimura/dating/backend/internal/domain"
@@ -63,6 +65,31 @@ func (h *FlowerHandler) UpdateFlower(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeDomainError(w, err, "failed to update flower")
 		return
+	}
+
+	writeJSON(w, http.StatusOK, item)
+}
+
+func (h *FlowerHandler) AcquireFlower(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	item, err := h.flowerService.AcquireFlower(r.Context(), r.PathValue("id"), claims.Subject)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrInsufficientPoints):
+			writeError(w, http.StatusConflict, "insufficient points")
+			return
+		case errors.Is(err, sql.ErrNoRows):
+			writeError(w, http.StatusNotFound, "flower not found")
+			return
+		default:
+			writeDomainError(w, err, "failed to acquire flower")
+			return
+		}
 	}
 
 	writeJSON(w, http.StatusOK, item)

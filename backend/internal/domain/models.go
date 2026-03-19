@@ -79,6 +79,7 @@ type User struct {
 	Country      string   `json:"country"`
 	Prefecture   string   `json:"prefecture"`
 	DatingReason string   `json:"datingReason"`
+	PointBalance int      `json:"pointBalance"`
 	CreatedAt    string   `json:"createdAt"`
 	LastLoginAt  string   `json:"lastLoginAt"`
 	UpdatedAt    string   `json:"updatedAt"`
@@ -124,6 +125,13 @@ type UpdateFlowerInput struct {
 	Description string `json:"description"`
 	PricePoints int    `json:"pricePoints"`
 	Published   bool   `json:"published"`
+}
+
+type FlowerAcquireResult struct {
+	Flower      Flower `json:"flower"`
+	User        User   `json:"user"`
+	OwnedCount  int    `json:"ownedCount"`
+	SpentPoints int    `json:"spentPoints"`
 }
 
 type Banner struct {

@@ -19,7 +19,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 
 func (r *UserRepository) ListUsers(ctx context.Context) ([]domain.User, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, created_at, last_login_at, updated_at
+		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, point_balance, created_at, last_login_at, updated_at
 		FROM users
 		ORDER BY created_at DESC, id DESC
 	`)
@@ -46,7 +46,7 @@ func (r *UserRepository) ListUsers(ctx context.Context) ([]domain.User, error) {
 
 func (r *UserRepository) GetUserByID(ctx context.Context, id string) (domain.User, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, created_at, last_login_at, updated_at
+		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, point_balance, created_at, last_login_at, updated_at
 		FROM users
 		WHERE id = $1
 	`, id)
@@ -301,6 +301,7 @@ func scanUser(scanner userScanner) (domain.User, error) {
 		&user.Country,
 		&user.Prefecture,
 		&user.DatingReason,
+		&user.PointBalance,
 		&createdAt,
 		&lastLoginAt,
 		&updatedAt,

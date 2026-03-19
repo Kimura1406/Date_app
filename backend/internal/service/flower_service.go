@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"database/sql"
+	"errors"
 	"fmt"
 	"math/big"
 	"strings"
@@ -17,7 +18,10 @@ type flowerRepository interface {
 	GetFlowerByID(ctx context.Context, id string) (domain.Flower, error)
 	CreateFlower(ctx context.Context, id string, input domain.CreateFlowerInput) (domain.Flower, error)
 	UpdateFlower(ctx context.Context, id string, input domain.UpdateFlowerInput) (domain.Flower, error)
+	AcquireFlower(ctx context.Context, flowerID, userID string) (domain.FlowerAcquireResult, error)
 }
+
+var ErrInsufficientPoints = errors.New("insufficient points")
 
 type FlowerService struct {
 	repo flowerRepository
@@ -65,6 +69,24 @@ func (s *FlowerService) UpdateFlower(ctx context.Context, id string, input domai
 	}
 
 	return s.repo.UpdateFlower(ctx, id, normalized)
+}
+
+func (s *FlowerService) AcquireFlower(ctx context.Context, flowerID, userID string) (domain.FlowerAcquireResult, error) {
+	flowerID = strings.TrimSpace(flowerID)
+	userID = strings.TrimSpace(userID)
+	if flowerID == "" || userID == "" {
+		return domain.FlowerAcquireResult{}, sql.ErrNoRows
+	}
+
+	result, err := s.repo.AcquireFlower(ctx, flowerID, userID)
+	if err != nil {
+		if strings.Contains(err.Error(), "insufficient points") {
+			return domain.FlowerAcquireResult{}, ErrInsufficientPoints
+		}
+		return domain.FlowerAcquireResult{}, err
+	}
+
+	return result, nil
 }
 
 func normalizeCreateFlowerInput(input domain.CreateFlowerInput) (domain.CreateFlowerInput, error) {

@@ -1112,6 +1112,101 @@ class AppStrings {
     }
   }
 
+  String get flowerShopAcquireButton {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Nhận';
+      case AppLanguage.japanese:
+        return '取得';
+      case AppLanguage.korean:
+        return '획득';
+      case AppLanguage.russian:
+        return 'Получить';
+      case AppLanguage.chinese:
+        return '获取';
+      case AppLanguage.english:
+        return 'Get';
+      case AppLanguage.thai:
+        return 'รับ';
+    }
+  }
+
+  String get flowerShopPointsLabel {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Point';
+      case AppLanguage.japanese:
+        return 'ポイント';
+      case AppLanguage.korean:
+        return '포인트';
+      case AppLanguage.russian:
+        return 'Поинты';
+      case AppLanguage.chinese:
+        return '积分';
+      case AppLanguage.english:
+        return 'Points';
+      case AppLanguage.thai:
+        return 'พอยต์';
+    }
+  }
+
+  String get flowerShopInsufficientTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Không đủ point';
+      case AppLanguage.japanese:
+        return 'ポイントが足りません';
+      case AppLanguage.korean:
+        return '포인트가 부족합니다';
+      case AppLanguage.russian:
+        return 'Недостаточно поинтов';
+      case AppLanguage.chinese:
+        return '积分不足';
+      case AppLanguage.english:
+        return 'Not enough points';
+      case AppLanguage.thai:
+        return 'พอยต์ไม่เพียงพอ';
+    }
+  }
+
+  String flowerShopInsufficientMessage(Object requiredPoints, Object currentPoints) {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Bạn cần ${requiredPoints}P nhưng hiện chỉ có ${currentPoints}P. Hãy tích lũy thêm point rồi quay lại nhận hoa.';
+      case AppLanguage.japanese:
+        return 'このお花を取得するには${requiredPoints}P必要です。現在の所持ポイントは${currentPoints}Pです。ポイントを増やしてからもう一度お試しください。';
+      case AppLanguage.korean:
+        return '이 꽃을 획득하려면 ${requiredPoints}P가 필요합니다. 현재 보유 포인트는 ${currentPoints}P입니다. 포인트를 더 모은 뒤 다시 시도해 주세요.';
+      case AppLanguage.russian:
+        return 'Для получения этого цветка нужно ${requiredPoints}P, а сейчас у вас только ${currentPoints}P. Пополните поинты и попробуйте снова.';
+      case AppLanguage.chinese:
+        return '获取这朵花需要${requiredPoints}P，您当前只有${currentPoints}P。请先获得更多积分后再试。';
+      case AppLanguage.english:
+        return 'You need ${requiredPoints}P to get this flower, but you only have ${currentPoints}P right now. Please collect more points and try again.';
+      case AppLanguage.thai:
+        return 'การรับดอกไม้นี้ต้องใช้ ${requiredPoints}P แต่ตอนนี้คุณมีเพียง ${currentPoints}P กรุณาสะสมพอยต์เพิ่มแล้วลองอีกครั้ง';
+    }
+  }
+
+  String flowerShopAcquiredMessage(Object flowerName, Object remainingPoints) {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Đã nhận $flowerName thành công. Point còn lại: ${remainingPoints}P';
+      case AppLanguage.japanese:
+        return '$flowerNameを取得しました。残りポイント: ${remainingPoints}P';
+      case AppLanguage.korean:
+        return '$flowerName 획득 완료. 남은 포인트: ${remainingPoints}P';
+      case AppLanguage.russian:
+        return 'Вы получили $flowerName. Осталось поинтов: ${remainingPoints}P';
+      case AppLanguage.chinese:
+        return '已成功获取$flowerName。剩余积分：${remainingPoints}P';
+      case AppLanguage.english:
+        return 'Successfully got $flowerName. Remaining points: ${remainingPoints}P';
+      case AppLanguage.thai:
+        return 'ได้รับ $flowerName แล้ว พอยต์คงเหลือ: ${remainingPoints}P';
+    }
+  }
+
   String get timelineTab {
     switch (language) {
       case AppLanguage.vietnamese:

@@ -163,6 +163,33 @@ class FlowerShopItem {
   }
 }
 
+class FlowerAcquireResult {
+  FlowerAcquireResult({
+    required this.flower,
+    required this.user,
+    required this.ownedCount,
+    required this.spentPoints,
+  });
+
+  final FlowerShopItem flower;
+  final AppUser user;
+  final int ownedCount;
+  final int spentPoints;
+
+  factory FlowerAcquireResult.fromJson(Map<String, dynamic> json) {
+    return FlowerAcquireResult(
+      flower: FlowerShopItem.fromJson(
+        json['flower'] as Map<String, dynamic>? ?? const {},
+      ),
+      user: AppUser.fromJson(
+        json['user'] as Map<String, dynamic>? ?? const {},
+      ),
+      ownedCount: json['ownedCount'] as int? ?? 0,
+      spentPoints: json['spentPoints'] as int? ?? 0,
+    );
+  }
+}
+
 class DiscoverBannerItem {
   DiscoverBannerItem({
     required this.id,
@@ -334,6 +361,7 @@ class AppUser {
     required this.bio,
     required this.distance,
     required this.interests,
+    required this.pointBalance,
   });
 
   final String id;
@@ -347,6 +375,7 @@ class AppUser {
   final String bio;
   final String distance;
   final List<String> interests;
+  final int pointBalance;
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
     return AppUser(
@@ -363,6 +392,7 @@ class AppUser {
       interests: (json['interests'] as List<dynamic>? ?? [])
           .map((item) => item.toString())
           .toList(),
+      pointBalance: json['pointBalance'] as int? ?? 0,
     );
   }
 
@@ -379,6 +409,7 @@ class AppUser {
       'bio': bio,
       'distance': distance,
       'interests': interests,
+      'pointBalance': pointBalance,
     };
   }
 }

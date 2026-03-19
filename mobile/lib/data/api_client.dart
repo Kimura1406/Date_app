@@ -54,6 +54,23 @@ class ApiClient {
         .toList();
   }
 
+  Future<FlowerAcquireResult> acquireFlower({
+    required String token,
+    required String flowerId,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$apiBaseUrl/api/v1/flowers/$flowerId/acquire'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Acquire flower failed'));
+    }
+
+    return FlowerAcquireResult.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
   Future<List<DiscoverBannerItem>> fetchPublicBanners() async {
     final response = await _client.get(Uri.parse('$apiBaseUrl/api/v1/banners'));
     if (response.statusCode != 200) {

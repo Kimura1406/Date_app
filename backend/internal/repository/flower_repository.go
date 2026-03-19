@@ -105,6 +105,99 @@ func (r *FlowerRepository) UpdateFlower(ctx context.Context, id string, input do
 	return r.GetFlowerByID(ctx, id)
 }
 
+func (r *FlowerRepository) AcquireFlower(ctx context.Context, flowerID, userID string) (domain.FlowerAcquireResult, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return domain.FlowerAcquireResult{}, fmt.Errorf("begin acquire flower: %w", err)
+	}
+
+	flower, err := getFlowerByIDTx(ctx, tx, flowerID)
+	if err != nil {
+		_ = tx.Rollback()
+		return domain.FlowerAcquireResult{}, err
+	}
+	if !flower.Published {
+		_ = tx.Rollback()
+		return domain.FlowerAcquireResult{}, sql.ErrNoRows
+	}
+
+	user, err := getUserByIDTx(ctx, tx, userID)
+	if err != nil {
+		_ = tx.Rollback()
+		return domain.FlowerAcquireResult{}, err
+	}
+	if user.PointBalance < flower.PricePoints {
+		_ = tx.Rollback()
+		return domain.FlowerAcquireResult{}, fmt.Errorf("insufficient points")
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO flower_purchases (flower_id, user_id, price_points)
+		VALUES ($1, $2, $3)
+	`, flowerID, userID, flower.PricePoints); err != nil {
+		_ = tx.Rollback()
+		return domain.FlowerAcquireResult{}, fmt.Errorf("insert flower purchase: %w", err)
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE users
+		SET point_balance = point_balance - $2,
+			updated_at = NOW()
+		WHERE id = $1
+	`, userID, flower.PricePoints); err != nil {
+		_ = tx.Rollback()
+		return domain.FlowerAcquireResult{}, fmt.Errorf("decrease user points: %w", err)
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE flowers
+		SET purchase_count = purchase_count + 1,
+			purchaser_count = (
+				SELECT COUNT(DISTINCT user_id)
+				FROM flower_purchases
+				WHERE flower_id = $1
+			),
+			updated_at = NOW()
+		WHERE id = $1
+	`, flowerID); err != nil {
+		_ = tx.Rollback()
+		return domain.FlowerAcquireResult{}, fmt.Errorf("update flower counters: %w", err)
+	}
+
+	var ownedCount int
+	if err := tx.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		FROM flower_purchases
+		WHERE flower_id = $1 AND user_id = $2
+	`, flowerID, userID).Scan(&ownedCount); err != nil {
+		_ = tx.Rollback()
+		return domain.FlowerAcquireResult{}, fmt.Errorf("count owned flowers: %w", err)
+	}
+
+	updatedFlower, err := getFlowerByIDTx(ctx, tx, flowerID)
+	if err != nil {
+		_ = tx.Rollback()
+		return domain.FlowerAcquireResult{}, err
+	}
+
+	updatedUser, err := getUserByIDTx(ctx, tx, userID)
+	if err != nil {
+		_ = tx.Rollback()
+		return domain.FlowerAcquireResult{}, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return domain.FlowerAcquireResult{}, fmt.Errorf("commit acquire flower: %w", err)
+	}
+
+	return domain.FlowerAcquireResult{
+		Flower:      updatedFlower,
+		User:        updatedUser,
+		OwnedCount:  ownedCount,
+		SpentPoints: flower.PricePoints,
+	}, nil
+}
+
 type flowerScanner interface {
 	Scan(dest ...any) error
 }
@@ -136,4 +229,24 @@ func scanFlower(scanner flowerScanner) (domain.Flower, error) {
 	item.CreatedAt = createdAt.Format(time.RFC3339)
 	item.UpdatedAt = updatedAt.Format(time.RFC3339)
 	return item, nil
+}
+
+func getFlowerByIDTx(ctx context.Context, tx *sql.Tx, id string) (domain.Flower, error) {
+	row := tx.QueryRowContext(ctx, `
+		SELECT id, name, image_url, description, price_points, purchaser_count, purchase_count, published, created_at, updated_at
+		FROM flowers
+		WHERE id = $1
+		FOR UPDATE
+	`, id)
+	return scanFlower(row)
+}
+
+func getUserByIDTx(ctx context.Context, tx *sql.Tx, id string) (domain.User, error) {
+	row := tx.QueryRowContext(ctx, `
+		SELECT id, email, role, name, age, job, bio, distance, interests, birth_date, country, prefecture, dating_reason, point_balance, created_at, last_login_at, updated_at
+		FROM users
+		WHERE id = $1
+		FOR UPDATE
+	`, id)
+	return scanUser(row)
 }
