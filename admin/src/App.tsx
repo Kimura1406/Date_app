@@ -1030,15 +1030,21 @@ function App() {
 
               <div className="chat-detail-thread-wrap">
                 <div className="chat-detail-thread">
-                  {selectedChatRoom.messages.map((chat) => (
-                    <article className="chat-detail-message" key={chat.id}>
-                      <div className="chat-detail-meta">
-                        <strong>{chat.senderName}</strong>
-                        <span>{chat.sentAt}</span>
-                      </div>
-                      <p>{chat.body}</p>
-                    </article>
-                  ))}
+                  {selectedChatRoom.messages.map((chat) => {
+                    const isAdminMessage = chat.senderId === adminUser?.id;
+                    return (
+                      <article
+                        className={`chat-detail-message ${isAdminMessage ? 'admin' : 'user'}`}
+                        key={chat.id}
+                      >
+                        <div className="chat-detail-meta">
+                          <strong>{chat.senderName}</strong>
+                          <span>{chat.sentAt}</span>
+                        </div>
+                        <p>{chat.body}</p>
+                      </article>
+                    );
+                  })}
                 </div>
               </div>
 

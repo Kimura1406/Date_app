@@ -426,6 +426,18 @@ button:disabled {
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--admin-border);
+  max-width: 78%;
+}
+
+.chat-detail-message.user {
+  justify-self: start;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.chat-detail-message.admin {
+  justify-self: end;
+  background: rgba(162, 78, 91, 0.18);
+  border-color: rgba(255, 185, 197, 0.16);
 }
 
 .chat-segmented {
@@ -453,6 +465,11 @@ button:disabled {
   justify-content: space-between;
   gap: 12px;
   color: #b8aeb1;
+}
+
+.chat-detail-message.admin .chat-detail-meta,
+.chat-detail-message.admin p {
+  text-align: right;
 }
 
 .chat-detail-compose {
