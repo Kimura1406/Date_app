@@ -1036,6 +1036,44 @@ class AppStrings {
     }
   }
 
+  String get missionTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Nhiệm vụ';
+      case AppLanguage.japanese:
+        return 'MISSION';
+      case AppLanguage.korean:
+        return '미션';
+      case AppLanguage.russian:
+        return 'Миссия';
+      case AppLanguage.chinese:
+        return '任务';
+      case AppLanguage.english:
+        return 'Mission';
+      case AppLanguage.thai:
+        return 'ภารกิจ';
+    }
+  }
+
+  String get notificationsTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Thông báo';
+      case AppLanguage.japanese:
+        return 'お知らせ';
+      case AppLanguage.korean:
+        return '알림';
+      case AppLanguage.russian:
+        return 'Уведомления';
+      case AppLanguage.chinese:
+        return '通知';
+      case AppLanguage.english:
+        return 'Notifications';
+      case AppLanguage.thai:
+        return 'การแจ้งเตือน';
+    }
+  }
+
   String flowerGiftName(Object type) {
     final normalized = type.toString().split('.').last;
     switch (normalized) {
