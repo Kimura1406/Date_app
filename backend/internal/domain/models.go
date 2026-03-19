@@ -119,3 +119,30 @@ type UpdateFlowerInput struct {
 	PricePoints int    `json:"pricePoints"`
 	Published   bool   `json:"published"`
 }
+
+type Banner struct {
+	ID           string `json:"id"`
+	ImageURL     string `json:"imageUrl"`
+	EventName    string `json:"eventName"`
+	DisplayOrder int    `json:"displayOrder"`
+	RedirectLink string `json:"redirectLink"`
+	Published    bool   `json:"published"`
+	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
+}
+
+type CreateBannerInput struct {
+	ImageURL     string `json:"imageUrl"`
+	EventName    string `json:"eventName"`
+	DisplayOrder int    `json:"displayOrder"`
+	RedirectLink string `json:"redirectLink"`
+	Published    bool   `json:"published"`
+}
+
+type UpdateBannerInput struct {
+	ImageURL     string `json:"imageUrl"`
+	EventName    string `json:"eventName"`
+	DisplayOrder int    `json:"displayOrder"`
+	RedirectLink string `json:"redirectLink"`
+	Published    bool   `json:"published"`
+}

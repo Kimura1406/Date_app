@@ -42,6 +42,7 @@ func NewServer() (*Server, error) {
 	tokenManager := backendauth.NewTokenManager(cfg.JWTSecret, 24*time.Hour)
 	chatRepository := repository.NewChatRepository(db)
 	flowerRepository := repository.NewFlowerRepository(db)
+	bannerRepository := repository.NewBannerRepository(db)
 
 	router := httpapi.NewRouter(
 		cfg,
@@ -49,6 +50,7 @@ func NewServer() (*Server, error) {
 		service.NewMatchService(repository.NewMatchRepository(db)),
 		service.NewChatService(chatRepository),
 		service.NewFlowerService(flowerRepository),
+		service.NewBannerService(bannerRepository),
 		service.NewUserService(
 			repository.NewUserRepository(db),
 			repository.NewSessionRepository(db),

@@ -68,6 +68,25 @@ type FlowerFormState = {
   published: boolean;
 };
 
+type Banner = {
+  id: string;
+  imageUrl: string;
+  eventName: string;
+  displayOrder: number;
+  redirectLink: string;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type BannerFormState = {
+  imageUrl: string;
+  eventName: string;
+  displayOrder: number;
+  redirectLink: string;
+  published: boolean;
+};
+
 type ChatMessage = {
   id: string;
   senderId: string;
@@ -102,7 +121,7 @@ const menuSections: Array<{
   },
   { key: 'chat', label: '\u30c1\u30e3\u30c3\u30c8\u7ba1\u7406' },
   { key: 'gift', label: '\u304a\u82b1\u7ba1\u7406' },
-  { key: 'sales', label: '\u8ca9\u58f2\u7ba1\u7406' },
+  { key: 'sales', label: '\u30d0\u30ca\u30fc\u7ba1\u7406' },
   { key: 'revenue', label: '\u58f2\u4e0a\u7ba1\u7406' },
 ];
 
@@ -123,9 +142,9 @@ const viewMeta: Record<MenuKey, { title: string; description: string }> = {
       '\u3053\u306e\u753b\u9762\u306f\u307e\u3060\u6e96\u5099\u4e2d\u3067\u3059\u3002\u304a\u82b1\u30de\u30b9\u30bf\u306e\u7ba1\u7406\u3092\u5f8c\u304b\u3089\u8ffd\u52a0\u3067\u304d\u307e\u3059\u3002',
   },
   sales: {
-    title: '\u8ca9\u58f2\u7ba1\u7406',
+    title: '\u30d0\u30ca\u30fc\u7ba1\u7406',
     description:
-      '\u3053\u306e\u753b\u9762\u306f\u307e\u3060\u6e96\u5099\u4e2d\u3067\u3059\u3002\u8ca9\u58f2\u30d7\u30e9\u30f3\u3084\u5546\u54c1\u7ba1\u7406\u3092\u3053\u3053\u306b\u8ffd\u52a0\u3067\u304d\u307e\u3059\u3002',
+      '\u30a4\u30d9\u30f3\u30c8\u30d0\u30ca\u30fc\u306e\u516c\u958b\u72b6\u614b\u3084\u8868\u793a\u9806\u3001\u518d\u7528\u30ea\u30f3\u30af\u3092\u7ba1\u7406\u3067\u304d\u307e\u3059\u3002',
   },
   revenue: {
     title: '\u58f2\u4e0a\u7ba1\u7406',
@@ -152,6 +171,14 @@ const emptyFlowerForm: FlowerFormState = {
   published: true,
 };
 
+const emptyBannerForm: BannerFormState = {
+  imageUrl: '',
+  eventName: '',
+  displayOrder: 0,
+  redirectLink: '',
+  published: true,
+};
+
 function App() {
   const pageSizeOptions = [10, 20, 50, 100];
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -159,13 +186,18 @@ function App() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [flowers, setFlowers] = useState<Flower[]>([]);
   const [loadingFlowers, setLoadingFlowers] = useState(false);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [loadingBanners, setLoadingBanners] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savingFlower, setSavingFlower] = useState(false);
+  const [savingBanner, setSavingBanner] = useState(false);
   const [message, setMessage] = useState<string>('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedFlowerId, setSelectedFlowerId] = useState<string | null>(null);
+  const [selectedBannerId, setSelectedBannerId] = useState<string | null>(null);
   const [form, setForm] = useState<UserFormState>(emptyForm);
   const [flowerForm, setFlowerForm] = useState<FlowerFormState>(emptyFlowerForm);
+  const [bannerForm, setBannerForm] = useState<BannerFormState>(emptyBannerForm);
   const [adminEmail, setAdminEmail] = useState('admin@kimura.local');
   const [adminPassword, setAdminPassword] = useState('admin12345');
   const [authToken, setAuthToken] = useState('');
@@ -176,8 +208,10 @@ function App() {
   const [activeMenu, setActiveMenu] = useState<MenuKey>('user-list');
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isFlowerModalOpen, setIsFlowerModalOpen] = useState(false);
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [bannerSearch, setBannerSearch] = useState('');
   const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoom | null>(null);
   const [chatTab, setChatTab] = useState<'user' | 'admin'>('user');
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
@@ -193,6 +227,7 @@ function App() {
     setAdminUser(null);
     setUsers([]);
     setFlowers([]);
+    setBanners([]);
     setChatRooms([]);
     setSelectedChatRoom(null);
     setActiveMenu('user-list');
@@ -259,6 +294,12 @@ function App() {
   useEffect(() => {
     if (authToken && activeMenu === 'gift') {
       void loadFlowers(authToken);
+    }
+  }, [activeMenu, authToken]);
+
+  useEffect(() => {
+    if (authToken && activeMenu === 'sales') {
+      void loadBanners(authToken);
     }
   }, [activeMenu, authToken]);
 
@@ -347,6 +388,35 @@ function App() {
       setMessage(error instanceof Error ? error.message : 'Failed to load flowers');
     } finally {
       setLoadingFlowers(false);
+    }
+  }
+
+  async function loadBanners(token: string = authToken) {
+    if (!token) return;
+
+    setLoadingBanners(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/admin/banners`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to load banners');
+      }
+
+      setBanners(data.items ?? []);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to load banners');
+    } finally {
+      setLoadingBanners(false);
     }
   }
 
@@ -531,8 +601,10 @@ function App() {
     setAdminUser(null);
     setUsers([]);
     setFlowers([]);
+    setBanners([]);
     resetForm();
     resetFlowerForm();
+    resetBannerForm();
     setActiveMenu('user-list');
     setMessage('Logged out.');
     setLogoutLoading(false);
@@ -576,6 +648,11 @@ function App() {
     resetFlowerForm();
   }
 
+  function closeBannerModal() {
+    setIsBannerModalOpen(false);
+    resetBannerForm();
+  }
+
   function resetForm() {
     setSelectedUserId(null);
     setForm(emptyForm);
@@ -586,12 +663,21 @@ function App() {
     setFlowerForm(emptyFlowerForm);
   }
 
+  function resetBannerForm() {
+    setSelectedBannerId(null);
+    setBannerForm(emptyBannerForm);
+  }
+
   function updateField<K extends keyof UserFormState>(key: K, value: UserFormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
   function updateFlowerField<K extends keyof FlowerFormState>(key: K, value: FlowerFormState[K]) {
     setFlowerForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateBannerField<K extends keyof BannerFormState>(key: K, value: BannerFormState[K]) {
+    setBannerForm((current) => ({ ...current, [key]: value }));
   }
 
   function openEditFlowerModal(flower: Flower) {
@@ -605,6 +691,25 @@ function App() {
     });
     setMessage('');
     setIsFlowerModalOpen(true);
+  }
+
+  function openCreateBannerModal() {
+    resetBannerForm();
+    setMessage('');
+    setIsBannerModalOpen(true);
+  }
+
+  function openEditBannerModal(banner: Banner) {
+    setSelectedBannerId(banner.id);
+    setBannerForm({
+      imageUrl: banner.imageUrl,
+      eventName: banner.eventName,
+      displayOrder: banner.displayOrder,
+      redirectLink: banner.redirectLink,
+      published: banner.published,
+    });
+    setMessage('');
+    setIsBannerModalOpen(true);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -751,6 +856,70 @@ function App() {
     }
   }
 
+  async function handleBannerImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        updateBannerField('imageUrl', reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  }
+
+  async function handleBannerSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!authToken) return;
+
+    setSavingBanner(true);
+    setMessage('');
+
+    const payload = {
+      imageUrl: bannerForm.imageUrl,
+      eventName: bannerForm.eventName,
+      displayOrder: bannerForm.displayOrder,
+      redirectLink: bannerForm.redirectLink,
+      published: bannerForm.published,
+    };
+
+    const endpoint = selectedBannerId
+      ? `${apiBaseUrl}/api/v1/admin/banners/${selectedBannerId}`
+      : `${apiBaseUrl}/api/v1/admin/banners`;
+    const method = selectedBannerId ? 'PUT' : 'POST';
+
+    try {
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to save banner');
+      }
+
+      setMessage(selectedBannerId ? 'Banner updated successfully.' : 'Banner created successfully.');
+      closeBannerModal();
+      await loadBanners();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to save banner');
+    } finally {
+      setSavingBanner(false);
+    }
+  }
+
   function renderMenu() {
     return (
       <nav className="sidebar-nav">
@@ -817,6 +986,17 @@ function App() {
   const totalPages = Math.max(1, Math.ceil(users.length / pageSize));
   const normalizedPage = Math.min(currentPage, totalPages);
   const pagedUsers = users.slice((normalizedPage - 1) * pageSize, normalizedPage * pageSize);
+  const filteredBanners = banners.filter((banner) => {
+    const query = bannerSearch.trim().toLowerCase();
+    if (!query) {
+      return true;
+    }
+    return (
+      banner.id.toLowerCase().includes(query) ||
+      banner.eventName.toLowerCase().includes(query) ||
+      banner.redirectLink.toLowerCase().includes(query)
+    );
+  });
 
   if (!authToken) {
     return (
@@ -1247,6 +1427,112 @@ function App() {
               </div>
             </section>
           </>
+        ) : activeMenu === 'sales' ? (
+          <>
+            <section className="content-grid user-list-layout">
+              <div className="panel banner-panel">
+                <div className="panel-header panel-header-right banner-toolbar">
+                  <div className="inline-actions banner-toolbar-actions">
+                    <label className="banner-search">
+                      <input
+                        onChange={(event) => setBannerSearch(event.target.value)}
+                        placeholder={'\u691c\u7d22'}
+                        type="search"
+                        value={bannerSearch}
+                      />
+                    </label>
+                    <button className="banner-create-button" onClick={openCreateBannerModal} type="button">
+                      + {'\u65b0\u898f\u4f5c\u6210'}
+                    </button>
+                  </div>
+                </div>
+
+                {message ? <div className="notice">{message}</div> : null}
+
+                {loadingBanners ? (
+                  <p className="muted">Loading banners...</p>
+                ) : filteredBanners.length === 0 ? (
+                  <p className="muted">No banners found yet.</p>
+                ) : (
+                  <>
+                    <div className="table-wrap banner-table-wrap">
+                      <table className="user-table banner-table">
+                        <thead>
+                          <tr>
+                            <th className="banner-check-cell">
+                              <input type="checkbox" />
+                            </th>
+                            <th>ID</th>
+                            <th>{'\u753b\u50cf'}</th>
+                            <th>{'\u30a4\u30d9\u30f3\u30c8\u540d'}</th>
+                            <th>{'\u8868\u793a\u9806'}</th>
+                            <th>{'\u518d\u7528\u30ea\u30f3\u30af'}</th>
+                            <th>{'\u72b6\u614b'}</th>
+                            <th />
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredBanners.map((banner) => (
+                            <tr key={banner.id}>
+                              <td className="banner-check-cell">
+                                <input type="checkbox" />
+                              </td>
+                              <td>{banner.id}</td>
+                              <td>
+                                <img alt={banner.eventName} className="banner-thumb" src={banner.imageUrl} />
+                              </td>
+                              <td>{banner.eventName}</td>
+                              <td>{banner.displayOrder}</td>
+                              <td className="banner-link-cell">
+                                <a href={banner.redirectLink} rel="noreferrer" target="_blank">
+                                  {banner.redirectLink}
+                                </a>
+                              </td>
+                              <td>
+                                <span className={`status-chip ${banner.published ? 'published' : 'draft'}`}>
+                                  {banner.published ? '\u516c\u958b' : '\u672a\u516c\u958b'}
+                                </span>
+                              </td>
+                              <td>
+                                <div className="banner-row-actions">
+                                  <button className="icon-button" onClick={() => openEditBannerModal(banner)} type="button">
+                                    {'\u270e'}
+                                  </button>
+                                  <button className="icon-button ghost" type="button">
+                                    {'\ud83d\uddd1'}
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="banner-pagination">
+                      <span>
+                        {filteredBanners.length} {'\u4ef6\u4e2d'} 1 ~ {filteredBanners.length} {'\u4ef6\u3092\u8868\u793a'}
+                      </span>
+                      <div className="banner-pagination-controls">
+                        <button className="ghost banner-page-button" type="button">
+                          {'<'}
+                        </button>
+                        <span className="banner-page-current">1</span>
+                        <button className="ghost banner-page-button" type="button">
+                          {'>'}
+                        </button>
+                        <label className="banner-page-size">
+                          <select defaultValue="10">
+                            <option value="10">10件 / ページ</option>
+                          </select>
+                        </label>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </section>
+          </>
         ) : (
           renderPlaceholderView(activeMenu)
         )}
@@ -1405,6 +1691,90 @@ function App() {
                   </button>
                   <button disabled={savingFlower} type="submit">
                     {savingFlower ? 'Saving...' : '\u6295\u7a3f'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        ) : null}
+
+        {isBannerModalOpen ? (
+          <div className="modal-backdrop" onClick={closeBannerModal} role="presentation">
+            <div className="modal-panel" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+              <div className="panel-header">
+                <div>
+                  <h2>{selectedBannerId ? 'Edit banner' : '\u65b0\u898f\u4f5c\u6210'}</h2>
+                  <p className="muted">Create or update a banner item for the home carousel.</p>
+                </div>
+                <button className="ghost" onClick={closeBannerModal} type="button">
+                  Close
+                </button>
+              </div>
+
+              <form className="user-form" onSubmit={(event) => void handleBannerSubmit(event)}>
+                <label className="full-span">
+                  {'\u753b\u50cf\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9'}
+                  <input accept="image/*" onChange={(event) => void handleBannerImageChange(event)} type="file" />
+                  {bannerForm.imageUrl ? (
+                    <img alt="Banner preview" className="banner-preview" src={bannerForm.imageUrl} />
+                  ) : null}
+                </label>
+                <label>
+                  {'\u30a4\u30d9\u30f3\u30c8\u540d'}
+                  <input
+                    maxLength={100}
+                    onChange={(event) => updateBannerField('eventName', event.target.value)}
+                    type="text"
+                    value={bannerForm.eventName}
+                  />
+                </label>
+                <label>
+                  {'\u8868\u793a\u9806'}
+                  <input
+                    min={0}
+                    onChange={(event) =>
+                      updateBannerField('displayOrder', Math.max(0, Number(event.target.value) || 0))
+                    }
+                    type="number"
+                    value={bannerForm.displayOrder}
+                  />
+                </label>
+                <label className="full-span">
+                  {'\u518d\u7528\u30ea\u30f3\u30af'}
+                  <input
+                    onChange={(event) => updateBannerField('redirectLink', event.target.value)}
+                    placeholder="https://example.com"
+                    type="url"
+                    value={bannerForm.redirectLink}
+                  />
+                </label>
+                <fieldset className="full-span publish-fieldset">
+                  <legend>{'\u72b6\u614b'}</legend>
+                  <label className="radio-option">
+                    <input
+                      checked={bannerForm.published}
+                      name="banner-publish"
+                      onChange={() => updateBannerField('published', true)}
+                      type="radio"
+                    />
+                    {'\u516c\u958b'}
+                  </label>
+                  <label className="radio-option">
+                    <input
+                      checked={!bannerForm.published}
+                      name="banner-publish"
+                      onChange={() => updateBannerField('published', false)}
+                      type="radio"
+                    />
+                    {'\u672a\u516c\u958b'}
+                  </label>
+                </fieldset>
+                <div className="form-actions full-span">
+                  <button className="ghost" onClick={closeBannerModal} type="button">
+                    Cancel
+                  </button>
+                  <button disabled={savingBanner} type="submit">
+                    {savingBanner ? 'Saving...' : '\u65b0\u898f\u4f5c\u6210'}
                   </button>
                 </div>
               </form>
