@@ -273,7 +273,7 @@ button:disabled {
 
 .subscreen-panel {
   max-width: 880px;
-  padding: 28px 32px 32px;
+  padding: 28px 40px 40px;
 }
 
 .subscreen-panel .panel-header {
@@ -297,6 +297,7 @@ button:disabled {
 
 .subscreen-panel .user-form {
   gap: 20px 24px;
+  padding: 4px 8px 8px;
 }
 
 .subscreen-panel .user-form label {
@@ -319,6 +320,10 @@ button:disabled {
   min-height: 160px;
 }
 
+.subscreen-panel .full-span {
+  padding-right: 8px;
+}
+
 .subscreen-panel .user-form input::placeholder,
 .subscreen-panel .user-form textarea::placeholder {
   color: #97898b;
@@ -331,7 +336,7 @@ button:disabled {
 
 .subscreen-panel .form-actions {
   margin-top: 8px;
-  padding-top: 8px;
+  padding: 16px 8px 0 0;
 }
 
 .subscreen-panel .form-actions button {
