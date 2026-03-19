@@ -175,40 +175,30 @@ class AccountScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final compact = constraints.maxWidth < 520;
-                final itemWidth = compact
-                    ? constraints.maxWidth
-                    : (constraints.maxWidth - 24) / 3;
-                return Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    SizedBox(
-                      width: itemWidth,
-                      child: _MyPageStatCard(
-                        label: strings.likesCountLabel,
-                        value: _likeCount.toString(),
-                      ),
-                    ),
-                    SizedBox(
-                      width: itemWidth,
-                      child: _MyPageStatCard(
-                        label: strings.giftsLabel,
-                        value: _giftCount.toString(),
-                      ),
-                    ),
-                    SizedBox(
-                      width: itemWidth,
-                      child: _MyPageStatCard(
-                        label: strings.myPagePoints,
-                        value: '${_pointCount}P',
-                      ),
-                    ),
-                  ],
-                );
-              },
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _MyPageStatCard(
+                    label: strings.likesCountLabel,
+                    value: _likeCount.toString(),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _MyPageStatCard(
+                    label: strings.giftsLabel,
+                    value: _giftCount.toString(),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _MyPageStatCard(
+                    label: strings.myPagePoints,
+                    value: '${_pointCount}P',
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 18),
             Container(
