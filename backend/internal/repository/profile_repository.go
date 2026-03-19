@@ -19,12 +19,32 @@ func NewProfileRepository(db *sql.DB) *ProfileRepository {
 
 func (r *ProfileRepository) ListDiscoveryProfiles(ctx context.Context, filter domain.DiscoveryFilter) ([]domain.Profile, error) {
 	query := `
-		SELECT id, name, age, job, bio, distance, interests, country, gender, location, image_url, is_new
-		FROM profiles
+		SELECT
+			id,
+			name,
+			age,
+			job,
+			COALESCE(NULLIF(bio, ''), NULLIF(dating_reason, ''), '') AS bio,
+			COALESCE(NULLIF(distance, ''), NULLIF(prefecture, ''), NULLIF(country, ''), '') AS distance,
+			interests,
+			country,
+			'' AS gender,
+			COALESCE(NULLIF(prefecture, ''), NULLIF(country, ''), '') AS location,
+			'' AS image_url,
+			(created_at >= NOW() - INTERVAL '7 days') AS is_new
+		FROM users
 		WHERE 1 = 1
 	`
 	args := make([]any, 0, 6)
 	argIndex := 1
+
+	query += " AND role = 'user'"
+
+	if value := strings.TrimSpace(filter.ExcludeUserID); value != "" {
+		query += fmt.Sprintf(" AND id <> $%d", argIndex)
+		args = append(args, value)
+		argIndex++
+	}
 
 	if value := strings.TrimSpace(filter.Country); value != "" {
 		query += fmt.Sprintf(" AND lower(country) = lower($%d)", argIndex)
@@ -36,13 +56,8 @@ func (r *ProfileRepository) ListDiscoveryProfiles(ctx context.Context, filter do
 		args = append(args, value)
 		argIndex++
 	}
-	if value := strings.TrimSpace(filter.Gender); value != "" {
-		query += fmt.Sprintf(" AND lower(gender) = lower($%d)", argIndex)
-		args = append(args, value)
-		argIndex++
-	}
 	if value := strings.TrimSpace(filter.Location); value != "" {
-		query += fmt.Sprintf(" AND lower(location) LIKE lower($%d)", argIndex)
+		query += fmt.Sprintf(" AND (lower(prefecture) LIKE lower($%d) OR lower(country) LIKE lower($%d))", argIndex, argIndex)
 		args = append(args, "%"+value+"%")
 		argIndex++
 	}
@@ -57,11 +72,11 @@ func (r *ProfileRepository) ListDiscoveryProfiles(ctx context.Context, filter do
 		argIndex++
 	}
 
-	query += " ORDER BY is_new DESC, created_at ASC, id ASC"
+	query += " ORDER BY (created_at >= NOW() - INTERVAL '7 days') DESC, created_at DESC, id ASC"
 
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("query profiles: %w", err)
+		return nil, fmt.Errorf("query discovery users: %w", err)
 	}
 	defer rows.Close()
 

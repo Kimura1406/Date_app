@@ -19,10 +19,11 @@ func NewDiscoveryHandler(profileService *service.ProfileService) *DiscoveryHandl
 
 func (h *DiscoveryHandler) ListProfiles(w http.ResponseWriter, r *http.Request) {
 	filter := domain.DiscoveryFilter{
-		Country:  strings.TrimSpace(r.URL.Query().Get("country")),
-		Job:      strings.TrimSpace(r.URL.Query().Get("job")),
-		Gender:   strings.TrimSpace(r.URL.Query().Get("gender")),
-		Location: strings.TrimSpace(r.URL.Query().Get("location")),
+		Country:       strings.TrimSpace(r.URL.Query().Get("country")),
+		Job:           strings.TrimSpace(r.URL.Query().Get("job")),
+		Gender:        strings.TrimSpace(r.URL.Query().Get("gender")),
+		Location:      strings.TrimSpace(r.URL.Query().Get("location")),
+		ExcludeUserID: strings.TrimSpace(r.URL.Query().Get("excludeUserId")),
 	}
 	if minAge, err := strconv.Atoi(strings.TrimSpace(r.URL.Query().Get("minAge"))); err == nil {
 		filter.MinAge = minAge

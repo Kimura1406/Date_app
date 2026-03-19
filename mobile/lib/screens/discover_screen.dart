@@ -56,6 +56,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         location: _locationController.text.trim().isEmpty
             ? null
             : _locationController.text.trim(),
+        excludeUserId: widget.currentUser.id,
       ),
     );
   }

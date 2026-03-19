@@ -16,12 +16,13 @@ type Profile struct {
 }
 
 type DiscoveryFilter struct {
-	Country  string
-	Job      string
-	MinAge   int
-	MaxAge   int
-	Gender   string
-	Location string
+	Country       string
+	Job           string
+	MinAge        int
+	MaxAge        int
+	Gender        string
+	Location      string
+	ExcludeUserID string
 }
 
 type Match struct {

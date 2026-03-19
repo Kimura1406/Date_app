@@ -73,6 +73,7 @@ class DiscoveryFilter {
     this.maxAge,
     this.gender,
     this.location,
+    this.excludeUserId,
   });
 
   final String? country;
@@ -81,6 +82,7 @@ class DiscoveryFilter {
   final int? maxAge;
   final String? gender;
   final String? location;
+  final String? excludeUserId;
 
   Map<String, String> toQueryParameters() {
     final params = <String, String>{};
@@ -101,6 +103,9 @@ class DiscoveryFilter {
     }
     if (location != null && location!.isNotEmpty) {
       params['location'] = location!;
+    }
+    if (excludeUserId != null && excludeUserId!.isNotEmpty) {
+      params['excludeUserId'] = excludeUserId!;
     }
     return params;
   }
