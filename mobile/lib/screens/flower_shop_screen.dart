@@ -333,6 +333,7 @@ class _FlowerGiftCard extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF6D4751),
                     foregroundColor: Colors.white,
+                    minimumSize: const Size(92, 40),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     textStyle: theme.textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.w800,
