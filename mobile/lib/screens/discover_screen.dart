@@ -288,15 +288,6 @@ class _DiscoverBannerCarousel extends StatelessWidget {
   final PageController controller;
   final int currentBanner;
   final ValueChanged<int> onPageChanged;
-
-  static const _bannerColors = <List<Color>>[
-    [Color(0xFFF3C7D2), Color(0xFFF8E0D7)],
-    [Color(0xFFD9E8FF), Color(0xFFF2E8FF)],
-    [Color(0xFFF8DFC7), Color(0xFFF6EEE1)],
-    [Color(0xFFD8F0E4), Color(0xFFF0F7E9)],
-    [Color(0xFFE8D9FF), Color(0xFFF9E5EC)],
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -309,17 +300,11 @@ class _DiscoverBannerCarousel extends StatelessWidget {
             onPageChanged: onPageChanged,
             itemBuilder: (context, index) {
               final banner = banners[index];
-              final colors = _bannerColors[index % _bannerColors.length];
               return Padding(
                 padding: const EdgeInsets.only(right: 10),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(28),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: colors,
-                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.06),
@@ -328,26 +313,10 @@ class _DiscoverBannerCarousel extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: _DiscoverBannerImage(imageUrl: banner.imageUrl),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          banner.eventName,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: const Color(0xFF2F2323),
-                                fontWeight: FontWeight.w800,
-                              ),
-                        ),
-                      ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(28),
+                    child: SizedBox.expand(
+                      child: _DiscoverBannerImage(imageUrl: banner.imageUrl),
                     ),
                   ),
                 ),
