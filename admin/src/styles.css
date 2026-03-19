@@ -349,6 +349,11 @@ button:disabled {
   background: rgba(255, 255, 255, 0.35);
 }
 
+.fixed-list-wrap {
+  height: 620px;
+  overflow: auto;
+}
+
 .user-table {
   width: 100%;
   border-collapse: collapse;

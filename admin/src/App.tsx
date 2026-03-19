@@ -209,8 +209,14 @@ function App() {
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isFlowerModalOpen, setIsFlowerModalOpen] = useState(false);
   const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [userCurrentPage, setUserCurrentPage] = useState(1);
+  const [userPageSize, setUserPageSize] = useState(10);
+  const [chatCurrentPage, setChatCurrentPage] = useState(1);
+  const [chatPageSize, setChatPageSize] = useState(10);
+  const [flowerCurrentPage, setFlowerCurrentPage] = useState(1);
+  const [flowerPageSize, setFlowerPageSize] = useState(10);
+  const [bannerCurrentPage, setBannerCurrentPage] = useState(1);
+  const [bannerPageSize, setBannerPageSize] = useState(10);
   const [bannerSearch, setBannerSearch] = useState('');
   const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoom | null>(null);
   const [chatTab, setChatTab] = useState<'user' | 'admin'>('user');
@@ -325,7 +331,7 @@ function App() {
       }
 
       setUsers(data.items ?? []);
-      setCurrentPage(1);
+      setUserCurrentPage(1);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to load users');
     } finally {
@@ -355,6 +361,7 @@ function App() {
       }
 
       setChatRooms(data.items ?? []);
+      setChatCurrentPage(1);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to load chat rooms');
     } finally {
@@ -384,6 +391,7 @@ function App() {
       }
 
       setFlowers(data.items ?? []);
+      setFlowerCurrentPage(1);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to load flowers');
     } finally {
@@ -413,6 +421,7 @@ function App() {
       }
 
       setBanners(data.items ?? []);
+      setBannerCurrentPage(1);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to load banners');
     } finally {
@@ -982,10 +991,6 @@ function App() {
     );
   }
 
-  const activeUserCount = users.length;
-  const totalPages = Math.max(1, Math.ceil(users.length / pageSize));
-  const normalizedPage = Math.min(currentPage, totalPages);
-  const pagedUsers = users.slice((normalizedPage - 1) * pageSize, normalizedPage * pageSize);
   const filteredBanners = banners.filter((banner) => {
     const query = bannerSearch.trim().toLowerCase();
     if (!query) {
@@ -997,6 +1002,10 @@ function App() {
       banner.redirectLink.toLowerCase().includes(query)
     );
   });
+  const userPagination = paginateItems(users, userCurrentPage, userPageSize);
+  const chatPagination = paginateItems(chatRooms, chatCurrentPage, chatPageSize);
+  const flowerPagination = paginateItems(flowers, flowerCurrentPage, flowerPageSize);
+  const bannerPagination = paginateItems(filteredBanners, bannerCurrentPage, bannerPageSize);
 
   if (!authToken) {
     return (
@@ -1098,7 +1107,7 @@ function App() {
                   <p className="muted">No users found yet.</p>
                 ) : (
                   <>
-                    <div className="table-wrap">
+                    <div className="table-wrap fixed-list-wrap">
                       <table className="user-table">
                         <thead>
                           <tr>
@@ -1114,7 +1123,7 @@ function App() {
                           </tr>
                         </thead>
                         <tbody>
-                          {pagedUsers.map((user) => (
+                          {userPagination.items.map((user) => (
                             <tr key={user.id}>
                               <td>
                                 <div className="table-id-cell">
@@ -1161,10 +1170,10 @@ function App() {
                           <span>Rows per page</span>
                           <select
                             onChange={(event) => {
-                              setPageSize(Number(event.target.value));
-                              setCurrentPage(1);
+                              setUserPageSize(Number(event.target.value));
+                              setUserCurrentPage(1);
                             }}
-                            value={pageSize}
+                            value={userPageSize}
                           >
                             {pageSizeOptions.map((option) => (
                               <option key={option} value={option}>
@@ -1177,19 +1186,23 @@ function App() {
 
                       <div className="pagination-actions">
                         <span>
-                          Page {normalizedPage} / {totalPages}
+                          Page {userPagination.page} / {userPagination.totalPages}
                         </span>
                         <button
                           className="ghost"
-                          disabled={normalizedPage <= 1}
-                          onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                          disabled={userPagination.page <= 1}
+                          onClick={() => setUserCurrentPage((page) => Math.max(1, page - 1))}
                           type="button"
                         >
                           Prev
                         </button>
                         <button
-                          disabled={normalizedPage >= totalPages}
-                          onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                          disabled={userPagination.page >= userPagination.totalPages}
+                          onClick={() =>
+                            setUserCurrentPage((page) =>
+                              Math.min(userPagination.totalPages, page + 1),
+                            )
+                          }
                           type="button"
                         >
                           Next
@@ -1318,7 +1331,7 @@ function App() {
                 ) : chatRooms.length === 0 ? (
                   <p className="muted">No chat rooms found yet.</p>
                 ) : (
-                  <div className="table-wrap">
+                  <div className="table-wrap fixed-list-wrap">
                     <table className="user-table chat-table">
                       <thead>
                         <tr>
@@ -1329,7 +1342,7 @@ function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {chatRooms.map((room) => (
+                        {chatPagination.items.map((room) => (
                           <tr key={room.roomId}>
                             <td>
                               <code>{room.roomId}</code>
@@ -1353,6 +1366,55 @@ function App() {
                     </table>
                   </div>
                 )}
+
+                {!loadingChatRooms && chatRooms.length > 0 ? (
+                  <div className="pagination-bar">
+                    <div className="pagination-meta">
+                      <span>{chatRooms.length} rooms</span>
+                      <label className="page-size-label">
+                        <span>Rows per page</span>
+                        <select
+                          onChange={(event) => {
+                            setChatPageSize(Number(event.target.value));
+                            setChatCurrentPage(1);
+                          }}
+                          value={chatPageSize}
+                        >
+                          {pageSizeOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <div className="pagination-actions">
+                      <span>
+                        Page {chatPagination.page} / {chatPagination.totalPages}
+                      </span>
+                      <button
+                        className="ghost"
+                        disabled={chatPagination.page <= 1}
+                        onClick={() => setChatCurrentPage((page) => Math.max(1, page - 1))}
+                        type="button"
+                      >
+                        Prev
+                      </button>
+                      <button
+                        disabled={chatPagination.page >= chatPagination.totalPages}
+                        onClick={() =>
+                          setChatCurrentPage((page) =>
+                            Math.min(chatPagination.totalPages, page + 1),
+                          )
+                        }
+                        type="button"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </section>
 
@@ -1379,7 +1441,7 @@ function App() {
                 ) : flowers.length === 0 ? (
                   <p className="muted">No flowers found yet.</p>
                 ) : (
-                  <div className="table-wrap flower-table-wrap">
+                  <div className="table-wrap flower-table-wrap fixed-list-wrap">
                     <table className="user-table flower-table">
                       <thead>
                         <tr>
@@ -1393,7 +1455,7 @@ function App() {
                         </tr>
                       </thead>
                       <tbody>
-                        {flowers.map((flower) => (
+                        {flowerPagination.items.map((flower) => (
                           <tr key={flower.id}>
                             <td>
                               <code>{flower.id}</code>
@@ -1429,6 +1491,55 @@ function App() {
                     </table>
                   </div>
                 )}
+
+                {!loadingFlowers && flowers.length > 0 ? (
+                  <div className="pagination-bar">
+                    <div className="pagination-meta">
+                      <span>{flowers.length} 件</span>
+                      <label className="page-size-label">
+                        <span>Rows per page</span>
+                        <select
+                          onChange={(event) => {
+                            setFlowerPageSize(Number(event.target.value));
+                            setFlowerCurrentPage(1);
+                          }}
+                          value={flowerPageSize}
+                        >
+                          {pageSizeOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <div className="pagination-actions">
+                      <span>
+                        Page {flowerPagination.page} / {flowerPagination.totalPages}
+                      </span>
+                      <button
+                        className="ghost"
+                        disabled={flowerPagination.page <= 1}
+                        onClick={() => setFlowerCurrentPage((page) => Math.max(1, page - 1))}
+                        type="button"
+                      >
+                        Prev
+                      </button>
+                      <button
+                        disabled={flowerPagination.page >= flowerPagination.totalPages}
+                        onClick={() =>
+                          setFlowerCurrentPage((page) =>
+                            Math.min(flowerPagination.totalPages, page + 1),
+                          )
+                        }
+                        type="button"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </section>
           </>
@@ -1440,7 +1551,10 @@ function App() {
                   <div className="inline-actions banner-toolbar-actions">
                     <label className="banner-search">
                       <input
-                        onChange={(event) => setBannerSearch(event.target.value)}
+                        onChange={(event) => {
+                          setBannerSearch(event.target.value);
+                          setBannerCurrentPage(1);
+                        }}
                         placeholder={'\u691c\u7d22'}
                         type="search"
                         value={bannerSearch}
@@ -1460,7 +1574,7 @@ function App() {
                   <p className="muted">No banners found yet.</p>
                 ) : (
                   <>
-                    <div className="table-wrap banner-table-wrap">
+                    <div className="table-wrap banner-table-wrap fixed-list-wrap">
                       <table className="user-table banner-table">
                         <thead>
                           <tr>
@@ -1477,7 +1591,7 @@ function App() {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredBanners.map((banner) => (
+                          {bannerPagination.items.map((banner) => (
                             <tr key={banner.id}>
                               <td className="banner-check-cell">
                                 <input type="checkbox" />
@@ -1516,19 +1630,55 @@ function App() {
 
                     <div className="banner-pagination">
                       <span>
-                        {filteredBanners.length} {'\u4ef6\u4e2d'} 1 ~ {filteredBanners.length} {'\u4ef6\u3092\u8868\u793a'}
+                        {filteredBanners.length} {'\u4ef6\u4e2d'}{' '}
+                        {bannerPagination.items.length == 0
+                          ? 0
+                          : (bannerPagination.page - 1) * bannerPageSize + 1}{' '}
+                        ~{' '}
+                        {Math.min(
+                          filteredBanners.length,
+                          (bannerPagination.page - 1) * bannerPageSize +
+                            bannerPagination.items.length,
+                        )}{' '}
+                        {'\u4ef6\u3092\u8868\u793a'}
                       </span>
                       <div className="banner-pagination-controls">
-                        <button className="ghost banner-page-button" type="button">
+                        <button
+                          className="ghost banner-page-button"
+                          disabled={bannerPagination.page <= 1}
+                          onClick={() =>
+                            setBannerCurrentPage((page) => Math.max(1, page - 1))
+                          }
+                          type="button"
+                        >
                           {'<'}
                         </button>
-                        <span className="banner-page-current">1</span>
-                        <button className="ghost banner-page-button" type="button">
+                        <span className="banner-page-current">{bannerPagination.page}</span>
+                        <button
+                          className="ghost banner-page-button"
+                          disabled={bannerPagination.page >= bannerPagination.totalPages}
+                          onClick={() =>
+                            setBannerCurrentPage((page) =>
+                              Math.min(bannerPagination.totalPages, page + 1),
+                            )
+                          }
+                          type="button"
+                        >
                           {'>'}
                         </button>
                         <label className="banner-page-size">
-                          <select defaultValue="10">
-                            <option value="10">10件 / ページ</option>
+                          <select
+                            onChange={(event) => {
+                              setBannerPageSize(Number(event.target.value));
+                              setBannerCurrentPage(1);
+                            }}
+                            value={bannerPageSize}
+                          >
+                            {pageSizeOptions.map((option) => (
+                              <option key={option} value={option}>
+                                {option}件 / ページ
+                              </option>
+                            ))}
                           </select>
                         </label>
                       </div>
@@ -1839,6 +1989,17 @@ function StatCard({
       <strong>{value}</strong>
     </article>
   );
+}
+
+function paginateItems<T>(items: T[], currentPage: number, pageSize: number) {
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const page = Math.min(currentPage, totalPages);
+  const start = (page - 1) * pageSize;
+  return {
+    items: items.slice(start, start + pageSize),
+    page,
+    totalPages,
+  };
 }
 
 export default App;
