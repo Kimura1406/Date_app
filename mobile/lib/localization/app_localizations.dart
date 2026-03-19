@@ -1036,6 +1036,177 @@ class AppStrings {
     }
   }
 
+  String get timelineTab {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Timeline';
+      case AppLanguage.japanese:
+        return 'タイムライン';
+      case AppLanguage.korean:
+        return '타임라인';
+      case AppLanguage.russian:
+        return 'Лента';
+      case AppLanguage.chinese:
+        return '动态';
+      case AppLanguage.english:
+        return 'Timeline';
+      case AppLanguage.thai:
+        return 'ไทม์ไลน์';
+    }
+  }
+
+  String get timelineTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Timeline';
+      case AppLanguage.japanese:
+        return 'タイムライン';
+      case AppLanguage.korean:
+        return '타임라인';
+      case AppLanguage.russian:
+        return 'Лента';
+      case AppLanguage.chinese:
+        return '动态';
+      case AppLanguage.english:
+        return 'Timeline';
+      case AppLanguage.thai:
+        return 'ไทม์ไลน์';
+    }
+  }
+
+  String get timelineSubtitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Đăng nhanh cảm xúc của bạn và xem các bài nổi bật.';
+      case AppLanguage.japanese:
+        return '気軽に投稿して、注目の投稿をチェックできます。';
+      case AppLanguage.korean:
+        return '가볍게 글을 올리고 인기 게시물을 확인해 보세요.';
+      case AppLanguage.russian:
+        return 'Публикуйте мысли и смотрите популярные посты.';
+      case AppLanguage.chinese:
+        return '随手发帖，并查看热门内容。';
+      case AppLanguage.english:
+        return 'Post quickly and browse featured updates.';
+      case AppLanguage.thai:
+        return 'โพสต์ได้อย่างรวดเร็วและดูโพสต์เด่นได้ที่นี่';
+    }
+  }
+
+  String get timelineComposerTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Tạo bài đăng';
+      case AppLanguage.japanese:
+        return '投稿を作成';
+      case AppLanguage.korean:
+        return '게시물 작성';
+      case AppLanguage.russian:
+        return 'Создать пост';
+      case AppLanguage.chinese:
+        return '创建动态';
+      case AppLanguage.english:
+        return 'Create post';
+      case AppLanguage.thai:
+        return 'สร้างโพสต์';
+    }
+  }
+
+  String get timelineComposerPlaceholder {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Bạn đang nghĩ gì hôm nay?';
+      case AppLanguage.japanese:
+        return '今どんな気分ですか？';
+      case AppLanguage.korean:
+        return '오늘은 어떤 기분인가요?';
+      case AppLanguage.russian:
+        return 'О чём вы думаете сегодня?';
+      case AppLanguage.chinese:
+        return '今天想分享点什么？';
+      case AppLanguage.english:
+        return 'What do you want to share today?';
+      case AppLanguage.thai:
+        return 'วันนี้คุณอยากแชร์อะไรบ้าง';
+    }
+  }
+
+  String get timelineImagePlaceholder {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Dán link ảnh vào đây';
+      case AppLanguage.japanese:
+        return '画像URLを入力';
+      case AppLanguage.korean:
+        return '이미지 URL 입력';
+      case AppLanguage.russian:
+        return 'Вставьте ссылку на изображение';
+      case AppLanguage.chinese:
+        return '输入图片链接';
+      case AppLanguage.english:
+        return 'Paste image URL here';
+      case AppLanguage.thai:
+        return 'วางลิงก์รูปภาพที่นี่';
+    }
+  }
+
+  String get timelinePublishButton {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Đăng bài';
+      case AppLanguage.japanese:
+        return '投稿する';
+      case AppLanguage.korean:
+        return '게시하기';
+      case AppLanguage.russian:
+        return 'Опубликовать';
+      case AppLanguage.chinese:
+        return '发布';
+      case AppLanguage.english:
+        return 'Publish';
+      case AppLanguage.thai:
+        return 'โพสต์';
+    }
+  }
+
+  String get timelineFeaturedTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Bài đăng nổi bật';
+      case AppLanguage.japanese:
+        return '注目の投稿';
+      case AppLanguage.korean:
+        return '추천 게시물';
+      case AppLanguage.russian:
+        return 'Популярные посты';
+      case AppLanguage.chinese:
+        return '热门动态';
+      case AppLanguage.english:
+        return 'Featured posts';
+      case AppLanguage.thai:
+        return 'โพสต์เด่น';
+    }
+  }
+
+  String get timelineJustNow {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Vừa xong';
+      case AppLanguage.japanese:
+        return 'たった今';
+      case AppLanguage.korean:
+        return '방금 전';
+      case AppLanguage.russian:
+        return 'Только что';
+      case AppLanguage.chinese:
+        return '刚刚';
+      case AppLanguage.english:
+        return 'Just now';
+      case AppLanguage.thai:
+        return 'เมื่อสักครู่';
+    }
+  }
+
   String get missionTitle {
     switch (language) {
       case AppLanguage.vietnamese:

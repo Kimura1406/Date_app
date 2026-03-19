@@ -13,6 +13,7 @@ import '../screens/discover_screen.dart';
 import '../screens/flower_shop_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/matches_screen.dart';
+import '../screens/timeline_screen.dart';
 import '../widgets/app_scene_background.dart';
 
 class AuthShell extends StatefulWidget {
@@ -427,11 +428,14 @@ class _AuthShellState extends State<AuthShell> {
         currentUser: currentUser!,
         authToken: authToken,
       ),
+      const FlowerShopScreen(),
+      TimelineScreen(
+        currentUser: currentUser!,
+      ),
       MatchesScreen(
         currentUser: currentUser!,
         authToken: authToken,
       ),
-      const FlowerShopScreen(),
       AccountScreen(
         currentUser: currentUser!,
         selectedLanguage: context.languageController.language,
@@ -480,12 +484,16 @@ class _AuthShellState extends State<AuthShell> {
             label: strings.discoverTab,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.chat_bubble_outline),
-            label: strings.matchesTab,
-          ),
-          NavigationDestination(
             icon: const Icon(Icons.local_florist_outlined),
             label: strings.flowerShopTab,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.dynamic_feed_outlined),
+            label: strings.timelineTab,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.chat_bubble_outline),
+            label: strings.matchesTab,
           ),
           NavigationDestination(
             icon: const Icon(Icons.person_outline),
