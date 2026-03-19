@@ -26,8 +26,10 @@ class DiscoverScreen extends StatefulWidget {
 
 class _DiscoverScreenState extends State<DiscoverScreen> {
   late Future<List<DatingProfile>> profilesFuture;
+  late final PageController _bannerController;
 
   bool filtersExpanded = false;
+  int currentBanner = 0;
   String? selectedCountry;
   String? selectedJob;
   String? selectedGender;
@@ -38,11 +40,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   void initState() {
     super.initState();
+    _bannerController = PageController(viewportFraction: 0.9);
     profilesFuture = _loadProfiles();
   }
 
   @override
   void dispose() {
+    _bannerController.dispose();
     _locationController.dispose();
     super.dispose();
   }
@@ -181,6 +185,17 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 onApply: _applyFilters,
               ),
               const SizedBox(height: 16),
+            ] else ...[
+              _DiscoverBannerCarousel(
+                controller: _bannerController,
+                currentBanner: currentBanner,
+                onPageChanged: (value) {
+                  setState(() {
+                    currentBanner = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
             ],
             Text(
               strings.feedSectionTitle,
@@ -237,6 +252,124 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _DiscoverBannerCarousel extends StatelessWidget {
+  const _DiscoverBannerCarousel({
+    required this.controller,
+    required this.currentBanner,
+    required this.onPageChanged,
+  });
+
+  final PageController controller;
+  final int currentBanner;
+  final ValueChanged<int> onPageChanged;
+
+  static const _bannerColors = <List<Color>>[
+    [Color(0xFFF3C7D2), Color(0xFFF8E0D7)],
+    [Color(0xFFD9E8FF), Color(0xFFF2E8FF)],
+    [Color(0xFFF8DFC7), Color(0xFFF6EEE1)],
+    [Color(0xFFD8F0E4), Color(0xFFF0F7E9)],
+    [Color(0xFFE8D9FF), Color(0xFFF9E5EC)],
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 152,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: 5,
+            onPageChanged: onPageChanged,
+            itemBuilder: (context, index) {
+              final colors = _bannerColors[index];
+              return Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: colors,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            'Kimura',
+                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  color: const Color(0xFF4A2330),
+                                  fontWeight: FontWeight.w800,
+                                ),
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          strings.discoverBannerTitle(index),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: const Color(0xFF2F2323),
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          strings.discoverBannerSubtitle(index),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: const Color(0xFF5C4545),
+                                height: 1.4,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(5, (index) {
+            final active = index == currentBanner;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: active ? 22 : 8,
+              height: 8,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: active ? const Color(0xFF9E4E5D) : const Color(0xFFD7C1C1),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 }

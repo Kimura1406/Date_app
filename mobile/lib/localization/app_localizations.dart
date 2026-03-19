@@ -1074,6 +1074,186 @@ class AppStrings {
     }
   }
 
+  String discoverBannerTitle(int index) {
+    switch (index) {
+      case 0:
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Kết nối mới hôm nay';
+          case AppLanguage.japanese:
+            return '今日の新しい出会い';
+          case AppLanguage.korean:
+            return '오늘의 새로운 만남';
+          case AppLanguage.russian:
+            return 'Новые знакомства сегодня';
+          case AppLanguage.chinese:
+            return '今日新的相遇';
+          case AppLanguage.english:
+            return 'New connections today';
+          case AppLanguage.thai:
+            return 'การพบเจอใหม่วันนี้';
+        }
+      case 1:
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Những người phù hợp với bạn';
+          case AppLanguage.japanese:
+            return 'あなたに合うおすすめ';
+          case AppLanguage.korean:
+            return '당신에게 맞는 추천';
+          case AppLanguage.russian:
+            return 'Подходящие вам люди';
+          case AppLanguage.chinese:
+            return '为你推荐的人';
+          case AppLanguage.english:
+            return 'People who match you';
+          case AppLanguage.thai:
+            return 'คนที่เหมาะกับคุณ';
+        }
+      case 2:
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Trò chuyện nhẹ nhàng hơn';
+          case AppLanguage.japanese:
+            return 'もっと気軽に話そう';
+          case AppLanguage.korean:
+            return '더 가볍게 대화해 보세요';
+          case AppLanguage.russian:
+            return 'Начните общаться легче';
+          case AppLanguage.chinese:
+            return '更轻松地开始聊天';
+          case AppLanguage.english:
+            return 'Start chatting more easily';
+          case AppLanguage.thai:
+            return 'เริ่มคุยกันได้ง่ายขึ้น';
+        }
+      case 3:
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Khám phá gần bạn';
+          case AppLanguage.japanese:
+            return '近くの相手をチェック';
+          case AppLanguage.korean:
+            return '가까운 사람을 찾아보세요';
+          case AppLanguage.russian:
+            return 'Люди рядом с вами';
+          case AppLanguage.chinese:
+            return '发现你附近的人';
+          case AppLanguage.english:
+            return 'Discover people nearby';
+          case AppLanguage.thai:
+            return 'ค้นหาคนใกล้ตัวคุณ';
+        }
+      default:
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Tặng hoa để bắt đầu';
+          case AppLanguage.japanese:
+            return 'お花で会話を始めよう';
+          case AppLanguage.korean:
+            return '꽃 선물로 대화를 시작해요';
+          case AppLanguage.russian:
+            return 'Начните разговор с цветка';
+          case AppLanguage.chinese:
+            return '用鲜花开启聊天';
+          case AppLanguage.english:
+            return 'Start with a flower gift';
+          case AppLanguage.thai:
+            return 'เริ่มต้นด้วยการส่งดอกไม้';
+        }
+    }
+  }
+
+  String discoverBannerSubtitle(int index) {
+    switch (index) {
+      case 0:
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Mở rộng vòng tròn của bạn bằng những profile mới nhất.';
+          case AppLanguage.japanese:
+            return '新しく登録したプロフィールをチェックしましょう。';
+          case AppLanguage.korean:
+            return '새로 가입한 프로필을 먼저 확인해 보세요.';
+          case AppLanguage.russian:
+            return 'Сначала посмотрите новые профили в системе.';
+          case AppLanguage.chinese:
+            return '先看看最新加入的用户资料。';
+          case AppLanguage.english:
+            return 'See the latest profiles who just joined.';
+          case AppLanguage.thai:
+            return 'ดูโปรไฟล์ใหม่ล่าสุดที่เพิ่งเข้ามาได้เลย';
+        }
+      case 1:
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Dùng bộ lọc để tìm đúng người bạn đang muốn gặp.';
+          case AppLanguage.japanese:
+            return 'フィルターを使って会いたい相手を探せます。';
+          case AppLanguage.korean:
+            return '필터를 사용해 원하는 상대를 더 정확히 찾으세요.';
+          case AppLanguage.russian:
+            return 'Используйте фильтры, чтобы найти нужного человека.';
+          case AppLanguage.chinese:
+            return '使用筛选更精准地找到想认识的人。';
+          case AppLanguage.english:
+            return 'Use filters to find the right person faster.';
+          case AppLanguage.thai:
+            return 'ใช้ตัวกรองเพื่อหาคนที่ตรงใจได้เร็วขึ้น';
+        }
+      case 2:
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Một lời nhắn ngắn có thể bắt đầu một cuộc gặp dài lâu.';
+          case AppLanguage.japanese:
+            return '短い一言から素敵な会話が始まるかもしれません。';
+          case AppLanguage.korean:
+            return '짧은 한마디가 좋은 대화의 시작이 될 수 있어요.';
+          case AppLanguage.russian:
+            return 'Короткое сообщение может стать началом хорошего разговора.';
+          case AppLanguage.chinese:
+            return '一句简单问候，也许就是一段对话的开始。';
+          case AppLanguage.english:
+            return 'A short hello can start a great conversation.';
+          case AppLanguage.thai:
+            return 'ข้อความสั้น ๆ อาจเป็นจุดเริ่มต้นของบทสนทนาที่ดี';
+        }
+      case 3:
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Kiểm tra những người đang ở gần khu vực bạn chọn.';
+          case AppLanguage.japanese:
+            return '選択したエリアの近くにいる相手を見つけましょう。';
+          case AppLanguage.korean:
+            return '선택한 지역 근처에 있는 사람들을 확인해 보세요.';
+          case AppLanguage.russian:
+            return 'Смотрите людей рядом с выбранным вами районом.';
+          case AppLanguage.chinese:
+            return '查看你所选区域附近的用户。';
+          case AppLanguage.english:
+            return 'Browse people near the area you choose.';
+          case AppLanguage.thai:
+            return 'ดูคนที่อยู่ใกล้กับพื้นที่ที่คุณเลือก';
+        }
+      default:
+        switch (language) {
+          case AppLanguage.vietnamese:
+            return 'Một món quà nhỏ giúp cuộc trò chuyện dễ bắt đầu hơn.';
+          case AppLanguage.japanese:
+            return '小さなお花のギフトで会話を始めやすくなります。';
+          case AppLanguage.korean:
+            return '작은 꽃 선물로 대화를 더 부드럽게 시작해 보세요.';
+          case AppLanguage.russian:
+            return 'Небольшой подарок поможет начать разговор мягче.';
+          case AppLanguage.chinese:
+            return '一份小小花礼，会让对话更容易开始。';
+          case AppLanguage.english:
+            return 'A small flower gift can break the ice nicely.';
+          case AppLanguage.thai:
+            return 'ของขวัญดอกไม้เล็ก ๆ ช่วยให้เริ่มคุยกันง่ายขึ้น';
+        }
+    }
+  }
+
   String flowerGiftName(Object type) {
     final normalized = type.toString().split('.').last;
     switch (normalized) {
