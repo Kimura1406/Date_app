@@ -1360,8 +1360,11 @@ function App() {
         ) : activeMenu === 'gift' ? (
           <>
             <section className="content-grid user-list-layout">
-              <div className="panel">
-                <div className="panel-header panel-header-right">
+              <div className="panel flower-panel">
+                <div className="panel-header flower-panel-header">
+                  <div className="flower-record-count">
+                    {'件数'}: {flowers.length} {'件'}
+                  </div>
                   <div className="inline-actions">
                     <button onClick={openCreateFlowerModal} type="button">
                       {'\u304a\u82b1\u6295\u7a3f'}
@@ -1376,7 +1379,7 @@ function App() {
                 ) : flowers.length === 0 ? (
                   <p className="muted">No flowers found yet.</p>
                 ) : (
-                  <div className="table-wrap">
+                  <div className="table-wrap flower-table-wrap">
                     <table className="user-table flower-table">
                       <thead>
                         <tr>
@@ -1398,9 +1401,6 @@ function App() {
                             <td>
                               <div className="flower-name-cell">
                                 <strong>{flower.name}</strong>
-                                <span className={`pill ${flower.published ? '' : 'pill-muted'}`}>
-                                  {flower.published ? '\u516c\u958b' : '\u975e\u516c\u958b'}
-                                </span>
                               </div>
                             </td>
                             <td>
@@ -1414,9 +1414,14 @@ function App() {
                             <td>{flower.purchaserCount}</td>
                             <td>{flower.purchaseCount}</td>
                             <td>
-                              <button onClick={() => openEditFlowerModal(flower)} type="button">
-                                Edit
-                              </button>
+                              <div className="flower-actions">
+                                <span className={`status-chip ${flower.published ? 'published' : 'draft'}`}>
+                                  {flower.published ? '\u516c\u958b' : '\u975e\u516c\u958b'}
+                                </span>
+                                <button onClick={() => openEditFlowerModal(flower)} type="button">
+                                  Edit
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}

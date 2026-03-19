@@ -224,7 +224,7 @@ button:disabled {
 .content-grid {
   display: grid;
   gap: 24px;
-  margin-top: 24px;
+  margin-top: 8px;
 }
 
 .user-list-layout {
@@ -255,7 +255,7 @@ button:disabled {
 
 .admin-page-hero {
   margin-top: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .admin-page-hero h1 {
@@ -388,9 +388,29 @@ button:disabled {
   min-width: 920px;
 }
 
+.flower-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.flower-panel-header {
+  margin-bottom: 12px;
+}
+
+.flower-record-count {
+  color: #6d4a4a;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.flower-table-wrap {
+  max-height: calc(100vh - 260px);
+  overflow: auto;
+}
+
 .flower-name-cell {
   display: grid;
-  gap: 8px;
+  gap: 4px;
 }
 
 .flower-thumb,
@@ -411,6 +431,13 @@ button:disabled {
   width: min(220px, 100%);
   aspect-ratio: 1 / 1;
   margin-top: 8px;
+}
+
+.flower-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
 }
 
 .banner-panel {
