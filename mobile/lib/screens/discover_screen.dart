@@ -138,48 +138,50 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               ),
             ),
             const SizedBox(height: 14),
-            DiscoveryFilterPanel(
-              expanded: filtersExpanded,
-              country: selectedCountry,
-              job: selectedJob,
-              gender: selectedGender,
-              minAge: minAge,
-              maxAge: maxAge,
-              locationController: _locationController,
-              onToggleExpanded: () {
-                setState(() {
-                  filtersExpanded = !filtersExpanded;
-                });
-              },
-              onCountryChanged: (value) {
-                setState(() {
-                  selectedCountry = value;
-                });
-              },
-              onJobChanged: (value) {
-                setState(() {
-                  selectedJob = value;
-                });
-              },
-              onGenderChanged: (value) {
-                setState(() {
-                  selectedGender = value;
-                });
-              },
-              onMinAgeChanged: (value) {
-                setState(() {
-                  minAge = value;
-                });
-              },
-              onMaxAgeChanged: (value) {
-                setState(() {
-                  maxAge = value;
-                });
-              },
-              onReset: _resetFilters,
-              onApply: _applyFilters,
-            ),
-            const SizedBox(height: 16),
+            if (filtersExpanded) ...[
+              DiscoveryFilterPanel(
+                expanded: filtersExpanded,
+                country: selectedCountry,
+                job: selectedJob,
+                gender: selectedGender,
+                minAge: minAge,
+                maxAge: maxAge,
+                locationController: _locationController,
+                onToggleExpanded: () {
+                  setState(() {
+                    filtersExpanded = !filtersExpanded;
+                  });
+                },
+                onCountryChanged: (value) {
+                  setState(() {
+                    selectedCountry = value;
+                  });
+                },
+                onJobChanged: (value) {
+                  setState(() {
+                    selectedJob = value;
+                  });
+                },
+                onGenderChanged: (value) {
+                  setState(() {
+                    selectedGender = value;
+                  });
+                },
+                onMinAgeChanged: (value) {
+                  setState(() {
+                    minAge = value;
+                  });
+                },
+                onMaxAgeChanged: (value) {
+                  setState(() {
+                    maxAge = value;
+                  });
+                },
+                onReset: _resetFilters,
+                onApply: _applyFilters,
+              ),
+              const SizedBox(height: 16),
+            ],
             Text(
               strings.feedSectionTitle,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
