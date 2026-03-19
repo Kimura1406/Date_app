@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
 const adminAuthStorageKey = 'kimura_admin_auth';
@@ -45,6 +45,27 @@ type UserFormState = {
   country: string;
   prefecture: string;
   datingReason: string;
+};
+
+type Flower = {
+  id: string;
+  name: string;
+  imageUrl: string;
+  description: string;
+  pricePoints: number;
+  purchaserCount: number;
+  purchaseCount: number;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type FlowerFormState = {
+  imageUrl: string;
+  name: string;
+  description: string;
+  pricePoints: number;
+  published: boolean;
 };
 
 type ChatMessage = {
@@ -123,15 +144,28 @@ const emptyForm: UserFormState = {
   datingReason: '',
 };
 
+const emptyFlowerForm: FlowerFormState = {
+  imageUrl: '',
+  name: '',
+  description: '',
+  pricePoints: 1,
+  published: true,
+};
+
 function App() {
   const pageSizeOptions = [10, 20, 50, 100];
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [flowers, setFlowers] = useState<Flower[]>([]);
+  const [loadingFlowers, setLoadingFlowers] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savingFlower, setSavingFlower] = useState(false);
   const [message, setMessage] = useState<string>('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedFlowerId, setSelectedFlowerId] = useState<string | null>(null);
   const [form, setForm] = useState<UserFormState>(emptyForm);
+  const [flowerForm, setFlowerForm] = useState<FlowerFormState>(emptyFlowerForm);
   const [adminEmail, setAdminEmail] = useState('admin@kimura.local');
   const [adminPassword, setAdminPassword] = useState('admin12345');
   const [authToken, setAuthToken] = useState('');
@@ -141,6 +175,7 @@ function App() {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [activeMenu, setActiveMenu] = useState<MenuKey>('user-list');
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isFlowerModalOpen, setIsFlowerModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoom | null>(null);
@@ -157,6 +192,7 @@ function App() {
     setRefreshToken('');
     setAdminUser(null);
     setUsers([]);
+    setFlowers([]);
     setChatRooms([]);
     setSelectedChatRoom(null);
     setActiveMenu('user-list');
@@ -220,6 +256,12 @@ function App() {
     }
   }, [activeMenu, authToken, chatTab]);
 
+  useEffect(() => {
+    if (authToken && activeMenu === 'gift') {
+      void loadFlowers(authToken);
+    }
+  }, [activeMenu, authToken]);
+
   async function loadUsers(token: string = authToken) {
     if (!token) return;
 
@@ -276,6 +318,35 @@ function App() {
       setMessage(error instanceof Error ? error.message : 'Failed to load chat rooms');
     } finally {
       setLoadingChatRooms(false);
+    }
+  }
+
+  async function loadFlowers(token: string = authToken) {
+    if (!token) return;
+
+    setLoadingFlowers(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/admin/flowers`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to load flowers');
+      }
+
+      setFlowers(data.items ?? []);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to load flowers');
+    } finally {
+      setLoadingFlowers(false);
     }
   }
 
@@ -459,7 +530,9 @@ function App() {
     setRefreshToken('');
     setAdminUser(null);
     setUsers([]);
+    setFlowers([]);
     resetForm();
+    resetFlowerForm();
     setActiveMenu('user-list');
     setMessage('Logged out.');
     setLogoutLoading(false);
@@ -487,9 +560,20 @@ function App() {
     setIsUserModalOpen(true);
   }
 
+  function openCreateFlowerModal() {
+    resetFlowerForm();
+    setMessage('');
+    setIsFlowerModalOpen(true);
+  }
+
   function closeUserModal() {
     setIsUserModalOpen(false);
     resetForm();
+  }
+
+  function closeFlowerModal() {
+    setIsFlowerModalOpen(false);
+    resetFlowerForm();
   }
 
   function resetForm() {
@@ -497,8 +581,30 @@ function App() {
     setForm(emptyForm);
   }
 
+  function resetFlowerForm() {
+    setSelectedFlowerId(null);
+    setFlowerForm(emptyFlowerForm);
+  }
+
   function updateField<K extends keyof UserFormState>(key: K, value: UserFormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateFlowerField<K extends keyof FlowerFormState>(key: K, value: FlowerFormState[K]) {
+    setFlowerForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function openEditFlowerModal(flower: Flower) {
+    setSelectedFlowerId(flower.id);
+    setFlowerForm({
+      imageUrl: flower.imageUrl,
+      name: flower.name,
+      description: flower.description,
+      pricePoints: flower.pricePoints,
+      published: flower.published,
+    });
+    setMessage('');
+    setIsFlowerModalOpen(true);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -578,6 +684,70 @@ function App() {
       await loadUsers();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to delete user');
+    }
+  }
+
+  async function handleFlowerImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        updateFlowerField('imageUrl', reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  }
+
+  async function handleFlowerSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!authToken) return;
+
+    setSavingFlower(true);
+    setMessage('');
+
+    const payload = {
+      imageUrl: flowerForm.imageUrl,
+      name: flowerForm.name,
+      description: flowerForm.description,
+      pricePoints: flowerForm.pricePoints,
+      published: flowerForm.published,
+    };
+
+    const endpoint = selectedFlowerId
+      ? `${apiBaseUrl}/api/v1/admin/flowers/${selectedFlowerId}`
+      : `${apiBaseUrl}/api/v1/admin/flowers`;
+    const method = selectedFlowerId ? 'PUT' : 'POST';
+
+    try {
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to save flower');
+      }
+
+      setMessage(selectedFlowerId ? 'Flower updated successfully.' : 'Flower created successfully.');
+      closeFlowerModal();
+      await loadFlowers();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to save flower');
+    } finally {
+      setSavingFlower(false);
     }
   }
 
@@ -1007,6 +1177,76 @@ function App() {
             </section>
 
           </>
+        ) : activeMenu === 'gift' ? (
+          <>
+            <section className="content-grid user-list-layout">
+              <div className="panel">
+                <div className="panel-header panel-header-right">
+                  <div className="inline-actions">
+                    <button onClick={openCreateFlowerModal} type="button">
+                      {'\u304a\u82b1\u6295\u7a3f'}
+                    </button>
+                  </div>
+                </div>
+
+                {message ? <div className="notice">{message}</div> : null}
+
+                {loadingFlowers ? (
+                  <p className="muted">Loading flowers...</p>
+                ) : flowers.length === 0 ? (
+                  <p className="muted">No flowers found yet.</p>
+                ) : (
+                  <div className="table-wrap">
+                    <table className="user-table flower-table">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>{'\u82b1\u306e\u540d\u524d'}</th>
+                          <th>{'\u753b\u50cf'}</th>
+                          <th>{'\u4fa1\u683c'}</th>
+                          <th>{'\u8cfc\u5165\u8005\u6570'}</th>
+                          <th>{'\u8cfc\u5165\u56de\u6570'}</th>
+                          <th>Edit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {flowers.map((flower) => (
+                          <tr key={flower.id}>
+                            <td>
+                              <code>{flower.id}</code>
+                            </td>
+                            <td>
+                              <div className="flower-name-cell">
+                                <strong>{flower.name}</strong>
+                                <span className={`pill ${flower.published ? '' : 'pill-muted'}`}>
+                                  {flower.published ? '\u516c\u958b' : '\u975e\u516c\u958b'}
+                                </span>
+                              </div>
+                            </td>
+                            <td>
+                              <img
+                                alt={flower.name}
+                                className="flower-thumb"
+                                src={flower.imageUrl}
+                              />
+                            </td>
+                            <td>{flower.pricePoints}P</td>
+                            <td>{flower.purchaserCount}</td>
+                            <td>{flower.purchaseCount}</td>
+                            <td>
+                              <button onClick={() => openEditFlowerModal(flower)} type="button">
+                                Edit
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </section>
+          </>
         ) : (
           renderPlaceholderView(activeMenu)
         )}
@@ -1065,6 +1305,109 @@ function App() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        ) : null}
+
+        {isFlowerModalOpen ? (
+          <div className="modal-backdrop" onClick={closeFlowerModal} role="presentation">
+            <div className="modal-panel" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+              <div className="panel-header">
+                <div>
+                  <h2>{selectedFlowerId ? 'Edit flower' : '\u304a\u82b1\u6295\u7a3f'}</h2>
+                  <p className="muted">Upload one image and register the flower details.</p>
+                </div>
+                <button className="ghost" onClick={closeFlowerModal} type="button">
+                  Close
+                </button>
+              </div>
+
+              <form className="user-form" onSubmit={(event) => void handleFlowerSubmit(event)}>
+                <label className="full-span">
+                  {'\u753b\u50cf\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9'}
+                  <input accept="image/*" onChange={(event) => void handleFlowerImageChange(event)} type="file" />
+                  {flowerForm.imageUrl ? (
+                    <img alt="Flower preview" className="flower-preview" src={flowerForm.imageUrl} />
+                  ) : null}
+                </label>
+                <label className="full-span">
+                  {'\u82b1\u306e\u540d\u524d'}
+                  <input
+                    maxLength={50}
+                    onChange={(event) => updateFlowerField('name', event.target.value)}
+                    type="text"
+                    value={flowerForm.name}
+                  />
+                  <small className="field-note">{flowerForm.name.length}/50</small>
+                </label>
+                <label className="full-span">
+                  {'\u82b1\u306b\u3064\u3044\u3066'}
+                  <textarea
+                    maxLength={100}
+                    onChange={(event) => updateFlowerField('description', event.target.value)}
+                    rows={4}
+                    value={flowerForm.description}
+                  />
+                  <small className="field-note">{flowerForm.description.length}/100</small>
+                </label>
+                <label className="full-span">
+                  {'\u4fa1\u683c'}
+                  <div className="price-stepper">
+                    <button
+                      className="ghost"
+                      onClick={() => updateFlowerField('pricePoints', Math.max(1, flowerForm.pricePoints - 1))}
+                      type="button"
+                    >
+                      -
+                    </button>
+                    <input
+                      min={1}
+                      onChange={(event) =>
+                        updateFlowerField('pricePoints', Math.max(1, Number(event.target.value) || 1))
+                      }
+                      type="number"
+                      value={flowerForm.pricePoints}
+                    />
+                    <span>P</span>
+                    <button
+                      className="ghost"
+                      onClick={() => updateFlowerField('pricePoints', flowerForm.pricePoints + 1)}
+                      type="button"
+                    >
+                      +
+                    </button>
+                  </div>
+                </label>
+                <fieldset className="full-span publish-fieldset">
+                  <legend>{'\u516c\u958b\u72b6\u614b'}</legend>
+                  <label className="radio-option">
+                    <input
+                      checked={flowerForm.published}
+                      name="flower-publish"
+                      onChange={() => updateFlowerField('published', true)}
+                      type="radio"
+                    />
+                    {'\u516c\u958b'}
+                  </label>
+                  <label className="radio-option">
+                    <input
+                      checked={!flowerForm.published}
+                      name="flower-publish"
+                      onChange={() => updateFlowerField('published', false)}
+                      type="radio"
+                    />
+                    {'\u975e\u516c\u958b'}
+                  </label>
+                </fieldset>
+                <div className="form-actions full-span">
+                  <button className="ghost" onClick={closeFlowerModal} type="button">
+                    Cancel
+                  </button>
+                  <button disabled={savingFlower} type="submit">
+                    {savingFlower ? 'Saving...' : '\u6295\u7a3f'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         ) : null}

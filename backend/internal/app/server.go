@@ -41,12 +41,14 @@ func NewServer() (*Server, error) {
 
 	tokenManager := backendauth.NewTokenManager(cfg.JWTSecret, 24*time.Hour)
 	chatRepository := repository.NewChatRepository(db)
+	flowerRepository := repository.NewFlowerRepository(db)
 
 	router := httpapi.NewRouter(
 		cfg,
 		service.NewProfileService(repository.NewProfileRepository(db)),
 		service.NewMatchService(repository.NewMatchRepository(db)),
 		service.NewChatService(chatRepository),
+		service.NewFlowerService(flowerRepository),
 		service.NewUserService(
 			repository.NewUserRepository(db),
 			repository.NewSessionRepository(db),

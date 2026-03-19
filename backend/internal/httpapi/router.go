@@ -13,6 +13,7 @@ func NewRouter(
 	profileService *service.ProfileService,
 	matchService *service.MatchService,
 	chatService *service.ChatService,
+	flowerService *service.FlowerService,
 	userService *service.UserService,
 	tokenManager *backendauth.TokenManager,
 ) http.Handler {
@@ -22,6 +23,7 @@ func NewRouter(
 	discoveryHandler := NewDiscoveryHandler(profileService)
 	matchHandler := NewMatchHandler(matchService)
 	chatHandler := NewChatHandler(chatService)
+	flowerHandler := NewFlowerHandler(flowerService)
 	userHandler := NewUserHandler(userService, tokenManager)
 
 	mux.HandleFunc("GET /health", healthHandler.Handle)
@@ -34,6 +36,9 @@ func NewRouter(
 	mux.HandleFunc("GET /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.GetUser)))
 	mux.HandleFunc("PUT /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.UpdateUser)))
 	mux.HandleFunc("DELETE /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.DeleteUser)))
+	mux.HandleFunc("GET /api/v1/admin/flowers", withAuth(tokenManager, requireRole("admin", flowerHandler.ListFlowers)))
+	mux.HandleFunc("POST /api/v1/admin/flowers", withAuth(tokenManager, requireRole("admin", flowerHandler.CreateFlower)))
+	mux.HandleFunc("PUT /api/v1/admin/flowers/{id}", withAuth(tokenManager, requireRole("admin", flowerHandler.UpdateFlower)))
 	mux.HandleFunc("POST /api/v1/admin/users/{id}/operator-chat", withAuth(tokenManager, requireRole("admin", chatHandler.EnsureAdminRoomForUser)))
 	mux.HandleFunc("GET /api/v1/admin/chat-rooms", withAuth(tokenManager, requireRole("admin", chatHandler.ListAdminRooms)))
 	mux.HandleFunc("GET /api/v1/admin/chat-rooms/{id}", withAuth(tokenManager, requireRole("admin", chatHandler.GetRoomDetail)))

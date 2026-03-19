@@ -90,3 +90,32 @@ type UserCredentials struct {
 	Role         string
 	PasswordHash string
 }
+
+type Flower struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	ImageURL       string `json:"imageUrl"`
+	Description    string `json:"description"`
+	PricePoints    int    `json:"pricePoints"`
+	PurchaserCount int    `json:"purchaserCount"`
+	PurchaseCount  int    `json:"purchaseCount"`
+	Published      bool   `json:"published"`
+	CreatedAt      string `json:"createdAt"`
+	UpdatedAt      string `json:"updatedAt"`
+}
+
+type CreateFlowerInput struct {
+	Name        string `json:"name"`
+	ImageURL    string `json:"imageUrl"`
+	Description string `json:"description"`
+	PricePoints int    `json:"pricePoints"`
+	Published   bool   `json:"published"`
+}
+
+type UpdateFlowerInput struct {
+	Name        string `json:"name"`
+	ImageURL    string `json:"imageUrl"`
+	Description string `json:"description"`
+	PricePoints int    `json:"pricePoints"`
+	Published   bool   `json:"published"`
+}

@@ -319,6 +319,11 @@ button:disabled {
   font-weight: 700;
 }
 
+.pill-muted {
+  background: rgba(92, 82, 87, 0.16);
+  color: #6f5960;
+}
+
 .table-wrap {
   overflow-x: auto;
   border: 1px solid var(--admin-border);
@@ -377,6 +382,73 @@ button:disabled {
   white-space: normal;
   line-height: 1.5;
   color: #3b2c30;
+}
+
+.flower-table {
+  min-width: 920px;
+}
+
+.flower-name-cell {
+  display: grid;
+  gap: 8px;
+}
+
+.flower-thumb,
+.flower-preview {
+  display: block;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.flower-thumb {
+  width: 92px;
+  height: 92px;
+}
+
+.flower-preview {
+  width: min(220px, 100%);
+  aspect-ratio: 1 / 1;
+  margin-top: 8px;
+}
+
+.price-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.price-stepper input {
+  width: 120px;
+  text-align: center;
+}
+
+.publish-fieldset {
+  border: 1px solid var(--admin-border);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.publish-fieldset legend {
+  padding: 0 8px;
+  color: #f5efec;
+  font-weight: 700;
+}
+
+.radio-option {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.radio-option input {
+  width: auto;
 }
 
 .chat-table {
