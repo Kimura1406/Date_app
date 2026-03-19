@@ -115,10 +115,7 @@ const menuSections: Array<{
   children?: Array<{ key: MenuKey; label: string }>;
   key?: MenuKey;
 }> = [
-  {
-    label: '\u30e6\u30fc\u30b6\u30fc\u7ba1\u7406',
-    children: [{ key: 'user-list', label: '\u30e6\u30fc\u30b6\u30fc\u4e00\u89a7' }],
-  },
+  { key: 'user-list', label: '\u30e6\u30fc\u30b6\u30fc\u7ba1\u7406' },
   { key: 'chat', label: '\u30c1\u30e3\u30c3\u30c8\u7ba1\u7406' },
   { key: 'gift', label: '\u304a\u82b1\u7ba1\u7406' },
   { key: 'sales', label: '\u30d0\u30ca\u30fc\u7ba1\u7406' },
@@ -127,7 +124,7 @@ const menuSections: Array<{
 
 const viewMeta: Record<MenuKey, { title: string; description: string }> = {
   'user-list': {
-    title: '\u30e6\u30fc\u30b6\u30fc\u4e00\u89a7',
+    title: '\u30e6\u30fc\u30b6\u30fc\u7ba1\u7406',
     description:
       '\u7ba1\u7406\u8005\u306e\u307f\u30e6\u30fc\u30b6\u30fc\u306e\u4f5c\u6210\u3001\u7de8\u96c6\u3001\u524a\u9664\u3001\u78ba\u8a8d\u304c\u3067\u304d\u307e\u3059\u3002',
   },

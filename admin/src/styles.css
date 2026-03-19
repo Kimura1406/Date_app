@@ -261,8 +261,9 @@ button:disabled {
 }
 
 .admin-page-hero h1 {
-  font-size: clamp(1.8rem, 3vw, 3rem);
+  font-size: 16px;
   max-width: none;
+  line-height: 1.2;
 }
 
 .panel {
@@ -359,6 +360,7 @@ button:disabled {
   border-collapse: collapse;
   min-width: 900px;
   background: rgba(255, 255, 255, 0.2);
+  font-size: 12px;
 }
 
 .user-table th,
@@ -378,7 +380,7 @@ button:disabled {
 }
 
 .user-table th {
-  font-size: 0.8rem;
+  font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #5d4a4f;
@@ -390,7 +392,7 @@ button:disabled {
 }
 
 .user-table code {
-  font-size: 0.95rem;
+  font-size: 12px;
   font-weight: 700;
   color: #7f4a56;
 }
@@ -422,8 +424,8 @@ button:disabled {
 
 .flower-record-count {
   color: #6d4a4a;
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .flower-table-wrap {
@@ -552,7 +554,7 @@ button:disabled {
   padding: 0.4rem 0.75rem;
   border-radius: 10px;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 12px;
 }
 
 .status-chip.published {
@@ -596,6 +598,7 @@ button:disabled {
   padding: 16px 4px 0;
   color: #2a1f1f;
   flex-wrap: wrap;
+  font-size: 12px;
 }
 
 .banner-pagination-controls {
@@ -826,6 +829,7 @@ button:disabled {
   gap: 16px;
   margin-top: 16px;
   flex-wrap: wrap;
+  font-size: 12px;
 }
 
 .pagination-meta,
