@@ -14,6 +14,7 @@ import (
 
 type bannerRepository interface {
 	ListBanners(ctx context.Context) ([]domain.Banner, error)
+	ListPublicBanners(ctx context.Context) ([]domain.Banner, error)
 	GetBannerByID(ctx context.Context, id string) (domain.Banner, error)
 	CreateBanner(ctx context.Context, id string, input domain.CreateBannerInput) (domain.Banner, error)
 	UpdateBanner(ctx context.Context, id string, input domain.UpdateBannerInput) (domain.Banner, error)
@@ -29,6 +30,10 @@ func NewBannerService(repo bannerRepository) *BannerService {
 
 func (s *BannerService) ListBanners(ctx context.Context) ([]domain.Banner, error) {
 	return s.repo.ListBanners(ctx)
+}
+
+func (s *BannerService) ListPublicBanners(ctx context.Context) ([]domain.Banner, error) {
+	return s.repo.ListPublicBanners(ctx)
 }
 
 func (s *BannerService) CreateBanner(ctx context.Context, input domain.CreateBannerInput) (domain.Banner, error) {

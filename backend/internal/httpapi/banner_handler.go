@@ -26,6 +26,16 @@ func (h *BannerHandler) ListBanners(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"items": items})
 }
 
+func (h *BannerHandler) ListPublicBanners(w http.ResponseWriter, r *http.Request) {
+	items, err := h.bannerService.ListPublicBanners(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to load banners")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
 func (h *BannerHandler) CreateBanner(w http.ResponseWriter, r *http.Request) {
 	var input domain.CreateBannerInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {

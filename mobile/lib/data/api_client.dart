@@ -54,6 +54,19 @@ class ApiClient {
         .toList();
   }
 
+  Future<List<DiscoverBannerItem>> fetchPublicBanners() async {
+    final response = await _client.get(Uri.parse('$apiBaseUrl/api/v1/banners'));
+    if (response.statusCode != 200) {
+      throw Exception('Banners request failed: ${response.statusCode}');
+    }
+
+    final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+    final items = jsonMap['items'] as List<dynamic>? ?? [];
+    return items
+        .map((item) => DiscoverBannerItem.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<List<ChatRoomSummary>> fetchChatRooms({
     required String token,
     required String roomType,

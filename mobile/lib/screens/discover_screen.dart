@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../data/api_client.dart';
@@ -26,6 +29,7 @@ class DiscoverScreen extends StatefulWidget {
 
 class _DiscoverScreenState extends State<DiscoverScreen> {
   late Future<List<DatingProfile>> profilesFuture;
+  late Future<List<DiscoverBannerItem>> bannersFuture;
   late final PageController _bannerController;
 
   bool filtersExpanded = false;
@@ -42,6 +46,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     super.initState();
     _bannerController = PageController(viewportFraction: 0.9);
     profilesFuture = _loadProfiles();
+    bannersFuture = _loadBanners();
   }
 
   @override
@@ -65,6 +70,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         excludeUserId: widget.currentUser.id,
       ),
     );
+  }
+
+  Future<List<DiscoverBannerItem>> _loadBanners() {
+    return ApiClient().fetchPublicBanners();
   }
 
   void _applyFilters() {
@@ -186,13 +195,24 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               ),
               const SizedBox(height: 16),
             ] else ...[
-              _DiscoverBannerCarousel(
-                controller: _bannerController,
-                currentBanner: currentBanner,
-                onPageChanged: (value) {
-                  setState(() {
-                    currentBanner = value;
-                  });
+              FutureBuilder<List<DiscoverBannerItem>>(
+                future: bannersFuture,
+                builder: (context, snapshot) {
+                  final banners = snapshot.data ?? const <DiscoverBannerItem>[];
+                  if (snapshot.connectionState != ConnectionState.done || banners.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return _DiscoverBannerCarousel(
+                    banners: banners,
+                    controller: _bannerController,
+                    currentBanner: currentBanner,
+                    onPageChanged: (value) {
+                      setState(() {
+                        currentBanner = value;
+                      });
+                    },
+                  );
                 },
               ),
               const SizedBox(height: 16),
@@ -258,11 +278,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
 class _DiscoverBannerCarousel extends StatelessWidget {
   const _DiscoverBannerCarousel({
+    required this.banners,
     required this.controller,
     required this.currentBanner,
     required this.onPageChanged,
   });
 
+  final List<DiscoverBannerItem> banners;
   final PageController controller;
   final int currentBanner;
   final ValueChanged<int> onPageChanged;
@@ -277,18 +299,17 @@ class _DiscoverBannerCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final strings = context.strings;
-
     return Column(
       children: [
         SizedBox(
           height: 152,
           child: PageView.builder(
             controller: controller,
-            itemCount: 5,
+            itemCount: banners.length,
             onPageChanged: onPageChanged,
             itemBuilder: (context, index) {
-              final colors = _bannerColors[index];
+              final banner = banners[index];
+              final colors = _bannerColors[index % _bannerColors.length];
               return Padding(
                 padding: const EdgeInsets.only(right: 10),
                 child: DecoratedBox(
@@ -312,36 +333,18 @@ class _DiscoverBannerCarousel extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            'Kimura',
-                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  color: const Color(0xFF4A2330),
-                                  fontWeight: FontWeight.w800,
-                                ),
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: _DiscoverBannerImage(imageUrl: banner.imageUrl),
                           ),
                         ),
-                        const Spacer(),
+                        const SizedBox(height: 12),
                         Text(
-                          strings.discoverBannerTitle(index),
+                          banner.eventName,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                 color: const Color(0xFF2F2323),
                                 fontWeight: FontWeight.w800,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          strings.discoverBannerSubtitle(index),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: const Color(0xFF5C4545),
-                                height: 1.4,
                               ),
                         ),
                       ],
@@ -355,7 +358,7 @@ class _DiscoverBannerCarousel extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(5, (index) {
+          children: List.generate(banners.length, (index) {
             final active = index == currentBanner;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 180),
@@ -371,6 +374,49 @@ class _DiscoverBannerCarousel extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _DiscoverBannerImage extends StatelessWidget {
+  const _DiscoverBannerImage({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = _decodeDataUri(imageUrl);
+    if (data != null) {
+      return Image.memory(data, fit: BoxFit.cover);
+    }
+
+    if (imageUrl.isEmpty) {
+      return Container(color: const Color(0xFFF5D7DE));
+    }
+
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(color: const Color(0xFFF5D7DE));
+      },
+    );
+  }
+
+  Uint8List? _decodeDataUri(String value) {
+    if (!value.startsWith('data:image')) {
+      return null;
+    }
+
+    final commaIndex = value.indexOf(',');
+    if (commaIndex < 0) {
+      return null;
+    }
+
+    try {
+      return base64Decode(value.substring(commaIndex + 1));
+    } catch (_) {
+      return null;
+    }
   }
 }
 

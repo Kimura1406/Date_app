@@ -44,6 +44,34 @@ func (r *BannerRepository) ListBanners(ctx context.Context) ([]domain.Banner, er
 	return items, nil
 }
 
+func (r *BannerRepository) ListPublicBanners(ctx context.Context) ([]domain.Banner, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT id, image_url, event_name, display_order, redirect_link, published, created_at, updated_at
+		FROM banners
+		WHERE published = TRUE
+		ORDER BY display_order ASC, created_at DESC, id DESC
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("query public banners: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]domain.Banner, 0)
+	for rows.Next() {
+		item, err := scanBanner(rows)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate public banners: %w", err)
+	}
+
+	return items, nil
+}
+
 func (r *BannerRepository) GetBannerByID(ctx context.Context, id string) (domain.Banner, error) {
 	row := r.db.QueryRowContext(ctx, `
 		SELECT id, image_url, event_name, display_order, redirect_link, published, created_at, updated_at

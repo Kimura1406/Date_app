@@ -163,6 +163,32 @@ class FlowerShopItem {
   }
 }
 
+class DiscoverBannerItem {
+  DiscoverBannerItem({
+    required this.id,
+    required this.imageUrl,
+    required this.eventName,
+    required this.displayOrder,
+    required this.redirectLink,
+  });
+
+  final String id;
+  final String imageUrl;
+  final String eventName;
+  final int displayOrder;
+  final String redirectLink;
+
+  factory DiscoverBannerItem.fromJson(Map<String, dynamic> json) {
+    return DiscoverBannerItem(
+      id: json['id'] as String? ?? '',
+      imageUrl: json['imageUrl'] as String? ?? '',
+      eventName: json['eventName'] as String? ?? '',
+      displayOrder: json['displayOrder'] as int? ?? 0,
+      redirectLink: json['redirectLink'] as String? ?? '',
+    );
+  }
+}
+
 class ChatParticipant {
   ChatParticipant({
     required this.userId,
