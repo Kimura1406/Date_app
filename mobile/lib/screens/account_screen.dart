@@ -7,7 +7,7 @@ import '../localization/discovery_strings.dart';
 import '../widgets/language_selector_field.dart';
 import '../widgets/profile_field.dart';
 
-class AccountScreen extends StatefulWidget {
+class AccountScreen extends StatelessWidget {
   const AccountScreen({
     super.key,
     required this.currentUser,
@@ -47,27 +47,9 @@ class AccountScreen extends StatefulWidget {
   final Future<void> Function() onDelete;
   final Future<void> Function() onLogout;
 
-  @override
-  State<AccountScreen> createState() => _AccountScreenState();
-}
-
-class _AccountScreenState extends State<AccountScreen> {
-  bool _didRequestLatestPoints = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_didRequestLatestPoints) return;
-    _didRequestLatestPoints = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-      await widget.onRefreshSession();
-    });
-  }
-
   int get _likeCount => 0;
   int get _giftCount => 0;
-  int get _pointCount => widget.currentUser.pointBalance;
+  int get _pointCount => currentUser.pointBalance;
 
   Future<void> _openLogoutConfirm(BuildContext context) async {
     final strings = context.strings;
@@ -92,7 +74,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
 
     if (confirmed == true) {
-      await widget.onLogout();
+      await onLogout();
     }
   }
 
@@ -148,8 +130,8 @@ class _AccountScreenState extends State<AccountScreen> {
                     radius: 36,
                     backgroundColor: const Color(0xFFF0D7D0),
                     child: Text(
-                      widget.currentUser.name.isNotEmpty
-                          ? widget.currentUser.name.substring(0, 1)
+                      currentUser.name.isNotEmpty
+                          ? currentUser.name.substring(0, 1)
                           : '?',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             color: const Color(0xFF4A2330),
@@ -163,7 +145,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.currentUser.name,
+                          currentUser.name,
                           style:
                               Theme.of(context).textTheme.titleLarge?.copyWith(
                                     color: const Color(0xFF2F2323),
@@ -172,7 +154,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${strings.myPageBirthDateLabel}: ${widget.currentUser.birthDate.isNotEmpty ? widget.currentUser.birthDate : strings.notSetLabel}',
+                          '${strings.myPageBirthDateLabel}: ${currentUser.birthDate.isNotEmpty ? currentUser.birthDate : strings.notSetLabel}',
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: const Color(0xFF6D5A5A),
@@ -180,7 +162,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${strings.myPageGenderLabel}: ${widget.currentUser.gender.isNotEmpty ? strings.genderName(widget.currentUser.gender) : strings.notSetLabel}',
+                          '${strings.myPageGenderLabel}: ${currentUser.gender.isNotEmpty ? strings.genderName(currentUser.gender) : strings.notSetLabel}',
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: const Color(0xFF6D5A5A),
@@ -249,21 +231,21 @@ class _AccountScreenState extends State<AccountScreen> {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => _MyAccountEditScreen(
-                            selectedLanguage: widget.selectedLanguage,
-                            onLanguageChanged: widget.onLanguageChanged,
-                            statusMessage: widget.statusMessage,
-                            busy: widget.busy,
-                            emailController: widget.emailController,
-                            passwordController: widget.passwordController,
-                            nameController: widget.nameController,
-                            ageController: widget.ageController,
-                            jobController: widget.jobController,
-                            bioController: widget.bioController,
-                            distanceController: widget.distanceController,
-                            interestsController: widget.interestsController,
-                            onRefreshSession: widget.onRefreshSession,
-                            onUpdate: widget.onUpdate,
-                            onDelete: widget.onDelete,
+                            selectedLanguage: selectedLanguage,
+                            onLanguageChanged: onLanguageChanged,
+                            statusMessage: statusMessage,
+                            busy: busy,
+                            emailController: emailController,
+                            passwordController: passwordController,
+                            nameController: nameController,
+                            ageController: ageController,
+                            jobController: jobController,
+                            bioController: bioController,
+                            distanceController: distanceController,
+                            interestsController: interestsController,
+                            onRefreshSession: onRefreshSession,
+                            onUpdate: onUpdate,
+                            onDelete: onDelete,
                           ),
                         ),
                       );
@@ -314,9 +296,9 @@ class _AccountScreenState extends State<AccountScreen> {
                         MaterialPageRoute(
                           builder: (_) => _SettingsScreen(
                             title: strings.myPageSettings,
-                            selectedLanguage: widget.selectedLanguage,
-                            onLanguageChanged: widget.onLanguageChanged,
-                            onRefreshSession: widget.onRefreshSession,
+                            selectedLanguage: selectedLanguage,
+                            onLanguageChanged: onLanguageChanged,
+                            onRefreshSession: onRefreshSession,
                           ),
                         ),
                       );
@@ -331,7 +313,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 ],
               ),
             ),
-            if (widget.statusMessage.isNotEmpty) ...[
+            if (statusMessage.isNotEmpty) ...[
               const SizedBox(height: 16),
               Container(
                 width: double.infinity,
@@ -341,7 +323,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  widget.statusMessage,
+                  statusMessage,
                   style: const TextStyle(color: Color(0xFF4A2330)),
                 ),
               ),
