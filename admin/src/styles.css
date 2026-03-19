@@ -273,10 +273,77 @@ button:disabled {
 
 .subscreen-panel {
   max-width: 880px;
+  padding: 28px 32px 32px;
 }
 
 .subscreen-panel .panel-header {
   margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(93, 74, 79, 0.12);
+}
+
+.subscreen-panel h2,
+.subscreen-panel .muted,
+.subscreen-panel .field-note,
+.subscreen-panel .publish-fieldset legend,
+.subscreen-panel .radio-option,
+.subscreen-panel .price-stepper span {
+  color: #231a1b;
+}
+
+.subscreen-panel .notice {
+  margin: 0 0 20px;
+}
+
+.subscreen-panel .user-form {
+  gap: 20px 24px;
+}
+
+.subscreen-panel .user-form label {
+  gap: 10px;
+  color: #231a1b;
+  font-weight: 700;
+}
+
+.subscreen-panel .user-form input,
+.subscreen-panel .user-form textarea,
+.subscreen-panel .price-stepper input {
+  border: 1px solid rgba(35, 26, 27, 0.28);
+  border-radius: 12px;
+  padding: 0.85rem 0.95rem;
+  background: #ffffff;
+  color: #231a1b;
+}
+
+.subscreen-panel .user-form textarea {
+  min-height: 160px;
+}
+
+.subscreen-panel .user-form input::placeholder,
+.subscreen-panel .user-form textarea::placeholder {
+  color: #97898b;
+}
+
+.subscreen-panel .publish-fieldset {
+  border: 1px solid rgba(93, 74, 79, 0.14);
+  background: rgba(250, 247, 246, 0.9);
+}
+
+.subscreen-panel .form-actions {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.subscreen-panel .form-actions button {
+  min-height: 40px;
+  padding: 0.7rem 1.1rem;
+  border-radius: 10px;
+}
+
+.subscreen-panel .form-actions .ghost {
+  background: #ffffff;
+  color: #4d4042;
+  border: 1px solid rgba(93, 74, 79, 0.16);
 }
 
 .user-list-layout > .panel .panel-header {
