@@ -99,7 +99,7 @@ class _AuthShellState extends State<AuthShell> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-      _applyUser(loginResult.user);
+      _applyUser(loginResult.user, resetTab: true);
       authToken = loginResult.accessToken;
       refreshToken = loginResult.refreshToken;
       await _persistRememberedLogin();
@@ -231,10 +231,12 @@ class _AuthShellState extends State<AuthShell> {
     );
   }
 
-  void _applyUser(AppUser user) {
+  void _applyUser(AppUser user, {bool resetTab = false}) {
     setState(() {
       currentUser = user;
-      currentTab = 0;
+      if (resetTab) {
+        currentTab = 0;
+      }
     });
     _emailController.text = user.email;
     _nameController.text = user.name;
