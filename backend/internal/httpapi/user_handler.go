@@ -162,6 +162,26 @@ func (h *UserHandler) ToggleLike(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, summary)
 }
 
+func (h *UserHandler) AddPoints(w http.ResponseWriter, r *http.Request) {
+	var input domain.UserPointGrantInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	user, err := h.userService.AddPoints(r.Context(), r.PathValue("id"), input)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to grant points")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, user)
+}
+
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	h.login(w, r, false)
 }

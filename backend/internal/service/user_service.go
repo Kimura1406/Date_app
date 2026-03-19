@@ -25,6 +25,7 @@ type userRepository interface {
 	CreateUser(ctx context.Context, id string, input domain.CreateUserInput, passwordHash string) (domain.User, error)
 	UpdateUser(ctx context.Context, id string, input domain.UpdateUserInput, passwordHash *string) (domain.User, error)
 	UpdateLastLogin(ctx context.Context, id string, loggedInAt time.Time) error
+	AddPoints(ctx context.Context, id string, points int) (domain.User, error)
 	GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error)
 	ToggleLike(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error)
 	DeleteUser(ctx context.Context, id string) error
@@ -129,6 +130,25 @@ func (s *UserService) UpdateUser(ctx context.Context, id string, input domain.Up
 
 func (s *UserService) DeleteUser(ctx context.Context, id string) error {
 	return s.repo.DeleteUser(ctx, id)
+}
+
+func (s *UserService) AddPoints(ctx context.Context, id string, input domain.UserPointGrantInput) (domain.User, error) {
+	if strings.TrimSpace(id) == "" {
+		return domain.User{}, sql.ErrNoRows
+	}
+	if input.Points <= 0 {
+		return domain.User{}, fmt.Errorf("points must be greater than 0")
+	}
+
+	user, err := s.repo.GetUserByID(ctx, id)
+	if err != nil {
+		return domain.User{}, err
+	}
+	if user.Role != "user" {
+		return domain.User{}, fmt.Errorf("points can only be granted to users")
+	}
+
+	return s.repo.AddPoints(ctx, id, input.Points)
 }
 
 func (s *UserService) GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error) {

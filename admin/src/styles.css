@@ -334,6 +334,33 @@ button:disabled {
   background: rgba(250, 247, 246, 0.9);
 }
 
+.subscreen-panel .point-grant-panel {
+  margin-top: 4px;
+  margin-right: 8px;
+  padding: 16px;
+  border: 1px solid rgba(93, 74, 79, 0.14);
+  border-radius: 16px;
+  background: rgba(250, 247, 246, 0.9);
+}
+
+.subscreen-panel .point-grant-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.subscreen-panel .point-grant-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.subscreen-panel .point-grant-controls input {
+  max-width: 200px;
+}
+
 .subscreen-panel .form-actions {
   margin-top: 8px;
   padding: 16px 8px 0 0;

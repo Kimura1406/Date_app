@@ -40,6 +40,7 @@ func NewRouter(
 	mux.HandleFunc("POST /api/v1/admin/users", withAuth(tokenManager, requireRole("admin", userHandler.CreateUser)))
 	mux.HandleFunc("GET /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.GetUser)))
 	mux.HandleFunc("PUT /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.UpdateUser)))
+	mux.HandleFunc("POST /api/v1/admin/users/{id}/points", withAuth(tokenManager, requireRole("admin", userHandler.AddPoints)))
 	mux.HandleFunc("DELETE /api/v1/admin/users/{id}", withAuth(tokenManager, requireRole("admin", userHandler.DeleteUser)))
 	mux.HandleFunc("GET /api/v1/admin/flowers", withAuth(tokenManager, requireRole("admin", flowerHandler.ListFlowers)))
 	mux.HandleFunc("POST /api/v1/admin/flowers", withAuth(tokenManager, requireRole("admin", flowerHandler.CreateFlower)))

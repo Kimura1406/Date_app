@@ -98,6 +98,10 @@ type UserLikeSummary struct {
 	LikedByMe    bool   `json:"likedByMe"`
 }
 
+type UserPointGrantInput struct {
+	Points int `json:"points"`
+}
+
 type Flower struct {
 	ID             string `json:"id"`
 	Name           string `json:"name"`

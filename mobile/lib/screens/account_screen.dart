@@ -7,7 +7,7 @@ import '../localization/discovery_strings.dart';
 import '../widgets/language_selector_field.dart';
 import '../widgets/profile_field.dart';
 
-class AccountScreen extends StatelessWidget {
+class AccountScreen extends StatefulWidget {
   const AccountScreen({
     super.key,
     required this.currentUser,
@@ -47,8 +47,27 @@ class AccountScreen extends StatelessWidget {
   final Future<void> Function() onDelete;
   final Future<void> Function() onLogout;
 
+  @override
+  State<AccountScreen> createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends State<AccountScreen> {
+  bool _didRequestLatestPoints = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didRequestLatestPoints) return;
+    _didRequestLatestPoints = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await widget.onRefreshSession();
+    });
+  }
+
   int get _likeCount => 0;
   int get _giftCount => 0;
+  int get _pointCount => widget.currentUser.pointBalance;
 
   Future<void> _openLogoutConfirm(BuildContext context) async {
     final strings = context.strings;
@@ -73,7 +92,7 @@ class AccountScreen extends StatelessWidget {
     );
 
     if (confirmed == true) {
-      await onLogout();
+      await widget.onLogout();
     }
   }
 
@@ -129,8 +148,8 @@ class AccountScreen extends StatelessWidget {
                     radius: 36,
                     backgroundColor: const Color(0xFFF0D7D0),
                     child: Text(
-                      currentUser.name.isNotEmpty
-                          ? currentUser.name.substring(0, 1)
+                      widget.currentUser.name.isNotEmpty
+                          ? widget.currentUser.name.substring(0, 1)
                           : '?',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             color: const Color(0xFF4A2330),
@@ -144,7 +163,7 @@ class AccountScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          currentUser.name,
+                          widget.currentUser.name,
                           style:
                               Theme.of(context).textTheme.titleLarge?.copyWith(
                                     color: const Color(0xFF2F2323),
@@ -153,7 +172,7 @@ class AccountScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${strings.myPageBirthDateLabel}: ${currentUser.birthDate.isNotEmpty ? currentUser.birthDate : strings.notSetLabel}',
+                          '${strings.myPageBirthDateLabel}: ${widget.currentUser.birthDate.isNotEmpty ? widget.currentUser.birthDate : strings.notSetLabel}',
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: const Color(0xFF6D5A5A),
@@ -161,7 +180,7 @@ class AccountScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${strings.myPageGenderLabel}: ${currentUser.gender.isNotEmpty ? strings.genderName(currentUser.gender) : strings.notSetLabel}',
+                          '${strings.myPageGenderLabel}: ${widget.currentUser.gender.isNotEmpty ? strings.genderName(widget.currentUser.gender) : strings.notSetLabel}',
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: const Color(0xFF6D5A5A),
@@ -174,22 +193,40 @@ class AccountScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _MyPageStatCard(
-                    label: strings.likesCountLabel,
-                    value: _likeCount.toString(),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _MyPageStatCard(
-                    label: strings.giftsLabel,
-                    value: _giftCount.toString(),
-                  ),
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxWidth < 520;
+                final itemWidth = compact
+                    ? constraints.maxWidth
+                    : (constraints.maxWidth - 24) / 3;
+                return Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    SizedBox(
+                      width: itemWidth,
+                      child: _MyPageStatCard(
+                        label: strings.likesCountLabel,
+                        value: _likeCount.toString(),
+                      ),
+                    ),
+                    SizedBox(
+                      width: itemWidth,
+                      child: _MyPageStatCard(
+                        label: strings.giftsLabel,
+                        value: _giftCount.toString(),
+                      ),
+                    ),
+                    SizedBox(
+                      width: itemWidth,
+                      child: _MyPageStatCard(
+                        label: strings.myPagePoints,
+                        value: '${_pointCount}P',
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 18),
             Container(
@@ -212,21 +249,21 @@ class AccountScreen extends StatelessWidget {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => _MyAccountEditScreen(
-                            selectedLanguage: selectedLanguage,
-                            onLanguageChanged: onLanguageChanged,
-                            statusMessage: statusMessage,
-                            busy: busy,
-                            emailController: emailController,
-                            passwordController: passwordController,
-                            nameController: nameController,
-                            ageController: ageController,
-                            jobController: jobController,
-                            bioController: bioController,
-                            distanceController: distanceController,
-                            interestsController: interestsController,
-                            onRefreshSession: onRefreshSession,
-                            onUpdate: onUpdate,
-                            onDelete: onDelete,
+                            selectedLanguage: widget.selectedLanguage,
+                            onLanguageChanged: widget.onLanguageChanged,
+                            statusMessage: widget.statusMessage,
+                            busy: widget.busy,
+                            emailController: widget.emailController,
+                            passwordController: widget.passwordController,
+                            nameController: widget.nameController,
+                            ageController: widget.ageController,
+                            jobController: widget.jobController,
+                            bioController: widget.bioController,
+                            distanceController: widget.distanceController,
+                            interestsController: widget.interestsController,
+                            onRefreshSession: widget.onRefreshSession,
+                            onUpdate: widget.onUpdate,
+                            onDelete: widget.onDelete,
                           ),
                         ),
                       );
@@ -277,9 +314,9 @@ class AccountScreen extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (_) => _SettingsScreen(
                             title: strings.myPageSettings,
-                            selectedLanguage: selectedLanguage,
-                            onLanguageChanged: onLanguageChanged,
-                            onRefreshSession: onRefreshSession,
+                            selectedLanguage: widget.selectedLanguage,
+                            onLanguageChanged: widget.onLanguageChanged,
+                            onRefreshSession: widget.onRefreshSession,
                           ),
                         ),
                       );
@@ -294,7 +331,7 @@ class AccountScreen extends StatelessWidget {
                 ],
               ),
             ),
-            if (statusMessage.isNotEmpty) ...[
+            if (widget.statusMessage.isNotEmpty) ...[
               const SizedBox(height: 16),
               Container(
                 width: double.infinity,
@@ -304,7 +341,7 @@ class AccountScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  statusMessage,
+                  widget.statusMessage,
                   style: const TextStyle(color: Color(0xFF4A2330)),
                 ),
               ),

@@ -22,6 +22,7 @@ type User = {
   country: string;
   prefecture: string;
   datingReason: string;
+  pointBalance: number;
   createdAt: string;
   lastLoginAt: string;
   updatedAt: string;
@@ -273,6 +274,7 @@ function App() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loadingBanners, setLoadingBanners] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [grantingPoints, setGrantingPoints] = useState(false);
   const [savingFlower, setSavingFlower] = useState(false);
   const [savingBanner, setSavingBanner] = useState(false);
   const [message, setMessage] = useState<string>('');
@@ -310,6 +312,7 @@ function App() {
   const [chatDetailLoading, setChatDetailLoading] = useState(false);
   const [sendingChatMessage, setSendingChatMessage] = useState(false);
   const [chatMessageDraft, setChatMessageDraft] = useState('');
+  const [pointGrantValue, setPointGrantValue] = useState('0');
 
   function clearAdminSession(sessionMessage: string) {
     window.localStorage.removeItem(adminAuthStorageKey);
@@ -738,6 +741,7 @@ function App() {
       prefecture: user.prefecture,
       datingReason: user.datingReason,
     });
+    setPointGrantValue('0');
     setMessage('');
     setIsUserModalOpen(true);
   }
@@ -772,6 +776,7 @@ function App() {
   function resetForm() {
     setSelectedUserId(null);
     setForm(emptyForm);
+    setPointGrantValue('0');
   }
 
   function resetFlowerForm() {
@@ -912,6 +917,45 @@ function App() {
       await loadUsers();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to delete user');
+    }
+  }
+
+  async function handleGrantPoints() {
+    if (!authToken || !selectedUserId) return;
+
+    const amount = Number(pointGrantValue);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setMessage('Points must be greater than 0.');
+      return;
+    }
+
+    setGrantingPoints(true);
+    setMessage('');
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/admin/users/${selectedUserId}/points`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ points: amount }),
+      });
+      const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to grant points');
+      }
+
+      setUsers((current) => current.map((user) => (user.id === data.id ? (data as User) : user)));
+      setPointGrantValue('0');
+      setMessage('Points granted successfully.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to grant points');
+    } finally {
+      setGrantingPoints(false);
     }
   }
 
@@ -1612,6 +1656,27 @@ function App() {
                       />
                       <small className="field-note">{form.datingReason.length}/100</small>
                     </label>
+                    {selectedUserId ? (
+                      <div className="full-span point-grant-panel">
+                        <div className="point-grant-header">
+                          <strong>{'\u30dd\u30a4\u30f3\u30c8\u4ed8\u4e0e'}</strong>
+                          <span className="muted">
+                            Current: {users.find((user) => user.id === selectedUserId)?.pointBalance ?? 0}P
+                          </span>
+                        </div>
+                        <div className="point-grant-controls">
+                          <input
+                            min={1}
+                            onChange={(event) => setPointGrantValue(event.target.value)}
+                            type="number"
+                            value={pointGrantValue}
+                          />
+                          <button disabled={grantingPoints} onClick={() => void handleGrantPoints()} type="button">
+                            {grantingPoints ? 'Submitting...' : 'Submit'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
                     <div className="form-actions full-span">
                       <button className="ghost" onClick={closeUserModal} type="button">
                         Cancel

@@ -197,6 +197,28 @@ func (r *UserRepository) UpdateLastLogin(ctx context.Context, id string, loggedI
 	return nil
 }
 
+func (r *UserRepository) AddPoints(ctx context.Context, id string, points int) (domain.User, error) {
+	result, err := r.db.ExecContext(ctx, `
+		UPDATE users
+		SET point_balance = point_balance + $2,
+			updated_at = NOW()
+		WHERE id = $1
+	`, id, points)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("add user points: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return domain.User{}, fmt.Errorf("user point update result: %w", err)
+	}
+	if rowsAffected == 0 {
+		return domain.User{}, sql.ErrNoRows
+	}
+
+	return r.GetUserByID(ctx, id)
+}
+
 func (r *UserRepository) GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error) {
 	var summary domain.UserLikeSummary
 	summary.TargetUserID = targetUserID

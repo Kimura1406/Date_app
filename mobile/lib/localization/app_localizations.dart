@@ -979,6 +979,25 @@ class AppStrings {
     }
   }
 
+  String get myPagePoints {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Điểm của tôi';
+      case AppLanguage.japanese:
+        return 'マイポイント';
+      case AppLanguage.korean:
+        return '내 포인트';
+      case AppLanguage.russian:
+        return 'Мои поинты';
+      case AppLanguage.chinese:
+        return '我的积分';
+      case AppLanguage.english:
+        return 'My Points';
+      case AppLanguage.thai:
+        return 'พอยต์ของฉัน';
+    }
+  }
+
   String get flowerShopTitle {
     switch (language) {
       case AppLanguage.vietnamese:
