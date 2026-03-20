@@ -167,7 +167,16 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2F2323),
+        foregroundColor: Colors.white,
+        flexibleSpace: const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF5CA4F2), Color(0xFF4D8DDA)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         titleSpacing: 0,
         title: FutureBuilder<ChatRoomDetail>(
           future: _detailFuture,
@@ -179,12 +188,12 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: const Color(0xFFF3D6DF),
+                  backgroundColor: Colors.white.withValues(alpha: 0.22),
                   child: Icon(
                     widget.initialRoom.roomType == 'admin'
                         ? Icons.support_agent_rounded
                         : Icons.person_rounded,
-                    color: const Color(0xFF4A2330),
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -195,13 +204,13 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                       widget.roomDisplayName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF2F2323),
+                            color: Colors.white,
                           ),
                     ),
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF6D5A5A),
+                            color: Colors.white70,
                           ),
                     ),
                   ],
@@ -236,11 +245,25 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
           return Column(
             children: [
               Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _refreshDetail,
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.98),
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF5CA4F2).withValues(alpha: 0.08),
+                          blurRadius: 20,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: RefreshIndicator(
+                      onRefresh: _refreshDetail,
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                     itemCount: detail.messages.length,
                     itemBuilder: (context, index) {
                       final message = detail.messages[index];
@@ -256,14 +279,21 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color:
-                                isMe ? const Color(0xFFF0D7D0) : Colors.white,
+                            color: isMe
+                                ? const Color(0xFFEAF5FF)
+                                : const Color(0xFFF8FBFF),
                             borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isMe
+                                  ? const Color(0xFFCFE6FF)
+                                  : const Color(0xFFE5EEF8),
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 14,
-                                offset: const Offset(0, 8),
+                                color: const Color(0xFF5CA4F2)
+                                    .withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 6),
                               ),
                             ],
                           ),
@@ -276,7 +306,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                                     .textTheme
                                     .bodyMedium
                                     ?.copyWith(
-                                      color: const Color(0xFF4A2330),
+                                      color: const Color(0xFF1F2A37),
                                       height: 1.45,
                                     ),
                               ),
@@ -287,7 +317,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: const Color(0xFF7A6770),
+                                      color: const Color(0xFF7C8AA5),
                                     ),
                               ),
                             ],
@@ -295,6 +325,8 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                         ),
                       );
                     },
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -302,46 +334,62 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                 top: false,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _messageController,
-                          style: const TextStyle(
-                            color: Color(0xFF20181B),
-                          ),
-                          cursorColor: const Color(0xFF9E4E5D),
-                          textInputAction: TextInputAction.send,
-                          onSubmitted: (_) => _sendMessage(),
-                          decoration: InputDecoration(
-                            hintText: strings.chatInputPlaceholder,
-                            filled: true,
-                            fillColor: Colors.white.withValues(alpha: 0.95),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.98),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF5CA4F2).withValues(alpha: 0.08),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _messageController,
+                            style: const TextStyle(
+                              color: Color(0xFF1F2A37),
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(999),
-                              borderSide: BorderSide.none,
+                            cursorColor: const Color(0xFF4F8DDC),
+                            textInputAction: TextInputAction.send,
+                            onSubmitted: (_) => _sendMessage(),
+                            decoration: InputDecoration(
+                              hintText: strings.chatInputPlaceholder,
+                              filled: true,
+                              fillColor: const Color(0xFFF6FAFF),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(999),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      FilledButton(
-                        onPressed: _sending ? null : _sendMessage,
-                        style: FilledButton.styleFrom(
-                          shape: const CircleBorder(),
-                          padding: const EdgeInsets.all(16),
-                          backgroundColor: const Color(0xFFF0D7D0),
+                        const SizedBox(width: 12),
+                        FilledButton(
+                          onPressed: _sending ? null : _sendMessage,
+                          style: FilledButton.styleFrom(
+                            shape: const CircleBorder(),
+                            padding: const EdgeInsets.all(16),
+                            backgroundColor: const Color(0xFF5CA4F2),
+                          ),
+                          child: Icon(
+                            _sending
+                                ? Icons.hourglass_top_rounded
+                                : Icons.send_rounded,
+                            color: Colors.white,
+                          ),
                         ),
-                        child: Icon(
-                          _sending ? Icons.hourglass_top_rounded : Icons.send_rounded,
-                          color: const Color(0xFF4A2330),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

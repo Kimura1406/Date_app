@@ -470,19 +470,16 @@ class _MyAccountEditScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2F2323),
+        foregroundColor: Colors.white,
         elevation: 0,
+        flexibleSpace: const _SubScreenGradientHeader(),
         title: Text(strings.myPageProfileEdit),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-          child: Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.94),
-              borderRadius: BorderRadius.circular(28),
-            ),
+          child: _SubScreenCard(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -552,12 +549,16 @@ class _MyAccountEditScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFF0E9),
+                      color: const Color(0xFFEAF5FF),
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFCFE6FF)),
                     ),
                     child: Text(
                       statusMessage,
-                      style: const TextStyle(color: Color(0xFF4A2330)),
+                      style: const TextStyle(
+                        color: Color(0xFF4F8DDC),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -591,19 +592,16 @@ class _SettingsScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2F2323),
+        foregroundColor: Colors.white,
         elevation: 0,
+        flexibleSpace: const _SubScreenGradientHeader(),
         title: Text(title),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-          child: Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.94),
-              borderRadius: BorderRadius.circular(28),
-            ),
+          child: _SubScreenCard(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -641,17 +639,23 @@ class _BlockListScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2F2323),
+        foregroundColor: Colors.white,
         elevation: 0,
+        flexibleSpace: const _SubScreenGradientHeader(),
         title: Text(title),
       ),
       body: SafeArea(
-        child: Center(
-          child: Text(
-            strings.myPageEmptyPlaceholder,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: const Color(0xFF6D5A5A),
-                ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: _SubScreenCard(
+            child: Center(
+              child: Text(
+                strings.myPageEmptyPlaceholder,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: const Color(0xFF7C8AA5),
+                    ),
+              ),
+            ),
           ),
         ),
       ),
@@ -674,17 +678,24 @@ class _SimplePlaceholderScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2F2323),
+        foregroundColor: Colors.white,
         elevation: 0,
+        flexibleSpace: const _SubScreenGradientHeader(),
         title: Text(title),
       ),
       body: SafeArea(
-        child: Center(
-          child: Text(
-            description,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: const Color(0xFF6D5A5A),
-                ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: _SubScreenCard(
+            child: Center(
+              child: Text(
+                description,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: const Color(0xFF7C8AA5),
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
         ),
       ),
@@ -843,13 +854,14 @@ class _MyFlowersScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          foregroundColor: const Color(0xFF2F2323),
+          foregroundColor: Colors.white,
           elevation: 0,
+          flexibleSpace: const _SubScreenGradientHeader(),
           title: Text(strings.myFlowersTitle),
           bottom: TabBar(
-            labelColor: const Color(0xFF6D4751),
-            unselectedLabelColor: const Color(0xFF8A797B),
-            indicatorColor: const Color(0xFFB86A76),
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            indicatorColor: Colors.white,
             tabs: [
               Tab(text: strings.purchasedFlowersTab),
               Tab(text: strings.giftedFlowersTab),
@@ -864,13 +876,18 @@ class _MyFlowersScreen extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    snapshot.error.toString().replaceFirst('Exception: ', ''),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFF6D5A5A),
-                        ),
-                    textAlign: TextAlign.center,
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                  child: _SubScreenCard(
+                    child: Center(
+                      child: Text(
+                        snapshot.error.toString().replaceFirst('Exception: ', ''),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: const Color(0xFF7C8AA5),
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
                 );
               }
@@ -1005,27 +1022,24 @@ class _PointGuideScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2F2323),
+        foregroundColor: Colors.white,
         elevation: 0,
+        flexibleSpace: const _SubScreenGradientHeader(),
         title: Text(strings.pointGuideTitle),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-          child: Container(
+          child: _SubScreenCard(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.94),
-              borderRadius: BorderRadius.circular(28),
-            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   strings.pointGuideDescription,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: const Color(0xFF4D3B3D),
+                        color: const Color(0xFF4F6380),
                         height: 1.5,
                       ),
                 ),
@@ -1130,6 +1144,55 @@ class _FlowerImage extends StatelessWidget {
     } catch (_) {
       return null;
     }
+  }
+}
+
+class _SubScreenGradientHeader extends StatelessWidget {
+  const _SubScreenGradientHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF5CA4F2), Color(0xFF4D8DDA)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+    );
+  }
+}
+
+class _SubScreenCard extends StatelessWidget {
+  const _SubScreenCard({
+    required this.child,
+    this.padding,
+    this.width,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final double? width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.98),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF5CA4F2).withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: child,
+    );
   }
 }
 
