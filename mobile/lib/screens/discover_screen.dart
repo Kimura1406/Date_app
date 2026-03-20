@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -31,9 +32,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   late Future<List<DatingProfile>> profilesFuture;
   late Future<List<DiscoverBannerItem>> bannersFuture;
   late final PageController _bannerController;
+  Timer? _bannerAutoSlideTimer;
 
   bool filtersExpanded = false;
   int currentBanner = 0;
+  int _bannerCount = 0;
   String? selectedCountry;
   String? selectedJob;
   String? selectedGender;
@@ -46,14 +49,45 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     super.initState();
     _bannerController = PageController(viewportFraction: 0.9);
     profilesFuture = _loadProfiles();
-    bannersFuture = _loadBanners();
+    bannersFuture = _loadBanners().then((banners) {
+      _configureBannerAutoSlide(banners.length);
+      return banners;
+    });
   }
 
   @override
   void dispose() {
+    _bannerAutoSlideTimer?.cancel();
     _bannerController.dispose();
     _locationController.dispose();
     super.dispose();
+  }
+
+  void _configureBannerAutoSlide(int bannerCount) {
+    _bannerAutoSlideTimer?.cancel();
+    _bannerCount = bannerCount;
+
+    if (bannerCount <= 1) {
+      if (mounted && currentBanner != 0) {
+        setState(() {
+          currentBanner = 0;
+        });
+      }
+      return;
+    }
+
+    _bannerAutoSlideTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted || !_bannerController.hasClients || _bannerCount <= 1) {
+        return;
+      }
+
+      final nextBanner = (currentBanner + 1) % _bannerCount;
+      _bannerController.animateToPage(
+        nextBanner,
+        duration: const Duration(milliseconds: 380),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   Future<List<DatingProfile>> _loadProfiles() {
