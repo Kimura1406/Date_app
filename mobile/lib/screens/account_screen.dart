@@ -123,27 +123,13 @@ class AccountScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          strings.myPageTitle,
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                      LanguageSelectorField(
-                        label: '',
-                        language: selectedLanguage,
-                        onChanged: onLanguageChanged,
-                        compact: true,
-                      ),
-                    ],
+                  Text(
+                    strings.myPageTitle,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 0.4,
+                    ),
                   ),
                 ],
               ),
@@ -222,6 +208,8 @@ class AccountScreen extends StatelessWidget {
                   _MyPageStatsSection(
                     authToken: authToken,
                     pointBalance: currentUser.pointBalance,
+                    selectedLanguage: selectedLanguage,
+                    onLanguageChanged: onLanguageChanged,
                   ),
                   const SizedBox(height: 18),
                   Container(
@@ -361,10 +349,14 @@ class _MyPageStatsSection extends StatefulWidget {
   const _MyPageStatsSection({
     required this.authToken,
     required this.pointBalance,
+    required this.selectedLanguage,
+    required this.onLanguageChanged,
   });
 
   final String authToken;
   final int pointBalance;
+  final AppLanguage selectedLanguage;
+  final ValueChanged<AppLanguage> onLanguageChanged;
 
   @override
   State<_MyPageStatsSection> createState() => _MyPageStatsSectionState();
@@ -440,6 +432,14 @@ class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
                 label: strings.myPagePoints,
                 value: '${widget.pointBalance}P',
                 onTap: () => _openPointGuide(context),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _MyPageLanguageCard(
+                label: strings.changeLanguage,
+                selectedLanguage: widget.selectedLanguage,
+                onLanguageChanged: widget.onLanguageChanged,
               ),
             ),
           ],
@@ -623,12 +623,6 @@ class _SettingsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                LanguageSelectorField(
-                  label: strings.changeLanguage,
-                  language: selectedLanguage,
-                  onChanged: onLanguageChanged,
-                ),
-                const SizedBox(height: 12),
                 FilledButton.tonal(
                   onPressed: () async => onRefreshSession(),
                   child: Text(strings.refreshToken),
@@ -860,6 +854,55 @@ class _MyPageStatCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _MyPageLanguageCard extends StatelessWidget {
+  const _MyPageLanguageCard({
+    required this.label,
+    required this.selectedLanguage,
+    required this.onLanguageChanged,
+  });
+
+  final String label;
+  final AppLanguage selectedLanguage;
+  final ValueChanged<AppLanguage> onLanguageChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.98),
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF5CA4F2).withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF7C8AA5),
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 10),
+          LanguageSelectorField(
+            label: '',
+            language: selectedLanguage,
+            onChanged: onLanguageChanged,
+            compact: true,
+          ),
+        ],
       ),
     );
   }
