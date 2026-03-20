@@ -163,6 +163,14 @@ class _ProfileHeader extends StatelessWidget {
                 ),
               ),
               Positioned(
+                top: 14,
+                right: 14,
+                child: _ProfileActionMenu(
+                  authToken: authToken,
+                  profile: profile,
+                ),
+              ),
+              Positioned(
                 left: 18,
                 right: 18,
                 bottom: 18,
@@ -337,6 +345,158 @@ class _ChatHeaderButton extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileActionMenu extends StatelessWidget {
+  const _ProfileActionMenu({
+    required this.authToken,
+    required this.profile,
+  });
+
+  final String authToken;
+  final DatingProfile profile;
+
+  Future<void> _openReportDialog(BuildContext context) async {
+    final controller = TextEditingController();
+    String? errorText;
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('${profile.name}を通報する'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '理由',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: controller,
+                    maxLength: 100,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      hintText: '理由を入力してください',
+                      errorText: errorText,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('キャンセル'),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    final reason = controller.text.trim();
+                    if (reason.isEmpty) {
+                      setDialogState(() {
+                        errorText = '通報理由を入力してください';
+                      });
+                      return;
+                    }
+                    await ApiClient().reportUser(
+                      token: authToken,
+                      userId: profile.id,
+                      reason: reason,
+                    );
+                    if (!dialogContext.mounted) return;
+                    Navigator.of(dialogContext).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('通報しました')),
+                    );
+                  },
+                  child: const Text('通報する'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _openBlockConfirm(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text('${profile.name}をブロック'),
+          content: Text('${profile.name}をブロックしてもよろしいですか'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('キャンセル'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('はい'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    await ApiClient().blockUser(
+      token: authToken,
+      userId: profile.id,
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${profile.name}をブロックしました')),
+    );
+    Navigator.of(context).maybePop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      onSelected: (value) async {
+        try {
+          if (value == 'block') {
+            await _openBlockConfirm(context);
+          } else if (value == 'report') {
+            await _openReportDialog(context);
+          }
+        } catch (error) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error.toString().replaceFirst('Exception: ', '')),
+            ),
+          );
+        }
+      },
+      itemBuilder: (_) => const [
+        PopupMenuItem<String>(
+          value: 'block',
+          child: Text('ブロック'),
+        ),
+        PopupMenuItem<String>(
+          value: 'report',
+          child: Text('通報'),
+        ),
+      ],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Colors.white.withValues(alpha: 0.96),
+      icon: const Icon(Icons.more_horiz_rounded),
+      style: IconButton.styleFrom(
+        backgroundColor: Colors.white.withValues(alpha: 0.9),
+        foregroundColor: const Color(0xFF4A2330),
       ),
     );
   }

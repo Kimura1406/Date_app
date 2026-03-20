@@ -336,6 +336,70 @@ func (r *UserRepository) ListUsersWhoLiked(ctx context.Context, targetUserID str
 	return items, nil
 }
 
+func (r *UserRepository) BlockUser(ctx context.Context, blockedUserID, blockerUserID string) error {
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO user_blocks (blocked_user_id, blocker_user_id)
+		VALUES ($1, $2)
+		ON CONFLICT (blocked_user_id, blocker_user_id) DO NOTHING
+	`, blockedUserID, blockerUserID)
+	if err != nil {
+		return fmt.Errorf("insert user block: %w", err)
+	}
+
+	return nil
+}
+
+func (r *UserRepository) ListBlockedUsers(ctx context.Context, blockerUserID string) ([]domain.BlockedUser, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT u.id, u.name, u.birth_date, u.country, ub.created_at
+		FROM user_blocks ub
+		INNER JOIN users u ON u.id = ub.blocked_user_id
+		WHERE ub.blocker_user_id = $1
+		ORDER BY ub.created_at DESC, u.id DESC
+	`, blockerUserID)
+	if err != nil {
+		return nil, fmt.Errorf("query blocked users: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]domain.BlockedUser, 0)
+	for rows.Next() {
+		var item domain.BlockedUser
+		var birthDate time.Time
+		var blockedAt time.Time
+		if err := rows.Scan(
+			&item.ID,
+			&item.Name,
+			&birthDate,
+			&item.Country,
+			&blockedAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan blocked user: %w", err)
+		}
+		item.BirthDate = birthDate.Format("2006-01-02")
+		item.BlockedAt = blockedAt.Format(time.RFC3339)
+		items = append(items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate blocked users: %w", err)
+	}
+
+	return items, nil
+}
+
+func (r *UserRepository) ReportUser(ctx context.Context, reportedUserID, reporterUserID, reason string) error {
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO user_reports (reported_user_id, reporter_user_id, reason)
+		VALUES ($1, $2, $3)
+	`, reportedUserID, reporterUserID, reason)
+	if err != nil {
+		return fmt.Errorf("insert user report: %w", err)
+	}
+
+	return nil
+}
+
 type userScanner interface {
 	Scan(dest ...any) error
 }

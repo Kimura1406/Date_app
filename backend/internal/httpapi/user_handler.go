@@ -182,6 +182,70 @@ func (h *UserHandler) ListUsersWhoLikedMe(w http.ResponseWriter, r *http.Request
 	writeJSON(w, http.StatusOK, map[string]any{"items": items})
 }
 
+func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	if err := h.userService.BlockUser(r.Context(), r.PathValue("id"), claims.Subject); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to block user")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"blocked": true})
+}
+
+func (h *UserHandler) ListBlockedUsers(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	items, err := h.userService.ListBlockedUsers(r.Context(), claims.Subject)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to load blocked users")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
+func (h *UserHandler) ReportUser(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	var input domain.UserReportInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if err := h.userService.ReportUser(r.Context(), r.PathValue("id"), claims.Subject, input); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to report user")
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, map[string]any{"reported": true})
+}
+
 func (h *UserHandler) AddPoints(w http.ResponseWriter, r *http.Request) {
 	var input domain.UserPointGrantInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {

@@ -136,6 +136,55 @@ class ApiClient {
         .toList();
   }
 
+  Future<List<BlockedUserItem>> fetchBlockedUsers({
+    required String token,
+  }) async {
+    final response = await _client.get(
+      Uri.parse('$apiBaseUrl/api/v1/me/blocked-users'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Load blocked users failed'));
+    }
+
+    final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+    final items = jsonMap['items'] as List<dynamic>? ?? [];
+    return items
+        .map((item) => BlockedUserItem.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> blockUser({
+    required String token,
+    required String userId,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$apiBaseUrl/api/v1/users/$userId/block'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Block user failed'));
+    }
+  }
+
+  Future<void> reportUser({
+    required String token,
+    required String userId,
+    required String reason,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$apiBaseUrl/api/v1/users/$userId/report'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'reason': reason.trim()}),
+    );
+    if (response.statusCode != 201) {
+      throw Exception(_extractError(response.body, 'Report user failed'));
+    }
+  }
+
   Future<MyFlowersResponse> fetchMyFlowers({
     required String token,
   }) async {

@@ -262,6 +262,32 @@ class UserLikerItem {
   }
 }
 
+class BlockedUserItem {
+  BlockedUserItem({
+    required this.id,
+    required this.name,
+    required this.birthDate,
+    required this.country,
+    required this.blockedAt,
+  });
+
+  final String id;
+  final String name;
+  final String birthDate;
+  final String country;
+  final String blockedAt;
+
+  factory BlockedUserItem.fromJson(Map<String, dynamic> json) {
+    return BlockedUserItem(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      birthDate: json['birthDate'] as String? ?? '',
+      country: json['country'] as String? ?? '',
+      blockedAt: json['blockedAt'] as String? ?? '',
+    );
+  }
+}
+
 class OwnedFlowerItem {
   OwnedFlowerItem({
     required this.flower,

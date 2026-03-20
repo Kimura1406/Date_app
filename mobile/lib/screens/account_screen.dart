@@ -258,11 +258,12 @@ class AccountScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => _BlockListScreen(
-                            title: strings.myPageBlockList,
-                          ),
-                        ),
-                      );
+                                builder: (_) => _BlockListScreen(
+                                  title: strings.myPageBlockList,
+                                  token: authToken,
+                                ),
+                              ),
+                            );
                     },
                   ),
                   _MyPageDivider(),
@@ -627,9 +628,11 @@ class _SettingsScreen extends StatelessWidget {
 class _BlockListScreen extends StatelessWidget {
   const _BlockListScreen({
     required this.title,
+    required this.token,
   });
 
   final String title;
+  final String token;
 
   @override
   Widget build(BuildContext context) {
@@ -645,18 +648,96 @@ class _BlockListScreen extends StatelessWidget {
         title: Text(title),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-          child: _SubScreenCard(
-            child: Center(
-              child: Text(
-                strings.myPageEmptyPlaceholder,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: const Color(0xFF7C8AA5),
+        child: FutureBuilder<List<BlockedUserItem>>(
+          future: ApiClient().fetchBlockedUsers(token: token),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: _SubScreenCard(
+                  child: Center(
+                    child: Text(
+                      snapshot.error.toString().replaceFirst('Exception: ', ''),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: const Color(0xFF7C8AA5),
+                          ),
+                      textAlign: TextAlign.center,
                     ),
-              ),
-            ),
-          ),
+                  ),
+                ),
+              );
+            }
+
+            final items = snapshot.data ?? const <BlockedUserItem>[];
+            if (items.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: _SubScreenCard(
+                  child: Center(
+                    child: Text(
+                      strings.myPageEmptyPlaceholder,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: const Color(0xFF7C8AA5),
+                          ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return ListView.separated(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return _SubScreenCard(
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: const Color(0xFFE8F3FF),
+                        child: Text(
+                          item.name.isNotEmpty ? item.name[0] : '?',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: const Color(0xFF4F8DDC),
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: const Color(0xFF1F2A37),
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${item.birthDate} · ${item.country}',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: const Color(0xFF7C8AA5),
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
         ),
       ),
     );

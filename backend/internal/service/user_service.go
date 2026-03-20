@@ -29,6 +29,9 @@ type userRepository interface {
 	GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error)
 	ToggleLike(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error)
 	ListUsersWhoLiked(ctx context.Context, targetUserID string) ([]domain.UserLiker, error)
+	BlockUser(ctx context.Context, blockedUserID, blockerUserID string) error
+	ListBlockedUsers(ctx context.Context, blockerUserID string) ([]domain.BlockedUser, error)
+	ReportUser(ctx context.Context, reportedUserID, reporterUserID, reason string) error
 	DeleteUser(ctx context.Context, id string) error
 }
 
@@ -206,6 +209,83 @@ func (s *UserService) ListUsersWhoLiked(ctx context.Context, targetUserID string
 	}
 
 	return s.repo.ListUsersWhoLiked(ctx, targetUserID)
+}
+
+func (s *UserService) BlockUser(ctx context.Context, blockedUserID, blockerUserID string) error {
+	blockedUserID = strings.TrimSpace(blockedUserID)
+	blockerUserID = strings.TrimSpace(blockerUserID)
+	if blockedUserID == "" {
+		return fmt.Errorf("blocked user id is required")
+	}
+	if blockerUserID == "" {
+		return fmt.Errorf("blocker user id is required")
+	}
+	if blockedUserID == blockerUserID {
+		return fmt.Errorf("cannot block yourself")
+	}
+
+	blockedUser, err := s.repo.GetUserByID(ctx, blockedUserID)
+	if err != nil {
+		return err
+	}
+	if blockedUser.Role != "user" {
+		return fmt.Errorf("only users can be blocked")
+	}
+
+	if _, err := s.repo.GetUserByID(ctx, blockerUserID); err != nil {
+		return err
+	}
+
+	return s.repo.BlockUser(ctx, blockedUserID, blockerUserID)
+}
+
+func (s *UserService) ListBlockedUsers(ctx context.Context, blockerUserID string) ([]domain.BlockedUser, error) {
+	blockerUserID = strings.TrimSpace(blockerUserID)
+	if blockerUserID == "" {
+		return nil, fmt.Errorf("blocker user id is required")
+	}
+
+	if _, err := s.repo.GetUserByID(ctx, blockerUserID); err != nil {
+		return nil, err
+	}
+
+	return s.repo.ListBlockedUsers(ctx, blockerUserID)
+}
+
+func (s *UserService) ReportUser(ctx context.Context, reportedUserID, reporterUserID string, input domain.UserReportInput) error {
+	reportedUserID = strings.TrimSpace(reportedUserID)
+	reporterUserID = strings.TrimSpace(reporterUserID)
+	reason := strings.TrimSpace(input.Reason)
+
+	if reportedUserID == "" {
+		return fmt.Errorf("reported user id is required")
+	}
+	if reporterUserID == "" {
+		return fmt.Errorf("reporter user id is required")
+	}
+	if reportedUserID == reporterUserID {
+		return fmt.Errorf("cannot report yourself")
+	}
+	if reason == "" {
+		return fmt.Errorf("report reason is required")
+	}
+	if len([]rune(reason)) > 100 {
+		return fmt.Errorf("report reason must be 100 characters or fewer")
+	}
+
+	reportedUser, err := s.repo.GetUserByID(ctx, reportedUserID)
+	if err != nil {
+		return err
+	}
+	if reportedUser.Role != "user" {
+		return fmt.Errorf("only users can be reported")
+	}
+
+	if _, err := s.repo.GetUserByID(ctx, reporterUserID); err != nil {
+		return err
+	}
+
+	return s.repo.ReportUser(ctx, reportedUserID, reporterUserID, reason)
 }
 
 func (s *UserService) Login(ctx context.Context, input domain.LoginInput) (domain.AuthResponse, error) {

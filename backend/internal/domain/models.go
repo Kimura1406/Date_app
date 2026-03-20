@@ -106,6 +106,18 @@ type UserLiker struct {
 	LikedAt   string `json:"likedAt"`
 }
 
+type BlockedUser struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	BirthDate string `json:"birthDate"`
+	Country   string `json:"country"`
+	BlockedAt string `json:"blockedAt"`
+}
+
+type UserReportInput struct {
+	Reason string `json:"reason"`
+}
+
 type UserPointGrantInput struct {
 	Points int `json:"points"`
 }
