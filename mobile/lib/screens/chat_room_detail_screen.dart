@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../data/api_client.dart';
 import '../data/models.dart';
 import '../localization/app_localizations.dart';
-import '../widgets/app_scene_background.dart';
 import '../widgets/error_state.dart';
 
 class ChatRoomDetailScreen extends StatefulWidget {
@@ -163,65 +162,8 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
     final strings = context.strings;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        flexibleSpace: const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF5CA4F2), Color(0xFF4D8DDA)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-        titleSpacing: 0,
-        title: FutureBuilder<ChatRoomDetail>(
-          future: _detailFuture,
-          builder: (context, snapshot) {
-            final subtitle = snapshot.hasData
-                ? _subtitle(snapshot.data!, strings)
-                : strings.operatorRoomSubtitle;
-            return Row(
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.white.withValues(alpha: 0.22),
-                  child: Icon(
-                    widget.initialRoom.roomType == 'admin'
-                        ? Icons.support_agent_rounded
-                        : Icons.person_rounded,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.roomDisplayName,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                    ),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white70,
-                          ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-      body: AppSceneBackground(
-        child: FutureBuilder<ChatRoomDetail>(
+      backgroundColor: const Color(0xFFF6FAFF),
+      body: FutureBuilder<ChatRoomDetail>(
           future: _detailFuture,
           builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
@@ -241,12 +183,80 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
 
           final detail = snapshot.data!;
           _cachedDetail = detail;
+          final subtitle = _subtitle(detail, strings);
 
           return Column(
             children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF5CA4F2), Color(0xFF4D8DDA)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(28),
+                    bottomRight: Radius.circular(28),
+                  ),
+                ),
+                child: SafeArea(
+                  bottom: false,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.of(context).maybePop(),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white.withValues(alpha: 0.20),
+                          foregroundColor: Colors.white,
+                        ),
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                      const SizedBox(width: 10),
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.white.withValues(alpha: 0.22),
+                        child: Icon(
+                          widget.initialRoom.roomType == 'admin'
+                              ? Icons.support_agent_rounded
+                              : Icons.person_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.roomDisplayName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                  ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              subtitle,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Colors.white70,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.98),
@@ -264,67 +274,78 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                       child: ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                    itemCount: detail.messages.length,
-                    itemBuilder: (context, index) {
-                      final message = detail.messages[index];
-                      final isMe = message.senderId == widget.currentUser.id;
-                      return Align(
-                        alignment:
-                            isMe ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Container(
-                          constraints: const BoxConstraints(maxWidth: 280),
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isMe
-                                ? const Color(0xFFEAF5FF)
-                                : const Color(0xFFF8FBFF),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isMe
-                                  ? const Color(0xFFCFE6FF)
-                                  : const Color(0xFFE5EEF8),
+                        itemCount: detail.messages.length,
+                        itemBuilder: (context, index) {
+                          final message = detail.messages[index];
+                          final isMe = message.senderId == widget.currentUser.id;
+                          return Align(
+                            alignment: isMe
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.68,
+                              ),
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isMe
+                                      ? const Color(0xFFEAF5FF)
+                                      : const Color(0xFFF8FBFF),
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: const Radius.circular(22),
+                                    topRight: const Radius.circular(22),
+                                    bottomLeft: Radius.circular(isMe ? 22 : 8),
+                                    bottomRight: Radius.circular(isMe ? 8 : 22),
+                                  ),
+                                  border: Border.all(
+                                    color: isMe
+                                        ? const Color(0xFFCFE6FF)
+                                        : const Color(0xFFE5EEF8),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF5CA4F2)
+                                          .withValues(alpha: 0.05),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      message.body,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: const Color(0xFF1F2A37),
+                                            height: 1.45,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _formatTime(message.sentAt),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: const Color(0xFF7C8AA5),
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF5CA4F2)
-                                    .withValues(alpha: 0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                message.body,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: const Color(0xFF1F2A37),
-                                      height: 1.45,
-                                    ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _formatTime(message.sentAt),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: const Color(0xFF7C8AA5),
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -396,7 +417,6 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
             ],
           );
         },
-        ),
       ),
     );
   }
