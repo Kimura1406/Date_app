@@ -821,6 +821,7 @@ class _MyPageStatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         onTap: onTap,
         child: Container(
+          constraints: const BoxConstraints(minHeight: 104),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(26),
@@ -870,6 +871,7 @@ class _MyPageLanguageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: const BoxConstraints(minHeight: 104),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.98),
@@ -883,14 +885,17 @@ class _MyPageLanguageCard extends StatelessWidget {
         ],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: 2),
           LanguageSelectorField(
             label: '',
             language: selectedLanguage,
             onChanged: onLanguageChanged,
             compact: true,
           ),
+          const SizedBox(height: 2),
         ],
       ),
     );
