@@ -922,19 +922,31 @@ class _MyFlowerListView extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       item.flower.description,
-                      maxLines: 2,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: const Color(0xFF6D5A5A),
+                            height: 1.4,
                           ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      '${item.ownedCount} • ${item.flower.pricePoints}P',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: const Color(0xFFB86A76),
-                            fontWeight: FontWeight.w800,
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8E7E1),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        context.strings.ownedFlowerCountLabel(item.ownedCount),
+                        style:
+                            Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  color: const Color(0xFFB86A76),
+                                  fontWeight: FontWeight.w800,
+                                ),
+                      ),
                     ),
                   ],
                 ),

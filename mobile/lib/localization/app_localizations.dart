@@ -1131,6 +1131,25 @@ class AppStrings {
     }
   }
 
+  String ownedFlowerCountLabel(int count) {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Số lượng sở hữu: $count';
+      case AppLanguage.japanese:
+        return '所持数: $count';
+      case AppLanguage.korean:
+        return '보유 수량: $count';
+      case AppLanguage.russian:
+        return 'Количество: $count';
+      case AppLanguage.chinese:
+        return '持有数量: $count';
+      case AppLanguage.english:
+        return 'Owned: $count';
+      case AppLanguage.thai:
+        return 'จำนวนที่ถือครอง: $count';
+    }
+  }
+
   String get pointGuideTitle {
     switch (language) {
       case AppLanguage.vietnamese:
