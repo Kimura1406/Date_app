@@ -32,6 +32,7 @@ type userRepository interface {
 	BlockUser(ctx context.Context, blockedUserID, blockerUserID string) error
 	ListBlockedUsers(ctx context.Context, blockerUserID string) ([]domain.BlockedUser, error)
 	ReportUser(ctx context.Context, reportedUserID, reporterUserID, reason string) error
+	ListReportedUsers(ctx context.Context) ([]domain.ReportedUserSummary, error)
 	DeleteUser(ctx context.Context, id string) error
 }
 
@@ -286,6 +287,10 @@ func (s *UserService) ReportUser(ctx context.Context, reportedUserID, reporterUs
 	}
 
 	return s.repo.ReportUser(ctx, reportedUserID, reporterUserID, reason)
+}
+
+func (s *UserService) ListReportedUsers(ctx context.Context) ([]domain.ReportedUserSummary, error) {
+	return s.repo.ListReportedUsers(ctx)
 }
 
 func (s *UserService) Login(ctx context.Context, input domain.LoginInput) (domain.AuthResponse, error) {

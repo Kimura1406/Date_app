@@ -109,7 +109,26 @@ type ChatRoom = {
   messages: ChatMessage[];
 };
 
-type MenuKey = 'user-list' | 'chat' | 'gift' | 'sales' | 'revenue';
+type ReportEntry = {
+  id: string;
+  reporterUserId: string;
+  reporterUserName: string;
+  reason: string;
+  createdAt: string;
+};
+
+type ReportSummary = {
+  id: string;
+  reportedUserId: string;
+  reportedUserName: string;
+  latestReporterUserId: string;
+  latestReporterName: string;
+  latestReason: string;
+  latestReportedAt: string;
+  reports: ReportEntry[];
+};
+
+type MenuKey = 'user-list' | 'chat' | 'gift' | 'sales' | 'report' | 'revenue';
 type AdminPath =
   | 'user-list'
   | 'user-list/new'
@@ -118,6 +137,7 @@ type AdminPath =
   | 'gift/new'
   | 'sales'
   | 'sales/new'
+  | 'report'
   | 'revenue';
 
 const menuSections: Array<{
@@ -129,6 +149,7 @@ const menuSections: Array<{
   { key: 'chat', label: '\u30c1\u30e3\u30c3\u30c8\u7ba1\u7406' },
   { key: 'gift', label: '\u304a\u82b1\u7ba1\u7406' },
   { key: 'sales', label: '\u30d0\u30ca\u30fc\u7ba1\u7406' },
+  { key: 'report', label: '\u901a\u5831\u7ba1\u7406' },
   { key: 'revenue', label: '\u58f2\u4e0a\u7ba1\u7406' },
 ];
 
@@ -152,6 +173,11 @@ const viewMeta: Record<MenuKey, { title: string; description: string }> = {
     title: '\u30d0\u30ca\u30fc\u7ba1\u7406',
     description:
       '\u30a4\u30d9\u30f3\u30c8\u30d0\u30ca\u30fc\u306e\u516c\u958b\u72b6\u614b\u3084\u8868\u793a\u9806\u3001\u518d\u7528\u30ea\u30f3\u30af\u3092\u7ba1\u7406\u3067\u304d\u307e\u3059\u3002',
+  },
+  report: {
+    title: '\u901a\u5831\u7ba1\u7406',
+    description:
+      '\u901a\u5831\u3055\u308c\u305f\u30e6\u30fc\u30b6\u30fc\u3068\u76f4\u8fd1\u306e\u901a\u5831\u5185\u5bb9\u3092\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002',
   },
   revenue: {
     title: '\u58f2\u4e0a\u7ba1\u7406',
@@ -205,6 +231,8 @@ function parseAdminPath(hash: string): AdminPath {
       return 'sales';
     case '/banners/new':
       return 'sales/new';
+    case '/reports':
+      return 'report';
     case '/revenue':
       return 'revenue';
     default:
@@ -228,6 +256,8 @@ function pathToHash(path: AdminPath) {
       return '#/banners';
     case 'sales/new':
       return '#/banners/new';
+    case 'report':
+      return '#/reports';
     case 'revenue':
       return '#/revenue';
   }
@@ -244,6 +274,8 @@ function menuKeyFromPath(path: AdminPath): MenuKey {
     case 'sales':
     case 'sales/new':
       return 'sales';
+    case 'report':
+      return 'report';
     default:
       return path;
   }
@@ -259,6 +291,8 @@ function menuKeyToPath(menuKey: MenuKey): AdminPath {
       return 'gift';
     case 'sales':
       return 'sales';
+    case 'report':
+      return 'report';
     case 'revenue':
       return 'revenue';
   }
@@ -273,6 +307,8 @@ function App() {
   const [loadingFlowers, setLoadingFlowers] = useState(false);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loadingBanners, setLoadingBanners] = useState(false);
+  const [reports, setReports] = useState<ReportSummary[]>([]);
+  const [loadingReports, setLoadingReports] = useState(false);
   const [saving, setSaving] = useState(false);
   const [grantingPoints, setGrantingPoints] = useState(false);
   const [savingFlower, setSavingFlower] = useState(false);
@@ -305,6 +341,10 @@ function App() {
   const [bannerCurrentPage, setBannerCurrentPage] = useState(1);
   const [bannerPageSize, setBannerPageSize] = useState(10);
   const [bannerSearch, setBannerSearch] = useState('');
+  const [reportCurrentPage, setReportCurrentPage] = useState(1);
+  const [reportPageSize, setReportPageSize] = useState(10);
+  const [reportSearch, setReportSearch] = useState('');
+  const [selectedReportSummary, setSelectedReportSummary] = useState<ReportSummary | null>(null);
   const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoom | null>(null);
   const [chatTab, setChatTab] = useState<'user' | 'admin'>('user');
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
@@ -322,6 +362,7 @@ function App() {
     setUsers([]);
     setFlowers([]);
     setBanners([]);
+    setReports([]);
     setChatRooms([]);
     setSelectedChatRoom(null);
     navigateToPath('user-list');
@@ -416,6 +457,12 @@ function App() {
   useEffect(() => {
     if (authToken && activeMenu === 'sales') {
       void loadBanners(authToken);
+    }
+  }, [activeMenu, authToken]);
+
+  useEffect(() => {
+    if (authToken && activeMenu === 'report') {
+      void loadReports(authToken);
     }
   }, [activeMenu, authToken]);
 
@@ -536,6 +583,36 @@ function App() {
       setMessage(error instanceof Error ? error.message : 'Failed to load banners');
     } finally {
       setLoadingBanners(false);
+    }
+  }
+
+  async function loadReports(token: string = authToken) {
+    if (!token) return;
+
+    setLoadingReports(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/admin/reports`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (isInvalidTokenResponse(response, data)) {
+        clearAdminSession('Session expired. Please login again.');
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to load reports');
+      }
+
+      setReports(data.items ?? []);
+      setReportCurrentPage(1);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to load reports');
+    } finally {
+      setLoadingReports(false);
     }
   }
 
@@ -1170,10 +1247,23 @@ function App() {
       banner.redirectLink.toLowerCase().includes(query)
     );
   });
+  const filteredReports = reports.filter((report) => {
+    const query = reportSearch.trim().toLowerCase();
+    if (!query) {
+      return true;
+    }
+    return (
+      report.id.toLowerCase().includes(query) ||
+      report.reportedUserName.toLowerCase().includes(query) ||
+      report.latestReporterName.toLowerCase().includes(query) ||
+      report.latestReason.toLowerCase().includes(query)
+    );
+  });
   const userPagination = paginateItems(users, userCurrentPage, userPageSize);
   const chatPagination = paginateItems(chatRooms, chatCurrentPage, chatPageSize);
   const flowerPagination = paginateItems(flowers, flowerCurrentPage, flowerPageSize);
   const bannerPagination = paginateItems(filteredBanners, bannerCurrentPage, bannerPageSize);
+  const reportPagination = paginateItems(filteredReports, reportCurrentPage, reportPageSize);
 
   function renderCreateUserPanel() {
     return (
@@ -2083,9 +2173,175 @@ function App() {
               )}
             </section>
           </>
+        ) : activeMenu === 'report' ? (
+          <>
+            <section className="content-grid user-list-layout">
+              <div className="panel report-panel">
+                <div className="panel-header panel-header-right banner-toolbar">
+                  <div className="inline-actions banner-toolbar-actions">
+                    <label className="banner-search">
+                      <input
+                        onChange={(event) => {
+                          setReportSearch(event.target.value);
+                          setReportCurrentPage(1);
+                        }}
+                        placeholder={'\u691c\u7d22'}
+                        type="search"
+                        value={reportSearch}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {message ? <div className="notice">{message}</div> : null}
+
+                {loadingReports ? (
+                  <p className="muted">Loading reports...</p>
+                ) : filteredReports.length === 0 ? (
+                  <p className="muted">No reports found yet.</p>
+                ) : (
+                  <>
+                    <div className="table-wrap fixed-list-wrap report-table-wrap">
+                      <table className="user-table report-table">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>{'\u901a\u5831\u3055\u308c\u305f\u30e6\u30fc\u30b6\u30fc'}</th>
+                            <th>{'\u901a\u5831\u3057\u305f\u30e6\u30fc\u30b6\u30fc'}</th>
+                            <th>{'\u65e5\u6642'}</th>
+                            <th>{'\u901a\u5831\u5185\u5bb9'}</th>
+                            <th>{'BAN\u72b6\u614b'}</th>
+                            <th>{'\u78ba\u8a8d\u72b6\u614b'}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {reportPagination.items.map((report) => (
+                            <tr key={report.id}>
+                              <td>
+                                <code>{report.id}</code>
+                              </td>
+                              <td>{report.reportedUserName}</td>
+                              <td>{report.latestReporterName}</td>
+                              <td>{formatDateTime(report.latestReportedAt)}</td>
+                              <td className="report-reason-cell">
+                                <p title={report.latestReason}>{truncateReason(report.latestReason)}</p>
+                                <button
+                                  className="ghost report-more-button"
+                                  onClick={() => setSelectedReportSummary(report)}
+                                  type="button"
+                                >
+                                  {'\u3082\u3063\u3068\u898b\u308b'}
+                                </button>
+                              </td>
+                              <td>
+                                <span className="report-switch" aria-hidden="true">
+                                  <span />
+                                </span>
+                              </td>
+                              <td>
+                                <span className="status-chip draft">{'\u672a\u78ba\u8a8d'}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="banner-pagination">
+                      <span>
+                        {filteredReports.length} {'\u4ef6\u4e2d'}{' '}
+                        {reportPagination.items.length === 0
+                          ? 0
+                          : (reportPagination.page - 1) * reportPageSize + 1}{' '}
+                        ~{' '}
+                        {Math.min(
+                          filteredReports.length,
+                          (reportPagination.page - 1) * reportPageSize + reportPagination.items.length,
+                        )}{' '}
+                        {'\u4ef6\u3092\u8868\u793a'}
+                      </span>
+                      <div className="banner-pagination-controls">
+                        <button
+                          className="ghost banner-page-button"
+                          disabled={reportPagination.page <= 1}
+                          onClick={() => setReportCurrentPage((page) => Math.max(1, page - 1))}
+                          type="button"
+                        >
+                          {'<'}
+                        </button>
+                        <span className="banner-page-current">{reportPagination.page}</span>
+                        <button
+                          className="ghost banner-page-button"
+                          disabled={reportPagination.page >= reportPagination.totalPages}
+                          onClick={() =>
+                            setReportCurrentPage((page) =>
+                              Math.min(reportPagination.totalPages, page + 1),
+                            )
+                          }
+                          type="button"
+                        >
+                          {'>'}
+                        </button>
+                        <label className="banner-page-size">
+                          <select
+                            onChange={(event) => {
+                              setReportPageSize(Number(event.target.value));
+                              setReportCurrentPage(1);
+                            }}
+                            value={reportPageSize}
+                          >
+                            {pageSizeOptions.map((option) => (
+                              <option key={option} value={option}>
+                                {option}件 / ページ
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </section>
+          </>
         ) : (
           renderPlaceholderView(activeMenu)
         )}
+
+        {selectedReportSummary ? (
+          <div className="modal-backdrop" onClick={() => setSelectedReportSummary(null)} role="presentation">
+            <div
+              className="modal-panel report-detail-modal"
+              onClick={(event) => event.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+            >
+              <div className="panel-header">
+                <div>
+                  <h2>{selectedReportSummary.reportedUserName}</h2>
+                  <p className="muted">
+                    {selectedReportSummary.reports.length} {'\u4ef6\u306e\u901a\u5831'}
+                  </p>
+                </div>
+                <button className="ghost" onClick={() => setSelectedReportSummary(null)} type="button">
+                  Close
+                </button>
+              </div>
+
+              <div className="report-detail-list">
+                {selectedReportSummary.reports.map((report) => (
+                  <article className="report-detail-item" key={report.id}>
+                    <div className="report-detail-meta">
+                      <strong>{report.reporterUserName}</strong>
+                      <span>{formatDateTime(report.createdAt)}</span>
+                    </div>
+                    <p>{report.reason}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {selectedChatRoom ? (
           <div className="modal-backdrop" onClick={() => setSelectedChatRoom(null)} role="presentation">

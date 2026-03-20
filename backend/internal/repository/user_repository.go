@@ -400,6 +400,75 @@ func (r *UserRepository) ReportUser(ctx context.Context, reportedUserID, reporte
 	return nil
 }
 
+func (r *UserRepository) ListReportedUsers(ctx context.Context) ([]domain.ReportedUserSummary, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT
+			ur.id,
+			ur.reported_user_id,
+			reported.name,
+			ur.reporter_user_id,
+			reporter.name,
+			ur.reason,
+			ur.created_at
+		FROM user_reports ur
+		INNER JOIN users reported ON reported.id = ur.reported_user_id
+		INNER JOIN users reporter ON reporter.id = ur.reporter_user_id
+		ORDER BY ur.reported_user_id ASC, ur.created_at DESC, ur.id DESC
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("query user reports: %w", err)
+	}
+	defer rows.Close()
+
+	summaries := make([]domain.ReportedUserSummary, 0)
+	summaryByReportedUserID := make(map[string]int)
+
+	for rows.Next() {
+		var (
+			entry          domain.UserReportEntry
+			reportedUserID string
+			reportedName   string
+			reportedAt     time.Time
+		)
+		if err := rows.Scan(
+			&entry.ID,
+			&reportedUserID,
+			&reportedName,
+			&entry.ReporterUserID,
+			&entry.ReporterUserName,
+			&entry.Reason,
+			&reportedAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan user report summary: %w", err)
+		}
+		entry.CreatedAt = reportedAt.Format(time.RFC3339)
+
+		index, ok := summaryByReportedUserID[reportedUserID]
+		if !ok {
+			summaries = append(summaries, domain.ReportedUserSummary{
+				ID:                   reportedUserID,
+				ReportedUserID:       reportedUserID,
+				ReportedUserName:     reportedName,
+				LatestReporterUserID: entry.ReporterUserID,
+				LatestReporterName:   entry.ReporterUserName,
+				LatestReason:         entry.Reason,
+				LatestReportedAt:     entry.CreatedAt,
+				Reports:              []domain.UserReportEntry{},
+			})
+			index = len(summaries) - 1
+			summaryByReportedUserID[reportedUserID] = index
+		}
+
+		summaries[index].Reports = append(summaries[index].Reports, entry)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate user reports: %w", err)
+	}
+
+	return summaries, nil
+}
+
 type userScanner interface {
 	Scan(dest ...any) error
 }

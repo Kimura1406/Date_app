@@ -660,6 +660,51 @@ button:disabled {
   text-decoration: none;
 }
 
+.report-table {
+  min-width: 1120px;
+}
+
+.report-table-wrap {
+  background: #fffdfc;
+}
+
+.report-reason-cell {
+  min-width: 280px;
+  max-width: 360px;
+}
+
+.report-reason-cell p {
+  margin: 0 0 10px;
+  color: #3b2c30;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+.report-more-button {
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.report-switch {
+  width: 54px;
+  height: 30px;
+  border-radius: 999px;
+  background: #d8d5d4;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+}
+
+.report-switch span {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(33, 24, 24, 0.12);
+}
+
 .status-chip {
   display: inline-flex;
   align-items: center;
@@ -937,6 +982,44 @@ button:disabled {
 
 .chat-detail-compose-actions button {
   min-width: 150px;
+}
+
+.report-detail-modal {
+  width: min(760px, calc(100vw - 48px));
+  max-height: min(82vh, 880px);
+  display: flex;
+  flex-direction: column;
+}
+
+.report-detail-list {
+  display: grid;
+  gap: 14px;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.report-detail-item {
+  border: 1px solid rgba(109, 88, 88, 0.12);
+  border-radius: 16px;
+  background: #fffdfc;
+  padding: 16px 18px;
+}
+
+.report-detail-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #7d6d70;
+  font-size: 12px;
+}
+
+.report-detail-item p {
+  margin: 0;
+  color: #211818;
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 .field-note {

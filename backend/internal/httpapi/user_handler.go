@@ -31,6 +31,16 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"items": users})
 }
 
+func (h *UserHandler) ListReportedUsers(w http.ResponseWriter, r *http.Request) {
+	items, err := h.userService.ListReportedUsers(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to load reported users")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	if !canAccessUser(r, r.PathValue("id")) {
 		writeError(w, http.StatusForbidden, "forbidden")

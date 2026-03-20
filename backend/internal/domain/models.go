@@ -118,6 +118,25 @@ type UserReportInput struct {
 	Reason string `json:"reason"`
 }
 
+type UserReportEntry struct {
+	ID               string `json:"id"`
+	ReporterUserID   string `json:"reporterUserId"`
+	ReporterUserName string `json:"reporterUserName"`
+	Reason           string `json:"reason"`
+	CreatedAt        string `json:"createdAt"`
+}
+
+type ReportedUserSummary struct {
+	ID                   string            `json:"id"`
+	ReportedUserID       string            `json:"reportedUserId"`
+	ReportedUserName     string            `json:"reportedUserName"`
+	LatestReporterUserID string            `json:"latestReporterUserId"`
+	LatestReporterName   string            `json:"latestReporterName"`
+	LatestReason         string            `json:"latestReason"`
+	LatestReportedAt     string            `json:"latestReportedAt"`
+	Reports              []UserReportEntry `json:"reports"`
+}
+
 type UserPointGrantInput struct {
 	Points int `json:"points"`
 }
