@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
+import '../data/api_client.dart';
 import '../data/models.dart';
 import '../localization/app_language.dart';
 import '../localization/app_localizations.dart';
@@ -11,6 +15,7 @@ class AccountScreen extends StatelessWidget {
   const AccountScreen({
     super.key,
     required this.currentUser,
+    required this.authToken,
     required this.selectedLanguage,
     required this.onLanguageChanged,
     required this.statusMessage,
@@ -30,6 +35,7 @@ class AccountScreen extends StatelessWidget {
   });
 
   final AppUser currentUser;
+  final String authToken;
   final AppLanguage selectedLanguage;
   final ValueChanged<AppLanguage> onLanguageChanged;
   final String statusMessage;
@@ -46,10 +52,6 @@ class AccountScreen extends StatelessWidget {
   final Future<void> Function() onUpdate;
   final Future<void> Function() onDelete;
   final Future<void> Function() onLogout;
-
-  int get _likeCount => 0;
-  int get _giftCount => 0;
-  int get _pointCount => currentUser.pointBalance;
 
   Future<void> _openLogoutConfirm(BuildContext context) async {
     final strings = context.strings;
@@ -175,30 +177,9 @@ class AccountScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _MyPageStatCard(
-                    label: strings.likesCountLabel,
-                    value: _likeCount.toString(),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _MyPageStatCard(
-                    label: strings.giftsLabel,
-                    value: _giftCount.toString(),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _MyPageStatCard(
-                    label: strings.myPagePoints,
-                    value: '${_pointCount}P',
-                  ),
-                ),
-              ],
+            _MyPageStatsSection(
+              authToken: authToken,
+              pointBalance: currentUser.pointBalance,
             ),
             const SizedBox(height: 18),
             Container(
@@ -323,6 +304,136 @@ class AccountScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _MyPageStatsSection extends StatefulWidget {
+  const _MyPageStatsSection({
+    required this.authToken,
+    required this.pointBalance,
+  });
+
+  final String authToken;
+  final int pointBalance;
+
+  @override
+  State<_MyPageStatsSection> createState() => _MyPageStatsSectionState();
+}
+
+class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
+  final ApiClient _apiClient = ApiClient();
+  late Future<_MyPageStatsData> _statsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _statsFuture = _loadStats();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MyPageStatsSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.authToken != widget.authToken ||
+        oldWidget.pointBalance != widget.pointBalance) {
+      _statsFuture = _loadStats();
+    }
+  }
+
+  Future<_MyPageStatsData> _loadStats() async {
+    final likedUsers = await _apiClient.fetchUsersWhoLikedMe(
+      token: widget.authToken,
+    );
+    final myFlowers = await _apiClient.fetchMyFlowers(
+      token: widget.authToken,
+    );
+    final giftCount = [
+      ...myFlowers.purchased,
+      ...myFlowers.gifted,
+    ].fold<int>(0, (total, item) => total + item.ownedCount);
+
+    return _MyPageStatsData(
+      likeCount: likedUsers.length,
+      giftCount: giftCount,
+    );
+  }
+
+  void _openLikedUsers(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _LikedUsersScreen(token: widget.authToken),
+      ),
+    );
+  }
+
+  void _openMyFlowers(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _MyFlowersScreen(token: widget.authToken),
+      ),
+    );
+  }
+
+  void _openPointGuide(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const _PointGuideScreen(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+
+    return FutureBuilder<_MyPageStatsData>(
+      future: _statsFuture,
+      builder: (context, snapshot) {
+        final stats = snapshot.data ??
+            const _MyPageStatsData(
+              likeCount: 0,
+              giftCount: 0,
+            );
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _MyPageStatCard(
+                label: strings.likesCountLabel,
+                value: stats.likeCount.toString(),
+                onTap: () => _openLikedUsers(context),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _MyPageStatCard(
+                label: strings.giftsLabel,
+                value: stats.giftCount.toString(),
+                onTap: () => _openMyFlowers(context),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _MyPageStatCard(
+                label: strings.myPagePoints,
+                value: '${widget.pointBalance}P',
+                onTap: () => _openPointGuide(context),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _MyPageStatsData {
+  const _MyPageStatsData({
+    required this.likeCount,
+    required this.giftCount,
+  });
+
+  final int likeCount;
+  final int giftCount;
 }
 
 class _MyAccountEditScreen extends StatelessWidget {
@@ -594,39 +705,458 @@ class _MyPageStatCard extends StatelessWidget {
   const _MyPageStatCard({
     required this.label,
     required this.value,
+    this.onTap,
   });
 
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.94),
+    return Material(
+      color: Colors.white.withValues(alpha: 0.94),
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
         borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF6D5A5A),
-                ),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
           ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: const Color(0xFF2F2323),
-                  fontWeight: FontWeight.w800,
-                ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF6D5A5A),
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: const Color(0xFF2F2323),
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+}
+
+class _LikedUsersScreen extends StatelessWidget {
+  const _LikedUsersScreen({
+    required this.token,
+  });
+
+  final String token;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    final apiClient = ApiClient();
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: const Color(0xFF2F2323),
+        elevation: 0,
+        title: Text(strings.myPageLikedUsersTitle),
+      ),
+      body: SafeArea(
+        child: FutureBuilder<List<UserLikerItem>>(
+          future: apiClient.fetchUsersWhoLikedMe(token: token),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  snapshot.error.toString().replaceFirst('Exception: ', ''),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF6D5A5A),
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+
+            final items = snapshot.data ?? const <UserLikerItem>[];
+            if (items.isEmpty) {
+              return Center(
+                child: Text(
+                  strings.myPageNoLikedUsers,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: const Color(0xFF6D5A5A),
+                      ),
+                ),
+              );
+            }
+
+            return ListView.separated(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.94),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: const Color(0xFFF0D7D0),
+                        child: Text(
+                          item.name.isNotEmpty ? item.name.substring(0, 1) : '?',
+                          style: const TextStyle(
+                            color: Color(0xFF4A2330),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: const Color(0xFF2F2323),
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${item.birthDate} • ${item.country}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(color: const Color(0xFF6D5A5A)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _MyFlowersScreen extends StatelessWidget {
+  const _MyFlowersScreen({
+    required this.token,
+  });
+
+  final String token;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    final apiClient = ApiClient();
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          foregroundColor: const Color(0xFF2F2323),
+          elevation: 0,
+          title: Text(strings.myFlowersTitle),
+          bottom: TabBar(
+            labelColor: const Color(0xFF6D4751),
+            unselectedLabelColor: const Color(0xFF8A797B),
+            indicatorColor: const Color(0xFFB86A76),
+            tabs: [
+              Tab(text: strings.purchasedFlowersTab),
+              Tab(text: strings.giftedFlowersTab),
+            ],
+          ),
+        ),
+        body: SafeArea(
+          child: FutureBuilder<MyFlowersResponse>(
+            future: apiClient.fetchMyFlowers(token: token),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    snapshot.error.toString().replaceFirst('Exception: ', ''),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF6D5A5A),
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }
+
+              final response = snapshot.data ??
+                  MyFlowersResponse(purchased: const [], gifted: const []);
+
+              return TabBarView(
+                children: [
+                  _MyFlowerListView(
+                    items: response.purchased,
+                    emptyLabel: strings.noPurchasedFlowers,
+                  ),
+                  _MyFlowerListView(
+                    items: response.gifted,
+                    emptyLabel: strings.noGiftedFlowers,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MyFlowerListView extends StatelessWidget {
+  const _MyFlowerListView({
+    required this.items,
+    required this.emptyLabel,
+  });
+
+  final List<OwnedFlowerItem> items;
+  final String emptyLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return Center(
+        child: Text(
+          emptyLabel,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: const Color(0xFF6D5A5A),
+              ),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      itemCount: items.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.94),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: _FlowerImage(imageUrl: item.flower.imageUrl),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.flower.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: const Color(0xFF2F2323),
+                            fontWeight: FontWeight.w800,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.flower.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: const Color(0xFF6D5A5A),
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${item.ownedCount} • ${item.flower.pricePoints}P',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: const Color(0xFFB86A76),
+                            fontWeight: FontWeight.w800,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PointGuideScreen extends StatelessWidget {
+  const _PointGuideScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: const Color(0xFF2F2323),
+        elevation: 0,
+        title: Text(strings.pointGuideTitle),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.94),
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  strings.pointGuideDescription,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: const Color(0xFF4D3B3D),
+                        height: 1.5,
+                      ),
+                ),
+                const SizedBox(height: 18),
+                _PointGuideItem(text: strings.pointGuideStepMission),
+                const SizedBox(height: 12),
+                _PointGuideItem(text: strings.pointGuideStepEvents),
+                const SizedBox(height: 12),
+                _PointGuideItem(text: strings.pointGuideStepAdmin),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PointGuideItem extends StatelessWidget {
+  const _PointGuideItem({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          margin: const EdgeInsets.only(top: 6),
+          decoration: const BoxDecoration(
+            color: Color(0xFFB86A76),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF4D3B3D),
+                  height: 1.5,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FlowerImage extends StatelessWidget {
+  const _FlowerImage({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = _decodeDataUri(imageUrl);
+    if (data != null) {
+      return Image.memory(data, fit: BoxFit.cover);
+    }
+
+    if (imageUrl.isEmpty) {
+      return const Center(
+        child: Icon(
+          Icons.local_florist_rounded,
+          size: 40,
+          color: Color(0xFF6E4A4A),
+        ),
+      );
+    }
+
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return const Center(
+          child: Icon(
+            Icons.local_florist_rounded,
+            size: 40,
+            color: Color(0xFF6E4A4A),
+          ),
+        );
+      },
+    );
+  }
+
+  Uint8List? _decodeDataUri(String value) {
+    if (!value.startsWith('data:image')) {
+      return null;
+    }
+
+    final commaIndex = value.indexOf(',');
+    if (commaIndex < 0) {
+      return null;
+    }
+
+    try {
+      return base64Decode(value.substring(commaIndex + 1));
+    } catch (_) {
+      return null;
+    }
   }
 }
 

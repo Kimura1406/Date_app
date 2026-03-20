@@ -236,6 +236,78 @@ class UserLikeSummary {
   }
 }
 
+class UserLikerItem {
+  UserLikerItem({
+    required this.id,
+    required this.name,
+    required this.birthDate,
+    required this.country,
+    required this.likedAt,
+  });
+
+  final String id;
+  final String name;
+  final String birthDate;
+  final String country;
+  final String likedAt;
+
+  factory UserLikerItem.fromJson(Map<String, dynamic> json) {
+    return UserLikerItem(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      birthDate: json['birthDate'] as String? ?? '',
+      country: json['country'] as String? ?? '',
+      likedAt: json['likedAt'] as String? ?? '',
+    );
+  }
+}
+
+class OwnedFlowerItem {
+  OwnedFlowerItem({
+    required this.flower,
+    required this.ownedCount,
+    required this.lastOwnedAt,
+    required this.receivedFrom,
+  });
+
+  final FlowerShopItem flower;
+  final int ownedCount;
+  final String lastOwnedAt;
+  final String? receivedFrom;
+
+  factory OwnedFlowerItem.fromJson(Map<String, dynamic> json) {
+    return OwnedFlowerItem(
+      flower: FlowerShopItem.fromJson(
+        json['flower'] as Map<String, dynamic>? ?? const {},
+      ),
+      ownedCount: json['ownedCount'] as int? ?? 0,
+      lastOwnedAt: json['lastOwnedAt'] as String? ?? '',
+      receivedFrom: json['receivedFrom'] as String?,
+    );
+  }
+}
+
+class MyFlowersResponse {
+  MyFlowersResponse({
+    required this.purchased,
+    required this.gifted,
+  });
+
+  final List<OwnedFlowerItem> purchased;
+  final List<OwnedFlowerItem> gifted;
+
+  factory MyFlowersResponse.fromJson(Map<String, dynamic> json) {
+    return MyFlowersResponse(
+      purchased: (json['purchased'] as List<dynamic>? ?? [])
+          .map((item) => OwnedFlowerItem.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      gifted: (json['gifted'] as List<dynamic>? ?? [])
+          .map((item) => OwnedFlowerItem.fromJson(item as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
 class ChatParticipant {
   ChatParticipant({
     required this.userId,

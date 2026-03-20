@@ -998,6 +998,234 @@ class AppStrings {
     }
   }
 
+  String get myPageLikedUsersTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Những người đã thích tôi';
+      case AppLanguage.japanese:
+        return '自分をいいねした人';
+      case AppLanguage.korean:
+        return '나를 좋아요한 사람';
+      case AppLanguage.russian:
+        return 'Кто поставил мне лайк';
+      case AppLanguage.chinese:
+        return '给我点赞的人';
+      case AppLanguage.english:
+        return 'People who liked me';
+      case AppLanguage.thai:
+        return 'คนที่กดไลก์ฉัน';
+    }
+  }
+
+  String get myPageNoLikedUsers {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Chưa có ai nhấn like bạn.';
+      case AppLanguage.japanese:
+        return 'まだあなたをいいねした人はいません。';
+      case AppLanguage.korean:
+        return '아직 나를 좋아요한 사람이 없습니다.';
+      case AppLanguage.russian:
+        return 'Пока никто не поставил вам лайк.';
+      case AppLanguage.chinese:
+        return '暂时还没有人给你点赞。';
+      case AppLanguage.english:
+        return 'No one has liked you yet.';
+      case AppLanguage.thai:
+        return 'ยังไม่มีใครกดไลก์คุณ';
+    }
+  }
+
+  String get myFlowersTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Hoa của tôi';
+      case AppLanguage.japanese:
+        return '自分の花一覧';
+      case AppLanguage.korean:
+        return '내 꽃 목록';
+      case AppLanguage.russian:
+        return 'Мои цветы';
+      case AppLanguage.chinese:
+        return '我的鲜花';
+      case AppLanguage.english:
+        return 'My flowers';
+      case AppLanguage.thai:
+        return 'ดอกไม้ของฉัน';
+    }
+  }
+
+  String get purchasedFlowersTab {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Hoa đã mua';
+      case AppLanguage.japanese:
+        return '花を買った';
+      case AppLanguage.korean:
+        return '구매한 꽃';
+      case AppLanguage.russian:
+        return 'Купленные цветы';
+      case AppLanguage.chinese:
+        return '已购买鲜花';
+      case AppLanguage.english:
+        return 'Purchased';
+      case AppLanguage.thai:
+        return 'ดอกไม้ที่ซื้อ';
+    }
+  }
+
+  String get giftedFlowersTab {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Hoa đã được tặng';
+      case AppLanguage.japanese:
+        return '花をもらった';
+      case AppLanguage.korean:
+        return '선물받은 꽃';
+      case AppLanguage.russian:
+        return 'Подаренные цветы';
+      case AppLanguage.chinese:
+        return '已获赠鲜花';
+      case AppLanguage.english:
+        return 'Gifted';
+      case AppLanguage.thai:
+        return 'ดอกไม้ที่ได้รับ';
+    }
+  }
+
+  String get noPurchasedFlowers {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Bạn chưa mua bông hoa nào.';
+      case AppLanguage.japanese:
+        return 'まだ購入した花はありません。';
+      case AppLanguage.korean:
+        return '아직 구매한 꽃이 없습니다.';
+      case AppLanguage.russian:
+        return 'Вы ещё не купили цветы.';
+      case AppLanguage.chinese:
+        return '你还没有购买鲜花。';
+      case AppLanguage.english:
+        return 'You have not purchased any flowers yet.';
+      case AppLanguage.thai:
+        return 'คุณยังไม่ได้ซื้อดอกไม้';
+    }
+  }
+
+  String get noGiftedFlowers {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Bạn chưa được tặng hoa nào.';
+      case AppLanguage.japanese:
+        return 'まだもらった花はありません。';
+      case AppLanguage.korean:
+        return '아직 선물받은 꽃이 없습니다.';
+      case AppLanguage.russian:
+        return 'Вы ещё не получили цветы в подарок.';
+      case AppLanguage.chinese:
+        return '你还没有收到鲜花。';
+      case AppLanguage.english:
+        return 'You have not received any flowers yet.';
+      case AppLanguage.thai:
+        return 'คุณยังไม่ได้รับดอกไม้';
+    }
+  }
+
+  String get pointGuideTitle {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Hướng dẫn nhận point';
+      case AppLanguage.japanese:
+        return 'ポイント取得ガイド';
+      case AppLanguage.korean:
+        return '포인트 획득 가이드';
+      case AppLanguage.russian:
+        return 'Гайд по получению поинтов';
+      case AppLanguage.chinese:
+        return '积分获取指南';
+      case AppLanguage.english:
+        return 'Point guide';
+      case AppLanguage.thai:
+        return 'คู่มือรับพอยต์';
+    }
+  }
+
+  String get pointGuideDescription {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Sau này point sẽ được cộng từ mission, event và các phần thưởng trong app.';
+      case AppLanguage.japanese:
+        return '今後はミッション、イベント、アプリ内報酬からポイントを獲得できます。';
+      case AppLanguage.korean:
+        return '앞으로 미션, 이벤트, 앱 내 보상으로 포인트를 획득할 수 있습니다.';
+      case AppLanguage.russian:
+        return 'В будущем поинты можно будет получать за миссии, события и награды в приложении.';
+      case AppLanguage.chinese:
+        return '之后可通过任务、活动和应用内奖励获取积分。';
+      case AppLanguage.english:
+        return 'Points will be available later from missions, events, and in-app rewards.';
+      case AppLanguage.thai:
+        return 'ต่อไปคุณจะได้รับพอยต์จากมิชชัน อีเวนต์ และรางวัลในแอป';
+    }
+  }
+
+  String get pointGuideStepMission {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Hoàn thành mission hằng ngày để nhận point.';
+      case AppLanguage.japanese:
+        return 'デイリーミッションを達成してポイントを受け取ります。';
+      case AppLanguage.korean:
+        return '데일리 미션을 완료해 포인트를 받으세요.';
+      case AppLanguage.russian:
+        return 'Выполняйте ежедневные миссии, чтобы получать поинты.';
+      case AppLanguage.chinese:
+        return '完成每日任务即可获得积分。';
+      case AppLanguage.english:
+        return 'Complete daily missions to earn points.';
+      case AppLanguage.thai:
+        return 'ทำมิชชันประจำวันเพื่อรับพอยต์';
+    }
+  }
+
+  String get pointGuideStepEvents {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Tham gia event hoặc campaign banner để nhận thưởng.';
+      case AppLanguage.japanese:
+        return 'イベントやバナーキャンペーンに参加して報酬を獲得します。';
+      case AppLanguage.korean:
+        return '이벤트나 배너 캠페인에 참여해 보상을 획득하세요.';
+      case AppLanguage.russian:
+        return 'Участвуйте в событиях и баннерных кампаниях, чтобы получать награды.';
+      case AppLanguage.chinese:
+        return '参与活动或横幅活动即可获得奖励。';
+      case AppLanguage.english:
+        return 'Join events or banner campaigns to get rewards.';
+      case AppLanguage.thai:
+        return 'เข้าร่วมอีเวนต์หรือแคมเปญแบนเนอร์เพื่อรับรางวัล';
+    }
+  }
+
+  String get pointGuideStepAdmin {
+    switch (language) {
+      case AppLanguage.vietnamese:
+        return 'Admin cũng có thể cấp thêm point trong một số trường hợp hỗ trợ.';
+      case AppLanguage.japanese:
+        return 'サポート対応として運営からポイント付与される場合もあります。';
+      case AppLanguage.korean:
+        return '지원 대응에 따라 운영자가 포인트를 지급할 수도 있습니다.';
+      case AppLanguage.russian:
+        return 'В некоторых случаях поддержка также может начислить поинты.';
+      case AppLanguage.chinese:
+        return '在某些支持场景下，管理员也可以发放积分。';
+      case AppLanguage.english:
+        return 'Support admins may also grant points in some cases.';
+      case AppLanguage.thai:
+        return 'บางกรณีทีมแอดมินอาจมอบพอยต์ให้เพิ่มเติม';
+    }
+  }
+
   String get flowerShopTitle {
     switch (language) {
       case AppLanguage.vietnamese:

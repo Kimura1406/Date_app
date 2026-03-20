@@ -118,6 +118,40 @@ class ApiClient {
     );
   }
 
+  Future<List<UserLikerItem>> fetchUsersWhoLikedMe({
+    required String token,
+  }) async {
+    final response = await _client.get(
+      Uri.parse('$apiBaseUrl/api/v1/me/likes/users'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Load liked users failed'));
+    }
+
+    final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+    final items = jsonMap['items'] as List<dynamic>? ?? [];
+    return items
+        .map((item) => UserLikerItem.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<MyFlowersResponse> fetchMyFlowers({
+    required String token,
+  }) async {
+    final response = await _client.get(
+      Uri.parse('$apiBaseUrl/api/v1/me/flowers'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Load my flowers failed'));
+    }
+
+    return MyFlowersResponse.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
   Future<List<ChatRoomSummary>> fetchChatRooms({
     required String token,
     required String roomType,

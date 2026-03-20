@@ -467,6 +467,7 @@ class _AuthShellState extends State<AuthShell> {
       ),
       AccountScreen(
         currentUser: currentUser!,
+        authToken: authToken,
         selectedLanguage: context.languageController.language,
         onLanguageChanged: _changeLanguage,
         statusMessage: statusMessage,

@@ -98,6 +98,14 @@ type UserLikeSummary struct {
 	LikedByMe    bool   `json:"likedByMe"`
 }
 
+type UserLiker struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	BirthDate string `json:"birthDate"`
+	Country   string `json:"country"`
+	LikedAt   string `json:"likedAt"`
+}
+
 type UserPointGrantInput struct {
 	Points int `json:"points"`
 }
@@ -136,6 +144,18 @@ type FlowerAcquireResult struct {
 	User        User   `json:"user"`
 	OwnedCount  int    `json:"ownedCount"`
 	SpentPoints int    `json:"spentPoints"`
+}
+
+type OwnedFlowerItem struct {
+	Flower       Flower  `json:"flower"`
+	OwnedCount   int     `json:"ownedCount"`
+	LastOwnedAt  string  `json:"lastOwnedAt"`
+	ReceivedFrom *string `json:"receivedFrom,omitempty"`
+}
+
+type MyFlowersResponse struct {
+	Purchased []OwnedFlowerItem `json:"purchased"`
+	Gifted    []OwnedFlowerItem `json:"gifted"`
 }
 
 type Banner struct {

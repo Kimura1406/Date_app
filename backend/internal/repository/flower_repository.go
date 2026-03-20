@@ -198,6 +198,72 @@ func (r *FlowerRepository) AcquireFlower(ctx context.Context, flowerID, userID s
 	}, nil
 }
 
+func (r *FlowerRepository) ListOwnedFlowers(ctx context.Context, userID string) (domain.MyFlowersResponse, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT
+			f.id,
+			f.name,
+			f.image_url,
+			f.description,
+			f.price_points,
+			f.purchaser_count,
+			f.purchase_count,
+			f.published,
+			f.created_at,
+			f.updated_at,
+			COUNT(fp.flower_id) AS owned_count,
+			MAX(fp.purchased_at) AS last_owned_at
+		FROM flower_purchases fp
+		INNER JOIN flowers f ON f.id = fp.flower_id
+		WHERE fp.user_id = $1
+		GROUP BY
+			f.id, f.name, f.image_url, f.description, f.price_points,
+			f.purchaser_count, f.purchase_count, f.published, f.created_at, f.updated_at
+		ORDER BY MAX(fp.purchased_at) DESC, f.id DESC
+	`, userID)
+	if err != nil {
+		return domain.MyFlowersResponse{}, fmt.Errorf("query owned flowers: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]domain.OwnedFlowerItem, 0)
+	for rows.Next() {
+		var item domain.OwnedFlowerItem
+		var createdAt time.Time
+		var updatedAt time.Time
+		var lastOwnedAt time.Time
+		if err := rows.Scan(
+			&item.Flower.ID,
+			&item.Flower.Name,
+			&item.Flower.ImageURL,
+			&item.Flower.Description,
+			&item.Flower.PricePoints,
+			&item.Flower.PurchaserCount,
+			&item.Flower.PurchaseCount,
+			&item.Flower.Published,
+			&createdAt,
+			&updatedAt,
+			&item.OwnedCount,
+			&lastOwnedAt,
+		); err != nil {
+			return domain.MyFlowersResponse{}, fmt.Errorf("scan owned flower: %w", err)
+		}
+		item.Flower.CreatedAt = createdAt.Format(time.RFC3339)
+		item.Flower.UpdatedAt = updatedAt.Format(time.RFC3339)
+		item.LastOwnedAt = lastOwnedAt.Format(time.RFC3339)
+		items = append(items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return domain.MyFlowersResponse{}, fmt.Errorf("iterate owned flowers: %w", err)
+	}
+
+	return domain.MyFlowersResponse{
+		Purchased: items,
+		Gifted:    []domain.OwnedFlowerItem{},
+	}, nil
+}
+
 type flowerScanner interface {
 	Scan(dest ...any) error
 }

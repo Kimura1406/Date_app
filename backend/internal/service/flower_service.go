@@ -19,6 +19,7 @@ type flowerRepository interface {
 	CreateFlower(ctx context.Context, id string, input domain.CreateFlowerInput) (domain.Flower, error)
 	UpdateFlower(ctx context.Context, id string, input domain.UpdateFlowerInput) (domain.Flower, error)
 	AcquireFlower(ctx context.Context, flowerID, userID string) (domain.FlowerAcquireResult, error)
+	ListOwnedFlowers(ctx context.Context, userID string) (domain.MyFlowersResponse, error)
 }
 
 var ErrInsufficientPoints = errors.New("insufficient points")
@@ -87,6 +88,15 @@ func (s *FlowerService) AcquireFlower(ctx context.Context, flowerID, userID stri
 	}
 
 	return result, nil
+}
+
+func (s *FlowerService) ListOwnedFlowers(ctx context.Context, userID string) (domain.MyFlowersResponse, error) {
+	userID = strings.TrimSpace(userID)
+	if userID == "" {
+		return domain.MyFlowersResponse{}, sql.ErrNoRows
+	}
+
+	return s.repo.ListOwnedFlowers(ctx, userID)
 }
 
 func normalizeCreateFlowerInput(input domain.CreateFlowerInput) (domain.CreateFlowerInput, error) {

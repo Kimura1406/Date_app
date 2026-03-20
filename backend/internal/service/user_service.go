@@ -28,6 +28,7 @@ type userRepository interface {
 	AddPoints(ctx context.Context, id string, points int) (domain.User, error)
 	GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error)
 	ToggleLike(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error)
+	ListUsersWhoLiked(ctx context.Context, targetUserID string) ([]domain.UserLiker, error)
 	DeleteUser(ctx context.Context, id string) error
 }
 
@@ -192,6 +193,19 @@ func (s *UserService) ToggleLike(ctx context.Context, targetUserID, viewerUserID
 	}
 
 	return s.repo.ToggleLike(ctx, targetUserID, viewerUserID)
+}
+
+func (s *UserService) ListUsersWhoLiked(ctx context.Context, targetUserID string) ([]domain.UserLiker, error) {
+	targetUserID = strings.TrimSpace(targetUserID)
+	if targetUserID == "" {
+		return nil, fmt.Errorf("target user id is required")
+	}
+
+	if _, err := s.repo.GetUserByID(ctx, targetUserID); err != nil {
+		return nil, err
+	}
+
+	return s.repo.ListUsersWhoLiked(ctx, targetUserID)
 }
 
 func (s *UserService) Login(ctx context.Context, input domain.LoginInput) (domain.AuthResponse, error) {

@@ -297,6 +297,45 @@ func (r *UserRepository) ToggleLike(ctx context.Context, targetUserID, viewerUse
 	return summary, nil
 }
 
+func (r *UserRepository) ListUsersWhoLiked(ctx context.Context, targetUserID string) ([]domain.UserLiker, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT u.id, u.name, u.birth_date, u.country, ul.created_at
+		FROM user_likes ul
+		INNER JOIN users u ON u.id = ul.liker_user_id
+		WHERE ul.target_user_id = $1
+		ORDER BY ul.created_at DESC, u.id DESC
+	`, targetUserID)
+	if err != nil {
+		return nil, fmt.Errorf("query users who liked: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]domain.UserLiker, 0)
+	for rows.Next() {
+		var item domain.UserLiker
+		var birthDate time.Time
+		var likedAt time.Time
+		if err := rows.Scan(
+			&item.ID,
+			&item.Name,
+			&birthDate,
+			&item.Country,
+			&likedAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan user liker: %w", err)
+		}
+		item.BirthDate = birthDate.Format("2006-01-02")
+		item.LikedAt = likedAt.Format(time.RFC3339)
+		items = append(items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate users who liked: %w", err)
+	}
+
+	return items, nil
+}
+
 type userScanner interface {
 	Scan(dest ...any) error
 }
