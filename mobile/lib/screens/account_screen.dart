@@ -437,7 +437,6 @@ class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
             const SizedBox(width: 12),
             Expanded(
               child: _MyPageLanguageCard(
-                label: strings.changeLanguage,
                 selectedLanguage: widget.selectedLanguage,
                 onLanguageChanged: widget.onLanguageChanged,
               ),
@@ -861,12 +860,10 @@ class _MyPageStatCard extends StatelessWidget {
 
 class _MyPageLanguageCard extends StatelessWidget {
   const _MyPageLanguageCard({
-    required this.label,
     required this.selectedLanguage,
     required this.onLanguageChanged,
   });
 
-  final String label;
   final AppLanguage selectedLanguage;
   final ValueChanged<AppLanguage> onLanguageChanged;
 
@@ -886,16 +883,8 @@ class _MyPageLanguageCard extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF7C8AA5),
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          const SizedBox(height: 10),
           LanguageSelectorField(
             label: '',
             language: selectedLanguage,
