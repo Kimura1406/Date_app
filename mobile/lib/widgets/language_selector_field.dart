@@ -47,7 +47,7 @@ class LanguageSelectorField extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.white70),
         ),
@@ -72,13 +72,14 @@ class LanguageSelectorField extends StatelessWidget {
                 )
                 .toList(),
             selectedItemBuilder: (context) => AppLanguage.values
-                .map((item) => Row(
-                      children: [
-                        Text(item.flag),
-                        const SizedBox(width: 8),
-                        Text(item.label),
-                      ],
-                    ))
+                .map(
+                  (item) => Center(
+                    child: Text(
+                      item.flag,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
