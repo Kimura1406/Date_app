@@ -1,51 +1,89 @@
 <svg width="512" height="768" viewBox="0 0 512 768" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="coreRed" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256 180) rotate(90) scale(74 72)">
-      <stop stop-color="#FF9AA4"/>
-      <stop offset="0.34" stop-color="#F2475B"/>
-      <stop offset="1" stop-color="#8F0D1E"/>
+    <radialGradient id="roseCore" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(258 197) rotate(90) scale(86 84)">
+      <stop stop-color="#FFBDC4"/>
+      <stop offset="0.18" stop-color="#F95367"/>
+      <stop offset="0.6" stop-color="#D91933"/>
+      <stop offset="1" stop-color="#700513"/>
     </radialGradient>
-    <linearGradient id="petalRedA" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#FF6E81"/>
-      <stop offset="0.52" stop-color="#D91635"/>
-      <stop offset="1" stop-color="#710715"/>
+    <linearGradient id="petalA" x1="120" y1="92" x2="362" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF7788"/>
+      <stop offset="0.45" stop-color="#E01D39"/>
+      <stop offset="1" stop-color="#6D0512"/>
     </linearGradient>
-    <linearGradient id="petalRedB" x1="0.12" y1="0.08" x2="0.9" y2="1">
-      <stop stop-color="#FF8F9E"/>
-      <stop offset="0.45" stop-color="#C5142E"/>
-      <stop offset="1" stop-color="#5E0510"/>
+    <linearGradient id="petalB" x1="154" y1="115" x2="343" y2="298" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF9CAA"/>
+      <stop offset="0.5" stop-color="#CF112B"/>
+      <stop offset="1" stop-color="#5B0410"/>
     </linearGradient>
-    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#6FD66B"/>
-      <stop offset="0.42" stop-color="#2C9E3E"/>
-      <stop offset="1" stop-color="#14612A"/>
+    <linearGradient id="petalC" x1="177" y1="126" x2="329" y2="273" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB1BA"/>
+      <stop offset="0.48" stop-color="#D41A34"/>
+      <stop offset="1" stop-color="#620611"/>
     </linearGradient>
-    <linearGradient id="stem" x1="0" y1="0" x2="0" y2="1">
-      <stop stop-color="#6CCF7A"/>
-      <stop offset="1" stop-color="#2F7D44"/>
+    <linearGradient id="stem" x1="312" y1="320" x2="304" y2="742" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#88D781"/>
+      <stop offset="0.5" stop-color="#3B974D"/>
+      <stop offset="1" stop-color="#205B33"/>
     </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="22" stdDeviation="18" flood-color="#4A1018" flood-opacity="0.2"/>
+    <linearGradient id="leafDark" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#8BE070"/>
+      <stop offset="0.45" stop-color="#329B3D"/>
+      <stop offset="1" stop-color="#165928"/>
+    </linearGradient>
+    <linearGradient id="leafLight" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#B9F297"/>
+      <stop offset="0.46" stop-color="#58B151"/>
+      <stop offset="1" stop-color="#1A6832"/>
+    </linearGradient>
+    <radialGradient id="water" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0.35 0.25) scale(1 1.2)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.35" stop-color="#D7F3FF" stop-opacity="0.84"/>
+      <stop offset="0.75" stop-color="#7CD4FF" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#53B4FF" stop-opacity="0.2"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="24" stdDeviation="18" flood-color="#4C0B13" flood-opacity="0.22"/>
     </filter>
   </defs>
 
   <g filter="url(#shadow)">
-    <path d="M171 252C116 243 77 207 81 160C84 120 121 92 164 96C190 66 227 51 261 56C296 44 339 53 367 84C411 83 445 114 449 154C453 195 423 228 375 243C362 288 321 323 266 329C211 333 179 303 171 252Z" fill="url(#petalRedA)"/>
-    <path d="M183 220C145 205 123 176 128 145C133 114 166 95 203 99C216 73 241 58 267 60C296 49 330 57 349 82C388 84 416 108 418 139C421 172 399 198 364 209C353 244 322 270 279 275C233 280 199 260 183 220Z" fill="url(#petalRedB)"/>
-    <path d="M208 208C188 181 194 149 221 129C231 109 249 98 270 98C290 95 309 102 321 118C351 131 359 159 344 185C338 214 315 232 286 236C255 242 227 234 208 208Z" fill="url(#coreRed)"/>
-    <path d="M228 198C230 177 245 163 264 160C281 158 297 168 304 184C309 201 302 220 287 229C271 238 250 238 236 226C226 218 223 207 228 198Z" fill="#BC1229" opacity="0.82"/>
-    <path d="M248 198C248 182 261 171 275 171C291 171 302 183 301 197C300 213 288 224 274 224C260 224 248 213 248 198Z" fill="#FBE2E5" opacity="0.25"/>
-    <path d="M262 140C293 147 311 170 309 199" stroke="#FFD0D6" stroke-opacity="0.34" stroke-width="6" stroke-linecap="round"/>
-    <path d="M216 167C241 155 272 155 295 169" stroke="#FFD0D6" stroke-opacity="0.18" stroke-width="5" stroke-linecap="round"/>
+    <path d="M160 307C104 292 66 250 68 201C70 151 108 117 158 115C184 78 225 58 272 68C322 54 381 75 410 120C454 131 483 171 480 217C476 266 436 303 377 311C349 349 311 373 258 378C207 381 174 355 160 307Z" fill="url(#petalA)"/>
+    <path d="M167 272C129 253 104 224 107 189C110 152 142 127 183 126C204 96 235 82 271 86C307 79 345 90 368 115C407 124 432 151 432 185C432 219 410 247 374 263C357 294 325 315 284 320C237 326 194 311 167 272Z" fill="url(#petalB)"/>
+    <path d="M193 257C169 232 162 201 177 173C193 145 225 126 260 127C291 120 321 130 339 154C361 176 366 206 350 232C340 263 311 282 277 287C242 295 214 284 193 257Z" fill="url(#petalC)"/>
+    <path d="M212 238C199 213 205 182 227 166C242 151 262 145 281 148C305 145 325 157 336 177C346 196 344 220 331 239C318 258 298 270 276 272C251 278 226 265 212 238Z" fill="url(#roseCore)"/>
+    <path d="M231 228C229 211 239 194 254 187C266 179 281 178 294 184C309 189 319 201 320 216C321 231 313 244 299 253C286 260 270 261 255 257C242 252 234 241 231 228Z" fill="#9A0A1B" opacity="0.72"/>
+
+    <path d="M181 162C210 125 262 107 315 123" stroke="#FFD7DE" stroke-opacity="0.34" stroke-width="7" stroke-linecap="round"/>
+    <path d="M151 208C201 183 312 184 364 215" stroke="#FFD7DE" stroke-opacity="0.22" stroke-width="6" stroke-linecap="round"/>
+    <path d="M188 263C221 286 285 290 334 262" stroke="#FFD7DE" stroke-opacity="0.18" stroke-width="5" stroke-linecap="round"/>
+    <path d="M239 147C271 168 283 212 267 247" stroke="#FFE1E6" stroke-opacity="0.26" stroke-width="5" stroke-linecap="round"/>
+    <path d="M294 151C266 167 249 192 246 221" stroke="#FFE1E6" stroke-opacity="0.26" stroke-width="4" stroke-linecap="round"/>
   </g>
 
-  <path d="M276 310C276 355 275 407 274 453C273 518 274 585 274 679" stroke="url(#stem)" stroke-width="14" stroke-linecap="round"/>
-  <path d="M273 394C223 370 187 373 162 405C197 421 229 427 271 418" fill="url(#leaf)"/>
-  <path d="M274 478C320 447 355 446 391 472C356 499 320 509 273 502" fill="url(#leaf)"/>
-  <path d="M273 560C223 540 192 550 171 585C208 596 236 599 273 589" fill="url(#leaf)"/>
-  <path d="M277 626C320 603 347 606 377 632C343 650 317 654 276 648" fill="url(#leaf)"/>
-  <path d="M196 388C219 396 239 402 261 406" stroke="#C6F2C8" stroke-opacity="0.45" stroke-width="4" stroke-linecap="round"/>
-  <path d="M290 482C313 487 330 491 351 491" stroke="#C6F2C8" stroke-opacity="0.45" stroke-width="4" stroke-linecap="round"/>
-  <path d="M203 570C225 575 240 577 258 577" stroke="#C6F2C8" stroke-opacity="0.45" stroke-width="4" stroke-linecap="round"/>
-  <path d="M298 631C319 632 333 633 349 634" stroke="#C6F2C8" stroke-opacity="0.45" stroke-width="4" stroke-linecap="round"/>
+  <path d="M308 333C310 383 311 441 311 494C311 583 309 652 307 736" stroke="url(#stem)" stroke-width="13" stroke-linecap="round"/>
+  <path d="M304 395C248 369 205 373 172 409C211 432 252 437 307 423" fill="url(#leafLight)"/>
+  <path d="M312 476C359 445 401 446 444 479C402 507 364 514 310 499" fill="url(#leafDark)"/>
+  <path d="M303 564C246 543 205 554 176 594C221 611 255 615 304 603" fill="url(#leafDark)"/>
+  <path d="M310 651C355 626 394 629 429 659C389 680 354 684 308 673" fill="url(#leafLight)"/>
+
+  <path d="M196 401C227 408 251 412 281 413" stroke="#D9FFD2" stroke-opacity="0.42" stroke-width="4" stroke-linecap="round"/>
+  <path d="M335 482C360 487 383 490 410 490" stroke="#D9FFD2" stroke-opacity="0.42" stroke-width="4" stroke-linecap="round"/>
+  <path d="M201 579C233 586 255 589 286 589" stroke="#D9FFD2" stroke-opacity="0.42" stroke-width="4" stroke-linecap="round"/>
+  <path d="M332 661C360 664 382 666 404 666" stroke="#D9FFD2" stroke-opacity="0.42" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- water drops -->
+  <g opacity="0.95">
+    <ellipse cx="184" cy="149" rx="13" ry="18" fill="url(#water)"/>
+    <ellipse cx="330" cy="169" rx="12" ry="17" fill="url(#water)"/>
+    <ellipse cx="145" cy="230" rx="9" ry="13" fill="url(#water)"/>
+    <ellipse cx="382" cy="229" rx="10" ry="14" fill="url(#water)"/>
+    <ellipse cx="262" cy="97" rx="8" ry="11" fill="url(#water)"/>
+    <ellipse cx="238" cy="280" rx="12" ry="16" fill="url(#water)"/>
+    <ellipse cx="302" cy="304" rx="10" ry="14" fill="url(#water)"/>
+    <ellipse cx="240" cy="419" rx="9" ry="13" fill="url(#water)"/>
+    <ellipse cx="381" cy="466" rx="11" ry="15" fill="url(#water)"/>
+    <ellipse cx="220" cy="571" rx="10" ry="14" fill="url(#water)"/>
+    <ellipse cx="360" cy="640" rx="9" ry="13" fill="url(#water)"/>
+  </g>
 </svg>
