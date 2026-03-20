@@ -207,7 +207,6 @@ class AccountScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   _MyPageStatsSection(
                     authToken: authToken,
-                    pointBalance: currentUser.pointBalance,
                     selectedLanguage: selectedLanguage,
                     onLanguageChanged: onLanguageChanged,
                   ),
@@ -348,13 +347,11 @@ class AccountScreen extends StatelessWidget {
 class _MyPageStatsSection extends StatefulWidget {
   const _MyPageStatsSection({
     required this.authToken,
-    required this.pointBalance,
     required this.selectedLanguage,
     required this.onLanguageChanged,
   });
 
   final String authToken;
-  final int pointBalance;
   final AppLanguage selectedLanguage;
   final ValueChanged<AppLanguage> onLanguageChanged;
 
@@ -375,8 +372,7 @@ class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
   @override
   void didUpdateWidget(covariant _MyPageStatsSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.authToken != widget.authToken ||
-        oldWidget.pointBalance != widget.pointBalance) {
+    if (oldWidget.authToken != widget.authToken) {
       _giftCountFuture = _loadGiftCount();
     }
   }
@@ -399,14 +395,6 @@ class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
     );
   }
 
-  void _openPointGuide(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const _PointGuideScreen(),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
@@ -424,14 +412,6 @@ class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
                 label: strings.giftsLabel,
                 value: giftCount.toString(),
                 onTap: () => _openMyFlowers(context),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MyPageStatCard(
-                label: strings.myPagePoints,
-                value: '${widget.pointBalance}P',
-                onTap: () => _openPointGuide(context),
               ),
             ),
             const SizedBox(width: 12),
