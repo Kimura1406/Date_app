@@ -113,132 +113,187 @@ class _FlowerShopScreenState extends State<FlowerShopScreen> {
     final theme = Theme.of(context);
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF2FAFF),
+              Color(0xFFE7F5FF),
+            ],
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    strings.flowerShopTitle,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: const Color(0xFF2F2424),
-                      fontWeight: FontWeight.w800,
+            Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color(0xFF4BA9E8),
+                    Color(0xFF2F86D7),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x220A4474),
+                    blurRadius: 24,
+                    offset: Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      strings.flowerShopTitle,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        height: 1.05,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 14),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            '${strings.flowerShopPointsLabel}:',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.92),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8D24B),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              '${widget.currentUser.pointBalance}P',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: const Color(0xFF204A72),
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _sortAscending = !(_sortAscending ?? false);
+                              });
+                            },
+                            tooltip: _sortAscending == true
+                                ? strings.flowerShopSortHighToLow
+                                : strings.flowerShopSortLowToHigh,
+                            style: IconButton.styleFrom(
+                              backgroundColor:
+                                  Colors.white.withValues(alpha: 0.16),
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(42, 42),
+                            ),
+                            icon: Icon(
+                              _sortAscending == true
+                                  ? Icons.arrow_upward_rounded
+                                  : Icons.arrow_downward_rounded,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                _PointBalanceChip(points: widget.currentUser.pointBalance),
-                const SizedBox(width: 10),
-                IconButton.filledTonal(
-                  onPressed: () {
-                    setState(() {
-                      _sortAscending = !(_sortAscending ?? false);
-                    });
-                  },
-                  tooltip: _sortAscending == true
-                      ? strings.flowerShopSortHighToLow
-                      : strings.flowerShopSortLowToHigh,
-                  style: IconButton.styleFrom(
-                    backgroundColor: const Color(0xFFF3E1DC),
-                    foregroundColor: const Color(0xFF6D4751),
-                  ),
-                  icon: Icon(
-                    _sortAscending == true
-                        ? Icons.arrow_upward_rounded
-                        : Icons.arrow_downward_rounded,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              strings.flowerShopSubtitle,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF6D5A5A),
-                fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              child: Text(
+                strings.flowerShopSubtitle,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF4F82AA),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
             Expanded(
-              child: FutureBuilder<List<FlowerShopItem>>(
-                future: _flowersFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (snapshot.hasError) {
-                    return _FlowerShopError(
-                      message: snapshot.error.toString(),
-                      onRetry: _reload,
-                    );
-                  }
-
-                  final items = snapshot.data ?? const <FlowerShopItem>[];
-                  if (items.isEmpty) {
-                    return _FlowerShopEmpty(onRetry: _reload);
-                  }
-
-                  final sortedItems = [...items];
-                  if (_sortAscending != null) {
-                    sortedItems.sort((a, b) => a.pricePoints.compareTo(b.pricePoints));
-                    if (_sortAscending == false) {
-                      sortedItems.setAll(0, sortedItems.reversed);
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: FutureBuilder<List<FlowerShopItem>>(
+                  future: _flowersFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
                     }
-                  }
 
-                  return GridView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemCount: sortedItems.length,
-                    itemBuilder: (context, index) {
-                      final item = sortedItems[index];
-                      return _FlowerGiftCard(
-                        item: item,
-                        strings: strings,
-                        busy: _processingFlowerId == item.id,
-                        onAcquire: () => _acquireFlower(item),
+                    if (snapshot.hasError) {
+                      return _FlowerShopError(
+                        message: snapshot.error.toString(),
+                        onRetry: _reload,
                       );
-                    },
-                  );
-                },
+                    }
+
+                    final items = snapshot.data ?? const <FlowerShopItem>[];
+                    if (items.isEmpty) {
+                      return _FlowerShopEmpty(onRetry: _reload);
+                    }
+
+                    final sortedItems = [...items];
+                    if (_sortAscending != null) {
+                      sortedItems.sort(
+                        (a, b) => a.pricePoints.compareTo(b.pricePoints),
+                      );
+                      if (_sortAscending == false) {
+                        sortedItems.setAll(0, sortedItems.reversed);
+                      }
+                    }
+
+                    return GridView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 20),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 14,
+                        childAspectRatio: 0.73,
+                      ),
+                      itemCount: sortedItems.length,
+                      itemBuilder: (context, index) {
+                        final item = sortedItems[index];
+                        return _FlowerGiftCard(
+                          item: item,
+                          strings: strings,
+                          busy: _processingFlowerId == item.id,
+                          onAcquire: () => _acquireFlower(item),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _PointBalanceChip extends StatelessWidget {
-  const _PointBalanceChip({required this.points});
-
-  final int points;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8E7E1),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFE1C3BD)),
-      ),
-      child: Text(
-        '${context.strings.flowerShopPointsLabel}: ${points}P',
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: const Color(0xFF6D4751),
-              fontWeight: FontWeight.w800,
-            ),
       ),
     );
   }
@@ -261,30 +316,32 @@ class _FlowerGiftCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.82),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFFE9D7D1)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: const Color(0xFFD9EEF9)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 18,
-            offset: Offset(0, 10),
+            color: Color(0x140B4A7A),
+            blurRadius: 22,
+            offset: Offset(0, 12),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
+            AspectRatio(
+              aspectRatio: 1.25,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(22),
-                child: Container(
-                  width: double.infinity,
-                  color: const Color(0xFFF5E9E6),
+                borderRadius: BorderRadius.circular(20),
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFEAF7FF),
+                  ),
                   child: _FlowerImage(imageUrl: item.imageUrl),
                 ),
               ),
@@ -295,29 +352,42 @@ class _FlowerGiftCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: const Color(0xFF241919),
+                color: const Color(0xFF24262F),
                 fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: 6),
             Text(
               item.description,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: const Color(0xFF6D5A5A),
+                color: const Color(0xFF717A87),
                 fontWeight: FontWeight.w500,
-                height: 1.4,
               ),
             ),
+            const Spacer(),
             const SizedBox(height: 12),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFB86A76),
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF4BA9E8),
+                        Color(0xFF2F86D7),
+                      ],
+                    ),
                     borderRadius: BorderRadius.circular(999),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x224BA9E8),
+                        blurRadius: 12,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
                   ),
                   child: Text(
                     '${item.pricePoints}P',
@@ -331,10 +401,17 @@ class _FlowerGiftCard extends StatelessWidget {
                 FilledButton(
                   onPressed: busy ? null : onAcquire,
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF6D4751),
+                    backgroundColor: const Color(0xFFE1535D),
                     foregroundColor: Colors.white,
-                    minimumSize: const Size(92, 40),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    disabledBackgroundColor: const Color(0xFFD2D7E0),
+                    minimumSize: const Size(104, 40),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                     textStyle: theme.textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
