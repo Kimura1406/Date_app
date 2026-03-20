@@ -27,9 +27,10 @@ class ProfileCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFD9EEF9)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 18,
                 offset: const Offset(0, 8),
               ),
@@ -70,7 +71,7 @@ class ProfileCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF5A78),
+                      color: const Color(0xFFEF4444),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
@@ -96,7 +97,7 @@ class ProfileCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF2F2323),
+                            color: const Color(0xFF1F2A37),
                           ),
                     ),
                     const SizedBox(height: 4),
@@ -117,7 +118,7 @@ class ProfileCard extends StatelessWidget {
                                 .textTheme
                                 .bodySmall
                                 ?.copyWith(
-                                  color: const Color(0xFF5C4545),
+                                  color: const Color(0xFF10B981),
                                   fontWeight: FontWeight.w500,
                                 ),
                           ),
@@ -130,7 +131,7 @@ class ProfileCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF6D5A5A),
+                            color: const Color(0xFF94A3B8),
                           ),
                     ),
                   ],

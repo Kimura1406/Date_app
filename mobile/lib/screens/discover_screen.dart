@@ -128,31 +128,69 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final theme = Theme.of(context);
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF2FAFF),
+              Color(0xFFE7F5FF),
+            ],
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _DiscoverHeader(
-              onOpenMission: () => _openPlaceholderScreen(
-                title: strings.missionTitle,
-                icon: Icons.flag_circle_rounded,
+            Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color(0xFF4BA9E8),
+                    Color(0xFF2F86D7),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x220A4474),
+                    blurRadius: 24,
+                    offset: Offset(0, 10),
+                  ),
+                ],
               ),
-              onToggleFilter: () {
-                setState(() {
-                  filtersExpanded = !filtersExpanded;
-                });
-              },
-              onOpenNotifications: () => _openPlaceholderScreen(
-                title: strings.notificationsTitle,
-                icon: Icons.notifications_active_rounded,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
+                child: _DiscoverHeader(
+                  onOpenMission: () => _openPlaceholderScreen(
+                    title: strings.missionTitle,
+                    icon: Icons.flag_circle_rounded,
+                  ),
+                  onToggleFilter: () {
+                    setState(() {
+                      filtersExpanded = !filtersExpanded;
+                    });
+                  },
+                  onOpenNotifications: () => _openPlaceholderScreen(
+                    title: strings.notificationsTitle,
+                    icon: Icons.notifications_active_rounded,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 14),
-            if (filtersExpanded) ...[
-              DiscoveryFilterPanel(
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (filtersExpanded) ...[
+                      DiscoveryFilterPanel(
                 expanded: filtersExpanded,
                 country: selectedCountry,
                 job: selectedJob,
@@ -192,10 +230,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 },
                 onReset: _resetFilters,
                 onApply: _applyFilters,
-              ),
-              const SizedBox(height: 16),
-            ] else ...[
-              FutureBuilder<List<DiscoverBannerItem>>(
+                      ),
+                      const SizedBox(height: 16),
+                    ] else ...[
+                      FutureBuilder<List<DiscoverBannerItem>>(
                 future: bannersFuture,
                 builder: (context, snapshot) {
                   final banners = snapshot.data ?? const <DiscoverBannerItem>[];
@@ -203,30 +241,30 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                     return const SizedBox.shrink();
                   }
 
-                  return _DiscoverBannerCarousel(
-                    banners: banners,
-                    controller: _bannerController,
-                    currentBanner: currentBanner,
-                    onPageChanged: (value) {
-                      setState(() {
-                        currentBanner = value;
-                      });
-                    },
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
-            Text(
-              strings.feedSectionTitle,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF2F2323),
-                  ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: FutureBuilder<List<DatingProfile>>(
+                          return _DiscoverBannerCarousel(
+                            banners: banners,
+                            controller: _bannerController,
+                            currentBanner: currentBanner,
+                            onPageChanged: (value) {
+                              setState(() {
+                                currentBanner = value;
+                              });
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 18),
+                    ],
+                    Text(
+                      strings.feedSectionTitle,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1F2A37),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: FutureBuilder<List<DatingProfile>>(
                 future: profilesFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
@@ -244,9 +282,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                     return Center(
                       child: Text(
                         strings.noProfilesYet,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: const Color(0xFF6D5A5A),
-                            ),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: const Color(0xFF6E8297),
+                        ),
                       ),
                     );
                   }
@@ -255,9 +293,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 0.67,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.66,
                     ),
                     itemBuilder: (context, index) {
                       return ProfileCard(
@@ -267,6 +305,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                     },
                   );
                 },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -293,7 +335,7 @@ class _DiscoverBannerCarousel extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          height: 152,
+          height: 156,
           child: PageView.builder(
             controller: controller,
             itemCount: banners.length,
@@ -304,17 +346,17 @@ class _DiscoverBannerCarousel extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 10),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 18,
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(24),
                     child: SizedBox.expand(
                       child: _DiscoverBannerImage(imageUrl: banner.imageUrl),
                     ),
@@ -335,7 +377,7 @@ class _DiscoverBannerCarousel extends StatelessWidget {
               height: 8,
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
-                color: active ? const Color(0xFF9E4E5D) : const Color(0xFFD7C1C1),
+                color: active ? const Color(0xFF4BA9E8) : Colors.white,
                 borderRadius: BorderRadius.circular(999),
               ),
             );
@@ -407,7 +449,7 @@ class _DiscoverHeader extends StatelessWidget {
     return Row(
       children: [
         _HeaderActionChip(
-          icon: Icons.flag_circle_rounded,
+          icon: Icons.flag_rounded,
           label: 'MISSION',
           onTap: onOpenMission,
         ),
@@ -449,23 +491,31 @@ class _HeaderActionChip extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.82),
+            color: Colors.white.withValues(alpha: 0.18),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.flag_circle_rounded,
-                size: 18,
-                color: Color(0xFF4A2330),
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDC2626),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(
+                  icon,
+                  size: 12,
+                  color: const Color(0xFFFACC15),
+                ),
               ),
               const SizedBox(width: 8),
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: const Color(0xFF4A2330),
+                      color: Colors.white,
                       fontWeight: FontWeight.w800,
                     ),
               ),
@@ -501,13 +551,13 @@ class _HeaderIconButton extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.82),
+              color: Colors.white.withValues(alpha: 0.18),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
             ),
             child: Icon(
               icon,
-              color: const Color(0xFF4A2330),
+              color: Colors.white,
             ),
           ),
         ),
