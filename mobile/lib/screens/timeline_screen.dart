@@ -75,7 +75,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
                     Text(
                       strings.timelineComposerTitle,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: const Color(0xFF2F2323),
+                            color: const Color(0xFF1F2A37),
                             fontWeight: FontWeight.w800,
                           ),
                     ),
@@ -87,10 +87,14 @@ class _TimelineScreenState extends State<TimelineScreen> {
                       decoration: InputDecoration(
                         hintText: strings.timelineComposerPlaceholder,
                         filled: true,
-                        fillColor: const Color(0xFFF9F3F0),
+                        fillColor: const Color(0xFFF2F8FD),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide.none,
+                          borderSide: const BorderSide(color: Color(0xFFD8EBF9)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Color(0xFFD8EBF9)),
                         ),
                       ),
                     ),
@@ -100,10 +104,15 @@ class _TimelineScreenState extends State<TimelineScreen> {
                       decoration: InputDecoration(
                         hintText: strings.timelineImagePlaceholder,
                         filled: true,
-                        fillColor: const Color(0xFFF9F3F0),
+                        fillColor: const Color(0xFFF2F8FD),
+                        prefixIcon: const Icon(Icons.image_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide.none,
+                          borderSide: const BorderSide(color: Color(0xFFD8EBF9)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: Color(0xFFD8EBF9)),
                         ),
                       ),
                     ),
@@ -123,7 +132,9 @@ class _TimelineScreenState extends State<TimelineScreen> {
                                 ? () {
                                     Navigator.of(context).pop(
                                       _TimelinePost(
-                                        id: DateTime.now().microsecondsSinceEpoch.toString(),
+                                        id: DateTime.now()
+                                            .microsecondsSinceEpoch
+                                            .toString(),
                                         authorName: widget.currentUser.name,
                                         authorHandle: '@me',
                                         body: textController.text.trim(),
@@ -134,6 +145,9 @@ class _TimelineScreenState extends State<TimelineScreen> {
                                     );
                                   }
                                 : null,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF2F86D7),
+                            ),
                             child: Text(strings.timelinePublishButton),
                           ),
                         ),
@@ -166,49 +180,95 @@ class _TimelineScreenState extends State<TimelineScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final theme = Theme.of(context);
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF2FAFF),
+              Color(0xFFE7F5FF),
+            ],
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              strings.timelineTitle,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: const Color(0xFF2F2323),
-                    fontWeight: FontWeight.w800,
+            Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color(0xFF4BA9E8),
+                    Color(0xFF2F86D7),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x220A4474),
+                    blurRadius: 24,
+                    offset: Offset(0, 10),
                   ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      strings.timelineTitle,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      strings.timelineSubtitle,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.84),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              strings.timelineSubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF6D5A5A),
-                  ),
-            ),
-            const SizedBox(height: 16),
-            _TimelineComposerCard(
-              currentUser: widget.currentUser,
-              onTap: _openComposer,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              strings.timelineFeaturedTitle,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: const Color(0xFF2F2323),
-                    fontWeight: FontWeight.w800,
-                  ),
-            ),
-            const SizedBox(height: 12),
             Expanded(
-              child: ListView.separated(
-                physics: const BouncingScrollPhysics(),
-                itemCount: _posts.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 14),
-                itemBuilder: (context, index) {
-                  return _TimelinePostCard(post: _posts[index]);
-                },
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                child: ListView(
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    _TimelineComposerCard(
+                      currentUser: widget.currentUser,
+                      onTap: _openComposer,
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      strings.timelineFeaturedTitle,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: const Color(0xFF1F2A37),
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ...List.generate(_posts.length, (index) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: index == _posts.length - 1 ? 12 : 14,
+                        ),
+                        child: _TimelinePostCard(post: _posts[index]),
+                      );
+                    }),
+                  ],
+                ),
               ),
             ),
           ],
@@ -230,6 +290,7 @@ class _TimelineComposerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final theme = Theme.of(context);
 
     return Material(
       color: Colors.transparent,
@@ -239,8 +300,9 @@ class _TimelineComposerCard extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFD9EEF9)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.06),
@@ -252,12 +314,12 @@ class _TimelineComposerCard extends StatelessWidget {
           child: Row(
             children: [
               CircleAvatar(
-                radius: 24,
-                backgroundColor: const Color(0xFFF3D6DF),
+                radius: 20,
+                backgroundColor: const Color(0xFFE3F2FF),
                 child: Text(
                   currentUser.name.isNotEmpty ? currentUser.name[0] : '?',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: const Color(0xFF4A2330),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                        color: const Color(0xFF2F86D7),
                         fontWeight: FontWeight.w800,
                       ),
                 ),
@@ -265,18 +327,26 @@ class _TimelineComposerCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF9F3F0),
-                    borderRadius: BorderRadius.circular(18),
+                    color: const Color(0xFFF1F8FE),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: const Color(0xFFD8EBF9)),
                   ),
                   child: Text(
                     strings.timelineComposerPlaceholder,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFF8A7378),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF7C91A4),
                         ),
                   ),
                 ),
+              ),
+              const SizedBox(width: 10),
+              const Icon(
+                Icons.image_outlined,
+                color: Color(0xFF4BA9E8),
+                size: 22,
               ),
             ],
           ),
@@ -295,11 +365,13 @@ class _TimelinePostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(26),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFD9EEF9)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -311,75 +383,125 @@ class _TimelinePostCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor:
-                    post.isMine ? const Color(0xFFF0D7D0) : const Color(0xFFE8D9FF),
-                child: Text(
-                  post.authorName.isNotEmpty ? post.authorName[0] : '?',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: const Color(0xFF4A2330),
-                        fontWeight: FontWeight.w800,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: const Color(0xFFE3F2FF),
+                  child: Text(
+                    post.authorName.isNotEmpty ? post.authorName[0] : '?',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: const Color(0xFF2F86D7),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        post.authorName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: const Color(0xFF1F2A37),
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
+                      Text(
+                        post.publishedAtLabel,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFF8AA0B5),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      post.authorName,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: const Color(0xFF2F2323),
-                            fontWeight: FontWeight.w800,
-                          ),
-                    ),
-                    Text(
-                      post.publishedAtLabel,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF8A7378),
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 14),
-          Text(
-            post.body,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF4A3A3D),
-                  height: 1.45,
-                ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+            child: Text(
+              post.body,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: const Color(0xFF4A5764),
+                height: 1.45,
+              ),
+            ),
           ),
           if (post.imageUrl.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(22),
-              child: AspectRatio(
-                aspectRatio: 1.2,
-                child: Image.network(
-                  post.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: const Color(0xFFF9F3F0),
-                    alignment: Alignment.center,
-                    child: const Icon(
-                      Icons.image_not_supported_outlined,
-                      color: Color(0xFF9E4E5D),
-                      size: 40,
-                    ),
+            AspectRatio(
+              aspectRatio: 4 / 3,
+              child: Image.network(
+                post.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: const Color(0xFFF2F8FD),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.image_not_supported_outlined,
+                    color: Color(0xFF9AB5C9),
+                    size: 40,
                   ),
                 ),
               ),
             ),
           ],
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 14),
+            child: Row(
+              children: [
+                _PostActionButton(
+                  icon: Icons.favorite_border_rounded,
+                  label: '\u3044\u3044\u306d',
+                ),
+                SizedBox(width: 18),
+                _PostActionButton(
+                  icon: Icons.mode_comment_outlined,
+                  label: '\u30b3\u30e1\u30f3\u30c8',
+                ),
+              ],
+            ),
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _PostActionButton extends StatelessWidget {
+  const _PostActionButton({
+    required this.icon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 18,
+          color: const Color(0xFF8AA0B5),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: const Color(0xFF8AA0B5),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }
