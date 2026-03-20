@@ -170,6 +170,8 @@ class AccountScreen extends StatelessWidget {
                                     color: const Color(0xFF6D5A5A),
                                   ),
                         ),
+                        const SizedBox(height: 10),
+                        _MyPageLikeCountChip(authToken: authToken),
                       ],
                     ),
                   ),
@@ -321,12 +323,12 @@ class _MyPageStatsSection extends StatefulWidget {
 
 class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
   final ApiClient _apiClient = ApiClient();
-  late Future<_MyPageStatsData> _statsFuture;
+  late Future<int> _giftCountFuture;
 
   @override
   void initState() {
     super.initState();
-    _statsFuture = _loadStats();
+    _giftCountFuture = _loadGiftCount();
   }
 
   @override
@@ -334,34 +336,18 @@ class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.authToken != widget.authToken ||
         oldWidget.pointBalance != widget.pointBalance) {
-      _statsFuture = _loadStats();
+      _giftCountFuture = _loadGiftCount();
     }
   }
 
-  Future<_MyPageStatsData> _loadStats() async {
-    final likedUsers = await _apiClient.fetchUsersWhoLikedMe(
-      token: widget.authToken,
-    );
+  Future<int> _loadGiftCount() async {
     final myFlowers = await _apiClient.fetchMyFlowers(
       token: widget.authToken,
     );
-    final giftCount = [
+    return [
       ...myFlowers.purchased,
       ...myFlowers.gifted,
     ].fold<int>(0, (total, item) => total + item.ownedCount);
-
-    return _MyPageStatsData(
-      likeCount: likedUsers.length,
-      giftCount: giftCount,
-    );
-  }
-
-  void _openLikedUsers(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => _LikedUsersScreen(token: widget.authToken),
-      ),
-    );
   }
 
   void _openMyFlowers(BuildContext context) {
@@ -384,30 +370,18 @@ class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
   Widget build(BuildContext context) {
     final strings = context.strings;
 
-    return FutureBuilder<_MyPageStatsData>(
-      future: _statsFuture,
+    return FutureBuilder<int>(
+      future: _giftCountFuture,
       builder: (context, snapshot) {
-        final stats = snapshot.data ??
-            const _MyPageStatsData(
-              likeCount: 0,
-              giftCount: 0,
-            );
+        final giftCount = snapshot.data ?? 0;
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _MyPageStatCard(
-                label: strings.likesCountLabel,
-                value: stats.likeCount.toString(),
-                onTap: () => _openLikedUsers(context),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MyPageStatCard(
                 label: strings.giftsLabel,
-                value: stats.giftCount.toString(),
+                value: giftCount.toString(),
                 onTap: () => _openMyFlowers(context),
               ),
             ),
@@ -424,16 +398,6 @@ class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
       },
     );
   }
-}
-
-class _MyPageStatsData {
-  const _MyPageStatsData({
-    required this.likeCount,
-    required this.giftCount,
-  });
-
-  final int likeCount;
-  final int giftCount;
 }
 
 class _MyAccountEditScreen extends StatelessWidget {
@@ -750,116 +714,78 @@ class _MyPageStatCard extends StatelessWidget {
   }
 }
 
-class _LikedUsersScreen extends StatelessWidget {
-  const _LikedUsersScreen({
-    required this.token,
+class _MyPageLikeCountChip extends StatefulWidget {
+  const _MyPageLikeCountChip({
+    required this.authToken,
   });
 
-  final String token;
+  final String authToken;
+
+  @override
+  State<_MyPageLikeCountChip> createState() => _MyPageLikeCountChipState();
+}
+
+class _MyPageLikeCountChipState extends State<_MyPageLikeCountChip> {
+  final ApiClient _apiClient = ApiClient();
+  late Future<int> _likeCountFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _likeCountFuture = _loadLikeCount();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MyPageLikeCountChip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.authToken != widget.authToken) {
+      _likeCountFuture = _loadLikeCount();
+    }
+  }
+
+  Future<int> _loadLikeCount() async {
+    final likedUsers = await _apiClient.fetchUsersWhoLikedMe(
+      token: widget.authToken,
+    );
+    return likedUsers.length;
+  }
 
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
-    final apiClient = ApiClient();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2F2323),
-        elevation: 0,
-        title: Text(strings.myPageLikedUsersTitle),
-      ),
-      body: SafeArea(
-        child: FutureBuilder<List<UserLikerItem>>(
-          future: apiClient.fetchUsersWhoLikedMe(token: token),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  snapshot.error.toString().replaceFirst('Exception: ', ''),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF6D5A5A),
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              );
-            }
+    return FutureBuilder<int>(
+      future: _likeCountFuture,
+      builder: (context, snapshot) {
+        final likeCount = snapshot.data ?? 0;
 
-            final items = snapshot.data ?? const <UserLikerItem>[];
-            if (items.isEmpty) {
-              return Center(
-                child: Text(
-                  strings.myPageNoLikedUsers,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: const Color(0xFF6D5A5A),
-                      ),
-                ),
-              );
-            }
-
-            return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.94),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: const Color(0xFFF0D7D0),
-                        child: Text(
-                          item.name.isNotEmpty ? item.name.substring(0, 1) : '?',
-                          style: const TextStyle(
-                            color: Color(0xFF4A2330),
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    color: const Color(0xFF2F2323),
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${item.birthDate} • ${item.country}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(color: const Color(0xFF6D5A5A)),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ),
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8E7E1),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: const Color(0xFFE1C3BD)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.favorite_border_rounded,
+                size: 16,
+                color: Color(0xFF6D4751),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${strings.likesCountLabel} $likeCount',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: const Color(0xFF6D4751),
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
