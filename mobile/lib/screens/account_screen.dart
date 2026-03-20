@@ -98,106 +98,126 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final theme = Theme.of(context);
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.only(bottom: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              strings.myPageTitle,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF2F2323),
-                  ),
-            ),
-            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.94),
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 18,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(24, 18, 24, 26),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF5CA4F2), Color(0xFF4D8DDA)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(28),
+                  bottomRight: Radius.circular(28),
+                ),
               ),
-              child: Row(
+              child: Text(
+                strings.myPageTitle,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 36,
-                    backgroundColor: const Color(0xFFF0D7D0),
-                    child: Text(
-                      currentUser.name.isNotEmpty
-                          ? currentUser.name.substring(0, 1)
-                          : '?',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: const Color(0xFF4A2330),
-                            fontWeight: FontWeight.w800,
-                          ),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.98),
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF5CA4F2).withValues(alpha: 0.10),
+                          blurRadius: 24,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Text(
-                          currentUser.name,
-                          style:
-                              Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: const Color(0xFF2F2323),
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                        CircleAvatar(
+                          radius: 36,
+                          backgroundColor: const Color(0xFFE8F3FF),
+                          child: Text(
+                            currentUser.name.isNotEmpty
+                                ? currentUser.name.substring(0, 1)
+                                : '?',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              color: const Color(0xFF4F8DDC),
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${strings.myPageBirthDateLabel}: ${currentUser.birthDate.isNotEmpty ? currentUser.birthDate : strings.notSetLabel}',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: const Color(0xFF6D5A5A),
-                                  ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                currentUser.name,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: const Color(0xFF1F2A37),
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '${strings.myPageBirthDateLabel}: ${currentUser.birthDate.isNotEmpty ? currentUser.birthDate : strings.notSetLabel}',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: const Color(0xFF7C8AA5),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${strings.myPageGenderLabel}: ${currentUser.gender.isNotEmpty ? strings.genderName(currentUser.gender) : strings.notSetLabel}',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: const Color(0xFF7C8AA5),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              _MyPageLikeCountChip(authToken: authToken),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${strings.myPageGenderLabel}: ${currentUser.gender.isNotEmpty ? strings.genderName(currentUser.gender) : strings.notSetLabel}',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: const Color(0xFF6D5A5A),
-                                  ),
-                        ),
-                        const SizedBox(height: 10),
-                        _MyPageLikeCountChip(authToken: authToken),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            _MyPageStatsSection(
-              authToken: authToken,
-              pointBalance: currentUser.pointBalance,
-            ),
-            const SizedBox(height: 18),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.94),
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 16,
-                    offset: const Offset(0, 10),
+                  const SizedBox(height: 16),
+                  _MyPageStatsSection(
+                    authToken: authToken,
+                    pointBalance: currentUser.pointBalance,
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
+                  const SizedBox(height: 18),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.98),
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF5CA4F2).withValues(alpha: 0.08),
+                          blurRadius: 20,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
                   _MyPageMenuTile(
                     title: strings.myPageProfileEdit,
                     onTap: () {
@@ -283,24 +303,31 @@ class AccountScreen extends StatelessWidget {
                     danger: true,
                     onTap: () => _openLogoutConfirm(context),
                   ),
+                      ],
+                    ),
+                  ),
+                  if (statusMessage.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEAF5FF),
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(color: const Color(0xFFCFE6FF)),
+                      ),
+                      child: Text(
+                        statusMessage,
+                        style: const TextStyle(
+                          color: Color(0xFF4F8DDC),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
-            if (statusMessage.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF0E9),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  statusMessage,
-                  style: const TextStyle(color: Color(0xFF4A2330)),
-                ),
-              ),
-            ],
           ],
         ),
       ),
@@ -679,15 +706,22 @@ class _MyPageStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.94),
-      borderRadius: BorderRadius.circular(24),
+      color: Colors.white.withValues(alpha: 0.98),
+      borderRadius: BorderRadius.circular(26),
       child: InkWell(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(26),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF5CA4F2).withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,14 +729,15 @@ class _MyPageStatCard extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF6D5A5A),
+                      color: const Color(0xFF7C8AA5),
+                      fontWeight: FontWeight.w600,
                     ),
               ),
               const SizedBox(height: 8),
               Text(
                 value,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: const Color(0xFF2F2323),
+                      color: const Color(0xFF1F2A37),
                       fontWeight: FontWeight.w800,
                     ),
               ),
@@ -760,11 +795,11 @@ class _MyPageLikeCountChipState extends State<_MyPageLikeCountChip> {
         final likeCount = snapshot.data ?? 0;
 
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8E7E1),
+            color: const Color(0xFFEAF5FF),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0xFFE1C3BD)),
+            border: Border.all(color: const Color(0xFFCFE6FF)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -772,13 +807,13 @@ class _MyPageLikeCountChipState extends State<_MyPageLikeCountChip> {
               const Icon(
                 Icons.favorite_border_rounded,
                 size: 16,
-                color: Color(0xFF6D4751),
+                color: Color(0xFF4F8DDC),
               ),
               const SizedBox(width: 6),
               Text(
                 '${strings.likesCountLabel} $likeCount',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: const Color(0xFF6D4751),
+                      color: const Color(0xFF4F8DDC),
                       fontWeight: FontWeight.w700,
                     ),
               ),
@@ -1112,10 +1147,10 @@ class _MyPageMenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor =
-        danger ? const Color(0xFF9B1C31) : const Color(0xFF2F2323);
+        danger ? const Color(0xFFE15656) : const Color(0xFF1F2A37);
 
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 6),
       title: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -1135,11 +1170,11 @@ class _MyPageMenuTile extends StatelessWidget {
 class _MyPageDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Divider(
+    return const Divider(
       height: 1,
-      color: Colors.black.withValues(alpha: 0.08),
-      indent: 18,
-      endIndent: 18,
+      color: Color(0xFFEAF2FB),
+      indent: 22,
+      endIndent: 22,
     );
   }
 }
