@@ -100,10 +100,20 @@ class _MatchesScreenState extends State<MatchesScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final theme = Theme.of(context);
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF2FAFF),
+              Color(0xFFE7F5FF),
+            ],
+          ),
+        ),
         child: FutureBuilder<_ChatListBundle>(
           future: _roomsFuture,
           builder: (context, snapshot) {
@@ -129,65 +139,94 @@ class _MatchesScreenState extends State<MatchesScreen> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  strings.chatRoomsTitle,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF2F2323),
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Color(0xFF4BA9E8),
+                        Color(0xFF2F86D7),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x220A4474),
+                        blurRadius: 24,
+                        offset: Offset(0, 10),
                       ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          strings.chatRoomsTitle,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          strings.chatRoomsSubtitle,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.84),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  strings.chatRoomsSubtitle,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF6D5A5A),
-                      ),
-                ),
-                const SizedBox(height: 18),
-                _PinnedOperatorRoomCard(
-                  strings: strings,
-                  room: operatorRoom,
-                  onTap: operatorRoom == null ? null : () => _openRoom(operatorRoom),
-                ),
-                const SizedBox(height: 16),
                 Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: _refreshRooms,
-                    child: userRooms.isEmpty
-                        ? ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: [
-                              SizedBox(
-                                height: 220,
-                                child: Center(
-                                  child: Text(
-                                    strings.noUserChatRooms,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge
-                                        ?.copyWith(
-                                          color: const Color(0xFF7A6770),
-                                        ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                    child: RefreshIndicator(
+                      onRefresh: _refreshRooms,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          _PinnedOperatorRoomCard(
+                            strings: strings,
+                            room: operatorRoom,
+                            onTap:
+                                operatorRoom == null ? null : () => _openRoom(operatorRoom),
+                          ),
+                          const SizedBox(height: 14),
+                          if (userRooms.isEmpty)
+                            SizedBox(
+                              height: 220,
+                              child: Center(
+                                child: Text(
+                                  strings.noUserChatRooms,
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    color: const Color(0xFF7C91A4),
                                   ),
                                 ),
                               ),
-                            ],
-                          )
-                        : ListView.separated(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: userRooms.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
+                            )
+                          else
+                            ...List.generate(userRooms.length, (index) {
                               final room = userRooms[index];
-                              return _ChatRoomListTile(
-                                title: _roomDisplayName(room),
-                                subtitle: _roomSubtitle(room, strings),
-                                trailing: _formatRoomTime(room.lastMessageAt),
-                                onTap: () => _openRoom(room),
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: index == userRooms.length - 1 ? 12 : 12,
+                                ),
+                                child: _ChatRoomListTile(
+                                  title: _roomDisplayName(room),
+                                  subtitle: _roomSubtitle(room, strings),
+                                  trailing: _formatRoomTime(room.lastMessageAt),
+                                  onTap: () => _openRoom(room),
+                                ),
                               );
-                            },
-                          ),
+                            }),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -236,13 +275,14 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: const Color(0xFFF0D7D0),
+            color: const Color(0xFFF1F8FE),
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [
+            border: Border.all(color: const Color(0xFFD8EBF9)),
+            boxShadow: const [
               BoxShadow(
-                color: const Color(0xFFE0B9AF).withValues(alpha: 0.22),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+                color: Color(0x1A0A4474),
+                blurRadius: 16,
+                offset: Offset(0, 8),
               ),
             ],
           ),
@@ -251,13 +291,13 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
               Container(
                 width: 52,
                 height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.7),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFDCEEFF),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.support_agent_rounded,
-                  color: Color(0xFF4A2330),
+                  color: Color(0xFF2F86D7),
                 ),
               ),
               const SizedBox(width: 14),
@@ -268,7 +308,7 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
                     Text(
                       strings.operatorRoomName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: const Color(0xFF2F2323),
+                            color: const Color(0xFF1F2A37),
                             fontWeight: FontWeight.w800,
                           ),
                     ),
@@ -280,7 +320,7 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: const Color(0xFF5C4545),
+                            color: const Color(0xFF6E8297),
                             height: 1.4,
                           ),
                     ),
@@ -290,7 +330,7 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
               const SizedBox(width: 12),
               const Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFF4A2330),
+                color: Color(0xFF4BA9E8),
               ),
             ],
           ),
@@ -325,6 +365,7 @@ class _ChatRoomListTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFD9EEF9)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),
@@ -337,11 +378,11 @@ class _ChatRoomListTile extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: const Color(0xFFF6CDD2),
+                backgroundColor: const Color(0xFFE3F2FF),
                 child: Text(
                   title.isNotEmpty ? title.substring(0, 1) : '?',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: const Color(0xFF4A2330),
+                        color: const Color(0xFF2F86D7),
                         fontWeight: FontWeight.w700,
                       ),
                 ),
@@ -354,7 +395,7 @@ class _ChatRoomListTile extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: const Color(0xFF4A2330),
+                            color: const Color(0xFF1F2A37),
                             fontWeight: FontWeight.w700,
                           ),
                     ),
@@ -364,7 +405,7 @@ class _ChatRoomListTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: const Color(0xFF7A6770),
+                            color: const Color(0xFF6E8297),
                             height: 1.35,
                           ),
                     ),
@@ -379,14 +420,14 @@ class _ChatRoomListTile extends StatelessWidget {
                     Text(
                       trailing,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF7A6770),
+                            color: const Color(0xFF8AA0B5),
                             fontWeight: FontWeight.w600,
                           ),
                     ),
                   const SizedBox(height: 12),
                   const Icon(
                     Icons.chevron_right_rounded,
-                    color: Color(0xFF9E4E5D),
+                    color: Color(0xFF4BA9E8),
                   ),
                 ],
               ),
