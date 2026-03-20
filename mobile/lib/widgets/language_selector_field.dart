@@ -8,14 +8,83 @@ class LanguageSelectorField extends StatelessWidget {
     required this.label,
     required this.language,
     required this.onChanged,
+    this.compact = false,
   });
 
   final String label;
   final AppLanguage language;
   final ValueChanged<AppLanguage> onChanged;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
+    final field = DropdownButtonFormField<AppLanguage>(
+      value: language,
+      decoration: compact
+          ? const InputDecoration(border: InputBorder.none)
+          : const InputDecoration(border: OutlineInputBorder()),
+      icon: const Icon(Icons.expand_more),
+      items: AppLanguage.values
+          .map((item) => DropdownMenuItem<AppLanguage>(
+                value: item,
+                child: Row(
+                  children: [
+                    Text(item.flag),
+                    const SizedBox(width: 8),
+                    Text(item.label),
+                  ],
+                ),
+              ))
+          .toList(),
+      onChanged: (value) {
+        if (value != null) {
+          onChanged(value);
+        }
+      },
+    );
+
+    if (compact) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white70),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<AppLanguage>(
+            value: language,
+            onChanged: (value) {
+              if (value != null) onChanged(value);
+            },
+            items: AppLanguage.values
+                .map(
+                  (item) => DropdownMenuItem<AppLanguage>(
+                    value: item,
+                    child: Row(
+                      children: [
+                        Text(item.flag),
+                        const SizedBox(width: 8),
+                        Text(item.label),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
+            selectedItemBuilder: (context) => AppLanguage.values
+                .map((item) => Row(
+                      children: [
+                        Text(item.flag),
+                        const SizedBox(width: 8),
+                        Text(item.label),
+                      ],
+                    ))
+                .toList(),
+          ),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -28,25 +97,7 @@ class LanguageSelectorField extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 6),
-          DropdownButtonFormField<AppLanguage>(
-            initialValue: language,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-            items: AppLanguage.values
-                .map(
-                  (item) => DropdownMenuItem<AppLanguage>(
-                    value: item,
-                    child: Text(item.label),
-                  ),
-                )
-                .toList(),
-            onChanged: (value) {
-              if (value != null) {
-                onChanged(value);
-              }
-            },
-          ),
+          field,
         ],
       ),
     );

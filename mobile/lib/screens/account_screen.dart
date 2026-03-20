@@ -120,13 +120,32 @@ class AccountScreen extends StatelessWidget {
                   bottomRight: Radius.circular(28),
                 ),
               ),
-              child: Text(
-                strings.myPageTitle,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: 0.4,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          strings.myPageTitle,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                      LanguageSelectorField(
+                        label: '',
+                        language: selectedLanguage,
+                        onChanged: onLanguageChanged,
+                        compact: true,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
             Padding(
@@ -141,7 +160,8 @@ class AccountScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF5CA4F2).withValues(alpha: 0.10),
+                          color:
+                              const Color(0xFF5CA4F2).withValues(alpha: 0.10),
                           blurRadius: 24,
                           offset: const Offset(0, 12),
                         ),
@@ -210,7 +230,8 @@ class AccountScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF5CA4F2).withValues(alpha: 0.08),
+                          color:
+                              const Color(0xFF5CA4F2).withValues(alpha: 0.08),
                           blurRadius: 20,
                           offset: const Offset(0, 12),
                         ),
@@ -218,92 +239,92 @@ class AccountScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                  _MyPageMenuTile(
-                    title: strings.myPageProfileEdit,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => _MyAccountEditScreen(
-                            selectedLanguage: selectedLanguage,
-                            onLanguageChanged: onLanguageChanged,
-                            statusMessage: statusMessage,
-                            busy: busy,
-                            emailController: emailController,
-                            passwordController: passwordController,
-                            nameController: nameController,
-                            ageController: ageController,
-                            jobController: jobController,
-                            bioController: bioController,
-                            distanceController: distanceController,
-                            interestsController: interestsController,
-                            onRefreshSession: onRefreshSession,
-                            onUpdate: onUpdate,
-                            onDelete: onDelete,
+                        _MyPageMenuTile(
+                          title: strings.myPageProfileEdit,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => _MyAccountEditScreen(
+                                  selectedLanguage: selectedLanguage,
+                                  onLanguageChanged: onLanguageChanged,
+                                  statusMessage: statusMessage,
+                                  busy: busy,
+                                  emailController: emailController,
+                                  passwordController: passwordController,
+                                  nameController: nameController,
+                                  ageController: ageController,
+                                  jobController: jobController,
+                                  bioController: bioController,
+                                  distanceController: distanceController,
+                                  interestsController: interestsController,
+                                  onRefreshSession: onRefreshSession,
+                                  onUpdate: onUpdate,
+                                  onDelete: onDelete,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        _MyPageDivider(),
+                        _MyPageMenuTile(
+                          title: strings.myPageMyHome,
+                          onTap: () => _openPlaceholder(
+                            context,
+                            title: strings.myPageMyHome,
                           ),
                         ),
-                      );
-                    },
-                  ),
-                  _MyPageDivider(),
-                  _MyPageMenuTile(
-                    title: strings.myPageMyHome,
-                    onTap: () => _openPlaceholder(
-                      context,
-                      title: strings.myPageMyHome,
-                    ),
-                  ),
-                  _MyPageDivider(),
-                  _MyPageMenuTile(
-                    title: strings.myPageBlockList,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
+                        _MyPageDivider(),
+                        _MyPageMenuTile(
+                          title: strings.myPageBlockList,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
                                 builder: (_) => _BlockListScreen(
                                   title: strings.myPageBlockList,
                                   token: authToken,
                                 ),
                               ),
                             );
-                    },
-                  ),
-                  _MyPageDivider(),
-                  _MyPageMenuTile(
-                    title: strings.myPageTerms,
-                    onTap: () => _openPlaceholder(
-                      context,
-                      title: strings.myPageTerms,
-                    ),
-                  ),
-                  _MyPageDivider(),
-                  _MyPageMenuTile(
-                    title: strings.myPagePrivacy,
-                    onTap: () => _openPlaceholder(
-                      context,
-                      title: strings.myPagePrivacy,
-                    ),
-                  ),
-                  _MyPageDivider(),
-                  _MyPageMenuTile(
-                    title: strings.myPageSettings,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => _SettingsScreen(
-                            title: strings.myPageSettings,
-                            selectedLanguage: selectedLanguage,
-                            onLanguageChanged: onLanguageChanged,
-                            onRefreshSession: onRefreshSession,
+                          },
+                        ),
+                        _MyPageDivider(),
+                        _MyPageMenuTile(
+                          title: strings.myPageTerms,
+                          onTap: () => _openPlaceholder(
+                            context,
+                            title: strings.myPageTerms,
                           ),
                         ),
-                      );
-                    },
-                  ),
-                  _MyPageDivider(),
-                  _MyPageMenuTile(
-                    title: strings.logout,
-                    danger: true,
-                    onTap: () => _openLogoutConfirm(context),
-                  ),
+                        _MyPageDivider(),
+                        _MyPageMenuTile(
+                          title: strings.myPagePrivacy,
+                          onTap: () => _openPlaceholder(
+                            context,
+                            title: strings.myPagePrivacy,
+                          ),
+                        ),
+                        _MyPageDivider(),
+                        _MyPageMenuTile(
+                          title: strings.myPageSettings,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => _SettingsScreen(
+                                  title: strings.myPageSettings,
+                                  selectedLanguage: selectedLanguage,
+                                  onLanguageChanged: onLanguageChanged,
+                                  onRefreshSession: onRefreshSession,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        _MyPageDivider(),
+                        _MyPageMenuTile(
+                          title: strings.logout,
+                          danger: true,
+                          onTap: () => _openLogoutConfirm(context),
+                        ),
                       ],
                     ),
                   ),
@@ -484,11 +505,7 @@ class _MyAccountEditScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                LanguageSelectorField(
-                  label: strings.changeLanguage,
-                  language: selectedLanguage,
-                  onChanged: onLanguageChanged,
-                ),
+                // Language is now selected in main MyPage header, so hide in edit form to avoid duplicate.
                 ProfileField(
                   label: strings.emailLabel,
                   controller: emailController,
@@ -704,10 +721,11 @@ class _BlockListScreen extends StatelessWidget {
                         backgroundColor: const Color(0xFFE8F3FF),
                         child: Text(
                           item.name.isNotEmpty ? item.name[0] : '?',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: const Color(0xFF4F8DDC),
-                                fontWeight: FontWeight.w800,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: const Color(0xFF4F8DDC),
+                                    fontWeight: FontWeight.w800,
+                                  ),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -717,7 +735,10 @@ class _BlockListScreen extends StatelessWidget {
                           children: [
                             Text(
                               item.name,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
                                     color: const Color(0xFF1F2A37),
                                     fontWeight: FontWeight.w800,
                                   ),
@@ -725,7 +746,10 @@ class _BlockListScreen extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               '${item.birthDate} · ${item.country}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     color: const Color(0xFF7C8AA5),
                                   ),
                             ),
@@ -962,7 +986,9 @@ class _MyFlowersScreen extends StatelessWidget {
                   child: _SubScreenCard(
                     child: Center(
                       child: Text(
-                        snapshot.error.toString().replaceFirst('Exception: ', ''),
+                        snapshot.error
+                            .toString()
+                            .replaceFirst('Exception: ', ''),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: const Color(0xFF7C8AA5),
                             ),
