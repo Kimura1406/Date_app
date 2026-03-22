@@ -22,6 +22,7 @@ type chatRepository interface {
 	GetRoomDetail(ctx context.Context, roomID string) (domain.ChatRoomDetail, error)
 	CreateMessage(ctx context.Context, roomID, senderUserID, body string) (domain.ChatMessage, error)
 	IsParticipant(ctx context.Context, roomID, userID string) (bool, error)
+	MarkRoomRead(ctx context.Context, roomID, userID string) error
 }
 
 type ChatService struct {
@@ -46,7 +47,14 @@ func (s *ChatService) EnsureAndGetAdminRoom(ctx context.Context, userID string) 
 		return domain.ChatRoomDetail{}, err
 	}
 
-	return s.repo.GetRoomDetail(ctx, roomID)
+	detail, err := s.repo.GetRoomDetail(ctx, roomID)
+	if err != nil {
+		return domain.ChatRoomDetail{}, err
+	}
+	if err := s.repo.MarkRoomRead(ctx, roomID, userID); err != nil {
+		return domain.ChatRoomDetail{}, err
+	}
+	return detail, nil
 }
 
 func (s *ChatService) EnsureAndGetDirectRoom(ctx context.Context, requesterUserID, targetUserID string) (domain.ChatRoomDetail, error) {
@@ -63,7 +71,14 @@ func (s *ChatService) EnsureAndGetDirectRoom(ctx context.Context, requesterUserI
 		return domain.ChatRoomDetail{}, err
 	}
 
-	return s.repo.GetRoomDetail(ctx, roomID)
+	detail, err := s.repo.GetRoomDetail(ctx, roomID)
+	if err != nil {
+		return domain.ChatRoomDetail{}, err
+	}
+	if err := s.repo.MarkRoomRead(ctx, roomID, requesterUserID); err != nil {
+		return domain.ChatRoomDetail{}, err
+	}
+	return detail, nil
 }
 
 func (s *ChatService) ListRooms(ctx context.Context, roomType string) ([]domain.ChatRoomSummary, error) {
@@ -91,7 +106,16 @@ func (s *ChatService) GetRoomDetail(ctx context.Context, roomID, requesterUserID
 		}
 	}
 
-	return s.repo.GetRoomDetail(ctx, roomID)
+	detail, err := s.repo.GetRoomDetail(ctx, roomID)
+	if err != nil {
+		return domain.ChatRoomDetail{}, err
+	}
+	if requesterUserID != "" {
+		if err := s.repo.MarkRoomRead(ctx, roomID, requesterUserID); err != nil {
+			return domain.ChatRoomDetail{}, err
+		}
+	}
+	return detail, nil
 }
 
 func (s *ChatService) CreateMessage(ctx context.Context, roomID, senderUserID, senderRole string, input domain.CreateChatMessageInput) (domain.ChatMessage, error) {

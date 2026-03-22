@@ -56,6 +56,7 @@ type ChatRoomSummary struct {
 	Participants  []ChatParticipant `json:"participants"`
 	LastMessage   string            `json:"lastMessage"`
 	LastMessageAt string            `json:"lastMessageAt"`
+	UnreadCount   int               `json:"unreadCount"`
 }
 
 type ChatRoomDetail struct {

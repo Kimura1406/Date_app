@@ -364,6 +364,7 @@ class ChatRoomSummary {
     required this.participants,
     required this.lastMessage,
     required this.lastMessageAt,
+    required this.unreadCount,
   });
 
   final String roomId;
@@ -371,6 +372,7 @@ class ChatRoomSummary {
   final List<ChatParticipant> participants;
   final String lastMessage;
   final String lastMessageAt;
+  final int unreadCount;
 
   factory ChatRoomSummary.fromJson(Map<String, dynamic> json) {
     return ChatRoomSummary(
@@ -381,6 +383,7 @@ class ChatRoomSummary {
           .toList(),
       lastMessage: json['lastMessage'] as String? ?? '',
       lastMessageAt: json['lastMessageAt'] as String? ?? '',
+      unreadCount: json['unreadCount'] as int? ?? 0,
     );
   }
 }

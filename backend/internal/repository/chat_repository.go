@@ -107,7 +107,8 @@ func (r *ChatRepository) ListRooms(ctx context.Context, roomType string) ([]doma
 			u2.name,
 			u2.role,
 			COALESCE(last_msg.body, ''),
-			COALESCE(last_msg.created_at, cr.created_at)
+			COALESCE(last_msg.created_at, cr.created_at),
+			0
 		FROM chat_rooms cr
 		JOIN users u1 ON u1.id = cr.user_one_id
 		JOIN users u2 ON u2.id = cr.user_two_id
@@ -135,7 +136,8 @@ func (r *ChatRepository) ListRoomsForUser(ctx context.Context, userID, roomType 
 			u2.name,
 			u2.role,
 			COALESCE(last_msg.body, ''),
-			COALESCE(last_msg.created_at, cr.created_at)
+			COALESCE(last_msg.created_at, cr.created_at),
+			COALESCE(unread.unread_count, 0)
 		FROM chat_rooms cr
 		JOIN users u1 ON u1.id = cr.user_one_id
 		JOIN users u2 ON u2.id = cr.user_two_id
@@ -146,6 +148,16 @@ func (r *ChatRepository) ListRoomsForUser(ctx context.Context, userID, roomType 
 			ORDER BY cm.created_at DESC
 			LIMIT 1
 		) last_msg ON true
+		LEFT JOIN LATERAL (
+			SELECT COUNT(*)::INT AS unread_count
+			FROM chat_messages cm
+			LEFT JOIN chat_room_reads crr
+				ON crr.room_id = cr.id
+			   AND crr.user_id = $2
+			WHERE cm.room_id = cr.id
+			  AND cm.sender_user_id <> $2
+			  AND cm.created_at > COALESCE(crr.last_read_at, TO_TIMESTAMP(0))
+		) unread ON true
 		WHERE cr.room_type = $1
 		  AND (cr.user_one_id = $2 OR cr.user_two_id = $2)
 		ORDER BY COALESCE(last_msg.created_at, cr.created_at) DESC, cr.id DESC
@@ -165,6 +177,7 @@ func (r *ChatRepository) listRoomsByQuery(ctx context.Context, query string, arg
 		var first domain.ChatParticipant
 		var second domain.ChatParticipant
 		var lastAt time.Time
+		var unreadCount int
 
 		if err := rows.Scan(
 			&room.RoomID,
@@ -177,11 +190,13 @@ func (r *ChatRepository) listRoomsByQuery(ctx context.Context, query string, arg
 			&second.Role,
 			&room.LastMessage,
 			&lastAt,
+			&unreadCount,
 		); err != nil {
 			return nil, fmt.Errorf("scan chat room: %w", err)
 		}
 
 		room.LastMessageAt = lastAt.Format(time.RFC3339)
+		room.UnreadCount = unreadCount
 		room.Participants = []domain.ChatParticipant{first, second}
 		rooms = append(rooms, room)
 	}
@@ -348,6 +363,19 @@ func (r *ChatRepository) IsParticipant(ctx context.Context, roomID, userID strin
 		return false, fmt.Errorf("check chat participant: %w", err)
 	}
 	return exists, nil
+}
+
+func (r *ChatRepository) MarkRoomRead(ctx context.Context, roomID, userID string) error {
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO chat_room_reads (room_id, user_id, last_read_at)
+		VALUES ($1, $2, NOW())
+		ON CONFLICT (room_id, user_id)
+		DO UPDATE SET last_read_at = GREATEST(chat_room_reads.last_read_at, EXCLUDED.last_read_at)
+	`, roomID, userID)
+	if err != nil {
+		return fmt.Errorf("mark room read: %w", err)
+	}
+	return nil
 }
 
 func buildDeterministicRoomID(roomType, first, second string) string {

@@ -290,6 +290,7 @@ class _ChatHeaderButton extends StatelessWidget {
               participants: detail.participants,
               lastMessage: lastMessage?.body ?? '',
               lastMessageAt: lastMessage?.sentAt ?? '',
+              unreadCount: 0,
             );
 
             await Navigator.of(context).push(

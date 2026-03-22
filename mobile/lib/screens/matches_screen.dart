@@ -38,6 +38,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
     final adminRooms = results[0];
     final userRooms = results[1];
+    adminRooms.sort((a, b) => b.lastMessageAt.compareTo(a.lastMessageAt));
+    userRooms.sort((a, b) => b.lastMessageAt.compareTo(a.lastMessageAt));
     final fixedOperatorRoom = adminRooms.isNotEmpty ? adminRooms.first : null;
 
     return _ChatListBundle(
@@ -220,6 +222,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                   title: _roomDisplayName(room),
                                   subtitle: _roomSubtitle(room, strings),
                                   trailing: _formatRoomTime(room.lastMessageAt),
+                                  unreadCount: room.unreadCount,
                                   onTap: () => _openRoom(room),
                                 ),
                               );
@@ -328,9 +331,17 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Color(0xFF4BA9E8),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if ((room?.unreadCount ?? 0) > 0)
+                    _UnreadBadge(count: room!.unreadCount),
+                  const SizedBox(height: 10),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: Color(0xFF4BA9E8),
+                  ),
+                ],
               ),
             ],
           ),
@@ -345,12 +356,14 @@ class _ChatRoomListTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.trailing,
+    required this.unreadCount,
     required this.onTap,
   });
 
   final String title;
   final String subtitle;
   final String trailing;
+  final int unreadCount;
   final VoidCallback onTap;
 
   @override
@@ -424,7 +437,11 @@ class _ChatRoomListTile extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                     ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
+                  if (unreadCount > 0) ...[
+                    _UnreadBadge(count: unreadCount),
+                    const SizedBox(height: 10),
+                  ],
                   const Icon(
                     Icons.chevron_right_rounded,
                     color: Color(0xFF4BA9E8),
@@ -434,6 +451,41 @@ class _ChatRoomListTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _UnreadBadge extends StatelessWidget {
+  const _UnreadBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final display = count > 99 ? '99+' : '$count';
+
+    return Container(
+      constraints: const BoxConstraints(minWidth: 22),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE85A74),
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Text(
+        display,
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
       ),
     );
   }
