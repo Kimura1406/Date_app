@@ -812,12 +812,6 @@ class _ProfilePostFeedCardState extends State<_ProfilePostFeedCard> {
                   value: post.commentCount,
                   label: strings.commentsLabel,
                 ),
-                const SizedBox(height: 12),
-                _OverlayActionButton(
-                  icon: Icons.card_giftcard_rounded,
-                  value: post.giftCount,
-                  label: strings.giftsLabel,
-                ),
               ],
             ),
           ),
