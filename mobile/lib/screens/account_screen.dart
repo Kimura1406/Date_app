@@ -253,14 +253,6 @@ class AccountScreen extends StatelessWidget {
                         ),
                         _MyPageDivider(),
                         _MyPageMenuTile(
-                          title: strings.myPageMyHome,
-                          onTap: () => _openPlaceholder(
-                            context,
-                            title: strings.myPageMyHome,
-                          ),
-                        ),
-                        _MyPageDivider(),
-                        _MyPageMenuTile(
                           title: strings.myPageBlockList,
                           onTap: () {
                             Navigator.of(context).push(
