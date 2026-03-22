@@ -215,8 +215,7 @@ func Seed(db *sql.DB) error {
 		INSERT INTO chat_rooms (id, room_type, user_one_id, user_two_id)
 		VALUES
 			('admin-281LINAQ-913ADMIN', 'admin', LEAST('281LINAQ', '913ADMIN'), GREATEST('281LINAQ', '913ADMIN')),
-			('admin-472MARYA-913ADMIN', 'admin', LEAST('472MARYA', '913ADMIN'), GREATEST('472MARYA', '913ADMIN')),
-			('user-281LINAQ-472MARYA', 'user', LEAST('281LINAQ', '472MARYA'), GREATEST('281LINAQ', '472MARYA'))
+			('admin-472MARYA-913ADMIN', 'admin', LEAST('472MARYA', '913ADMIN'), GREATEST('472MARYA', '913ADMIN'))
 		ON CONFLICT DO NOTHING
 	`); err != nil {
 		return fmt.Errorf("seed chat rooms: %w", err)
@@ -228,9 +227,7 @@ func Seed(db *sql.DB) error {
 			('msg_seed_001', 'admin-281LINAQ-913ADMIN', '281LINAQ', 'サポートに相談したいことがあります。', NOW() - INTERVAL '40 minutes'),
 			('msg_seed_002', 'admin-281LINAQ-913ADMIN', '913ADMIN', 'もちろんです。ご不明点を教えてください。', NOW() - INTERVAL '36 minutes'),
 			('msg_seed_003', 'admin-472MARYA-913ADMIN', '472MARYA', '登録できたので、まずは使い方を知りたいです。', NOW() - INTERVAL '28 minutes'),
-			('msg_seed_004', 'admin-472MARYA-913ADMIN', '913ADMIN', 'プロフィール設定から始めるのがおすすめです。', NOW() - INTERVAL '21 minutes'),
-			('msg_seed_005', 'user-281LINAQ-472MARYA', '281LINAQ', '週末に新しいカフェへ行ってみない？', NOW() - INTERVAL '18 minutes'),
-			('msg_seed_006', 'user-281LINAQ-472MARYA', '472MARYA', 'いいね、午後なら時間あるよ。', NOW() - INTERVAL '12 minutes')
+			('msg_seed_004', 'admin-472MARYA-913ADMIN', '913ADMIN', 'プロフィール設定から始めるのがおすすめです。', NOW() - INTERVAL '21 minutes')
 		ON CONFLICT DO NOTHING
 	`); err != nil {
 		return fmt.Errorf("seed chat messages: %w", err)
