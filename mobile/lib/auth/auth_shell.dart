@@ -10,7 +10,6 @@ import '../localization/app_language.dart';
 import '../localization/app_localizations.dart';
 import '../screens/account_screen.dart';
 import '../screens/discover_screen.dart';
-import '../screens/flower_shop_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/matches_screen.dart';
 import '../screens/timeline_screen.dart';
@@ -453,11 +452,6 @@ class _AuthShellState extends State<AuthShell> {
         currentUser: currentUser!,
         authToken: authToken,
       ),
-      FlowerShopScreen(
-        currentUser: currentUser!,
-        authToken: authToken,
-        onUserChanged: _applyUserAndPersist,
-      ),
       TimelineScreen(
         currentUser: currentUser!,
       ),
@@ -507,7 +501,7 @@ class _AuthShellState extends State<AuthShell> {
           setState(() {
             currentTab = index;
           });
-          if (index == 1 || index == 4) {
+          if (index == 3) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
               _syncLatestUserSilently();
@@ -518,10 +512,6 @@ class _AuthShellState extends State<AuthShell> {
           NavigationDestination(
             icon: const Icon(Icons.favorite_border),
             label: strings.discoverTab,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.local_florist_outlined),
-            label: strings.flowerShopTab,
           ),
           NavigationDestination(
             icon: const Icon(Icons.dynamic_feed_outlined),

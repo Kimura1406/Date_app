@@ -206,7 +206,6 @@ class AccountScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   _MyPageStatsSection(
-                    authToken: authToken,
                     selectedLanguage: selectedLanguage,
                     onLanguageChanged: onLanguageChanged,
                   ),
@@ -344,87 +343,28 @@ class AccountScreen extends StatelessWidget {
   }
 }
 
-class _MyPageStatsSection extends StatefulWidget {
+class _MyPageStatsSection extends StatelessWidget {
   const _MyPageStatsSection({
-    required this.authToken,
     required this.selectedLanguage,
     required this.onLanguageChanged,
   });
 
-  final String authToken;
   final AppLanguage selectedLanguage;
   final ValueChanged<AppLanguage> onLanguageChanged;
 
   @override
-  State<_MyPageStatsSection> createState() => _MyPageStatsSectionState();
-}
-
-class _MyPageStatsSectionState extends State<_MyPageStatsSection> {
-  final ApiClient _apiClient = ApiClient();
-  late Future<int> _giftCountFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _giftCountFuture = _loadGiftCount();
-  }
-
-  @override
-  void didUpdateWidget(covariant _MyPageStatsSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.authToken != widget.authToken) {
-      _giftCountFuture = _loadGiftCount();
-    }
-  }
-
-  Future<int> _loadGiftCount() async {
-    final myFlowers = await _apiClient.fetchMyFlowers(
-      token: widget.authToken,
-    );
-    return [
-      ...myFlowers.purchased,
-      ...myFlowers.gifted,
-    ].fold<int>(0, (total, item) => total + item.ownedCount);
-  }
-
-  void _openMyFlowers(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => _MyFlowersScreen(token: widget.authToken),
-      ),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final strings = context.strings;
-
-    return FutureBuilder<int>(
-      future: _giftCountFuture,
-      builder: (context, snapshot) {
-        final giftCount = snapshot.data ?? 0;
-
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _MyPageStatCard(
-                label: strings.giftsLabel,
-                value: giftCount.toString(),
-                onTap: () => _openMyFlowers(context),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
               child: _MyPageLanguageCard(
-                selectedLanguage: widget.selectedLanguage,
-                onLanguageChanged: widget.onLanguageChanged,
+                selectedLanguage: selectedLanguage,
+                onLanguageChanged: onLanguageChanged,
               ),
             ),
           ],
         );
-      },
-    );
   }
 }
 
