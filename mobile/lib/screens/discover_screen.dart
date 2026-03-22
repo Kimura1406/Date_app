@@ -201,10 +201,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
                 child: _DiscoverHeader(
-                  onOpenMission: () => _openPlaceholderScreen(
-                    title: strings.missionTitle,
-                    icon: Icons.flag_circle_rounded,
-                  ),
                   onToggleFilter: () {
                     setState(() {
                       filtersExpanded = !filtersExpanded;
@@ -467,12 +463,10 @@ class _DiscoverBannerImage extends StatelessWidget {
 
 class _DiscoverHeader extends StatelessWidget {
   const _DiscoverHeader({
-    required this.onOpenMission,
     required this.onToggleFilter,
     required this.onOpenNotifications,
   });
 
-  final VoidCallback onOpenMission;
   final VoidCallback onToggleFilter;
   final VoidCallback onOpenNotifications;
 
@@ -481,13 +475,8 @@ class _DiscoverHeader extends StatelessWidget {
     final strings = context.strings;
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        _HeaderActionChip(
-          icon: Icons.flag_rounded,
-          label: 'MISSION',
-          onTap: onOpenMission,
-        ),
-        const Spacer(),
         _HeaderIconButton(
           icon: Icons.tune_rounded,
           tooltip: strings.filterTitle,
@@ -500,63 +489,6 @@ class _DiscoverHeader extends StatelessWidget {
           onTap: onOpenNotifications,
         ),
       ],
-    );
-  }
-}
-
-class _HeaderActionChip extends StatelessWidget {
-  const _HeaderActionChip({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.18),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDC2626),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Icon(
-                  icon,
-                  size: 12,
-                  color: const Color(0xFFFACC15),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                    ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
