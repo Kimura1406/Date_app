@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/api_client.dart';
 import '../data/models.dart';
 import '../data/profile_post_factory.dart';
+import '../firebase/firestore_chat_service.dart';
 import '../localization/app_localizations.dart';
 import '../localization/discovery_strings.dart';
 import '../widgets/app_scene_background.dart';
@@ -10,6 +11,7 @@ import 'chat_room_detail_screen.dart';
 
 const _defaultProfileCoverImage =
     'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80';
+final _firestoreChatService = FirestoreChatService();
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({
@@ -277,21 +279,29 @@ class _ChatHeaderButton extends StatelessWidget {
         onTap: () async {
           final messenger = ScaffoldMessenger.of(context);
           try {
-            final detail = await ApiClient().ensureDirectChatRoom(
-              token: authToken,
-              targetUserId: profile.id,
-            );
+            late final ChatRoomSummary initialRoom;
+            if (FirestoreChatService.isSupportedPlatform) {
+              initialRoom = await _firestoreChatService.ensureDirectRoom(
+                currentUser: currentUser,
+                targetProfile: profile,
+              );
+            } else {
+              final detail = await ApiClient().ensureDirectChatRoom(
+                token: authToken,
+                targetUserId: profile.id,
+              );
+              final lastMessage =
+                  detail.messages.isNotEmpty ? detail.messages.last : null;
+              initialRoom = ChatRoomSummary(
+                roomId: detail.roomId,
+                roomType: detail.roomType,
+                participants: detail.participants,
+                lastMessage: lastMessage?.body ?? '',
+                lastMessageAt: lastMessage?.sentAt ?? '',
+                unreadCount: 0,
+              );
+            }
             if (!context.mounted) return;
-
-            final lastMessage = detail.messages.isNotEmpty ? detail.messages.last : null;
-            final initialRoom = ChatRoomSummary(
-              roomId: detail.roomId,
-              roomType: detail.roomType,
-              participants: detail.participants,
-              lastMessage: lastMessage?.body ?? '',
-              lastMessageAt: lastMessage?.sentAt ?? '',
-              unreadCount: 0,
-            );
 
             await Navigator.of(context).push(
               MaterialPageRoute(

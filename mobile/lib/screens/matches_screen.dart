@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/api_client.dart';
 import '../data/models.dart';
+import '../firebase/firestore_chat_service.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/error_state.dart';
 import 'chat_room_detail_screen.dart';
@@ -22,12 +23,23 @@ class MatchesScreen extends StatefulWidget {
 
 class _MatchesScreenState extends State<MatchesScreen> {
   final _apiClient = ApiClient();
+  final _firestoreChatService = FirestoreChatService();
   late Future<_ChatListBundle> _roomsFuture;
+  late Future<ChatRoomSummary?> _operatorRoomFuture;
+  late Stream<List<ChatRoomSummary>> _userRoomsStream;
 
   @override
   void initState() {
     super.initState();
-    _roomsFuture = _loadRooms();
+    if (FirestoreChatService.isSupportedPlatform) {
+      _roomsFuture = Future.value(const _ChatListBundle());
+      _operatorRoomFuture = _loadOperatorRoom();
+      _userRoomsStream = _watchUserRooms();
+    } else {
+      _roomsFuture = _loadRooms();
+      _operatorRoomFuture = Future.value(null);
+      _userRoomsStream = const Stream.empty();
+    }
   }
 
   Future<_ChatListBundle> _loadRooms() async {
@@ -48,7 +60,29 @@ class _MatchesScreenState extends State<MatchesScreen> {
     );
   }
 
+  Future<ChatRoomSummary?> _loadOperatorRoom() async {
+    final adminRooms =
+        await _apiClient.fetchChatRooms(token: widget.authToken, roomType: 'admin');
+    adminRooms.sort((a, b) => b.lastMessageAt.compareTo(a.lastMessageAt));
+    return adminRooms.isNotEmpty ? adminRooms.first : null;
+  }
+
+  Stream<List<ChatRoomSummary>> _watchUserRooms() {
+    if (FirestoreChatService.isSupportedPlatform) {
+      return _firestoreChatService.watchUserRooms(currentUser: widget.currentUser);
+    }
+    return Stream.value(const <ChatRoomSummary>[]);
+  }
+
   Future<void> _refreshRooms() async {
+    if (FirestoreChatService.isSupportedPlatform) {
+      final operatorFuture = _loadOperatorRoom();
+      setState(() {
+        _operatorRoomFuture = operatorFuture;
+      });
+      await operatorFuture;
+      return;
+    }
     final future = _loadRooms();
     setState(() {
       _roomsFuture = future;
@@ -104,6 +138,73 @@ class _MatchesScreenState extends State<MatchesScreen> {
     final strings = context.strings;
     final theme = Theme.of(context);
 
+    if (FirestoreChatService.isSupportedPlatform) {
+      return SafeArea(
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFF2FAFF),
+                Color(0xFFE7F5FF),
+              ],
+            ),
+          ),
+          child: FutureBuilder<ChatRoomSummary?>(
+            future: _operatorRoomFuture,
+            builder: (context, operatorSnapshot) {
+              if (operatorSnapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (operatorSnapshot.hasError) {
+                return ErrorState(
+                  title: strings.chatRoomsTitle,
+                  message: operatorSnapshot.error.toString(),
+                  onRetry: () {
+                    setState(() {
+                      _operatorRoomFuture = _loadOperatorRoom();
+                    });
+                  },
+                );
+              }
+
+              return StreamBuilder<List<ChatRoomSummary>>(
+                stream: _userRoomsStream,
+                builder: (context, userSnapshot) {
+                  if (!userSnapshot.hasData && userSnapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (userSnapshot.hasError) {
+                    return ErrorState(
+                      title: strings.chatRoomsTitle,
+                      message: userSnapshot.error.toString(),
+                      onRetry: () {
+                        setState(() {
+                          _operatorRoomFuture = _loadOperatorRoom();
+                          _userRoomsStream = _watchUserRooms();
+                        });
+                      },
+                    );
+                  }
+
+                  final operatorRoom = operatorSnapshot.data;
+                  final userRooms = userSnapshot.data ?? const <ChatRoomSummary>[];
+
+                  return _buildChatListBody(
+                    strings: strings,
+                    theme: theme,
+                    operatorRoom: operatorRoom,
+                    userRooms: userRooms,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
     return SafeArea(
       child: DecoratedBox(
         decoration: const BoxDecoration(
@@ -135,108 +236,116 @@ class _MatchesScreenState extends State<MatchesScreen> {
             }
 
             final bundle = snapshot.data ?? const _ChatListBundle();
-            final operatorRoom = bundle.operatorRoom;
-            final userRooms = bundle.userRooms;
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        Color(0xFF4BA9E8),
-                        Color(0xFF2F86D7),
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x220A4474),
-                        blurRadius: 24,
-                        offset: Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          strings.chatRoomsTitle,
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          strings.chatRoomsSubtitle,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.84),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                    child: RefreshIndicator(
-                      onRefresh: _refreshRooms,
-                      child: ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          _PinnedOperatorRoomCard(
-                            strings: strings,
-                            room: operatorRoom,
-                            onTap:
-                                operatorRoom == null ? null : () => _openRoom(operatorRoom),
-                          ),
-                          const SizedBox(height: 14),
-                          if (userRooms.isEmpty)
-                            SizedBox(
-                              height: 220,
-                              child: Center(
-                                child: Text(
-                                  strings.noUserChatRooms,
-                                  style: theme.textTheme.bodyLarge?.copyWith(
-                                    color: const Color(0xFF7C91A4),
-                                  ),
-                                ),
-                              ),
-                            )
-                          else
-                            ...List.generate(userRooms.length, (index) {
-                              final room = userRooms[index];
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: index == userRooms.length - 1 ? 12 : 12,
-                                ),
-                                child: _ChatRoomListTile(
-                                  title: _roomDisplayName(room),
-                                  subtitle: _roomSubtitle(room, strings),
-                                  trailing: _formatRoomTime(room.lastMessageAt),
-                                  unreadCount: room.unreadCount,
-                                  onTap: () => _openRoom(room),
-                                ),
-                              );
-                            }),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            return _buildChatListBody(
+              strings: strings,
+              theme: theme,
+              operatorRoom: bundle.operatorRoom,
+              userRooms: bundle.userRooms,
             );
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildChatListBody({
+    required AppStrings strings,
+    required ThemeData theme,
+    required ChatRoomSummary? operatorRoom,
+    required List<ChatRoomSummary> userRooms,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Color(0xFF4BA9E8),
+                Color(0xFF2F86D7),
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x220A4474),
+                blurRadius: 24,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  strings.chatRoomsTitle,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  strings.chatRoomsSubtitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.84),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+            child: RefreshIndicator(
+              onRefresh: _refreshRooms,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  _PinnedOperatorRoomCard(
+                    strings: strings,
+                    room: operatorRoom,
+                    onTap: operatorRoom == null ? null : () => _openRoom(operatorRoom),
+                  ),
+                  const SizedBox(height: 14),
+                  if (userRooms.isEmpty)
+                    SizedBox(
+                      height: 220,
+                      child: Center(
+                        child: Text(
+                          strings.noUserChatRooms,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: const Color(0xFF7C91A4),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    ...List.generate(userRooms.length, (index) {
+                      final room = userRooms[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _ChatRoomListTile(
+                          title: _roomDisplayName(room),
+                          subtitle: _roomSubtitle(room, strings),
+                          trailing: _formatRoomTime(room.lastMessageAt),
+                          unreadCount: room.unreadCount,
+                          onTap: () => _openRoom(room),
+                        ),
+                      );
+                    }),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
