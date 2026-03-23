@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 import '../data/api_client.dart';
 import '../data/models.dart';
+import '../firebase/push_notification_service.dart';
 import '../localization/app_language.dart';
 import '../localization/app_localizations.dart';
 import '../screens/account_screen.dart';
@@ -28,6 +29,7 @@ class _AuthShellState extends State<AuthShell> {
   );
 
   final _apiClient = ApiClient();
+  final _pushNotificationService = PushNotificationService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _passwordFocusNode = FocusNode();
@@ -59,6 +61,7 @@ class _AuthShellState extends State<AuthShell> {
 
   @override
   void dispose() {
+    _pushNotificationService.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _passwordFocusNode.dispose();
@@ -103,6 +106,7 @@ class _AuthShellState extends State<AuthShell> {
       refreshToken = loginResult.refreshToken;
       await _persistRememberedLogin();
       await _persistSession();
+      await _syncPushNotificationToken();
       _showStatus(strings.loginSuccessful);
     });
   }
@@ -129,6 +133,7 @@ class _AuthShellState extends State<AuthShell> {
       authToken = loginResult.accessToken;
       refreshToken = loginResult.refreshToken;
       await _persistSession();
+      await _syncPushNotificationToken();
       _showStatus(strings.sessionRefreshed);
     });
   }
@@ -144,9 +149,21 @@ class _AuthShellState extends State<AuthShell> {
       refreshToken = loginResult.refreshToken;
       _applyUser(loginResult.user);
       await _persistSession();
+      await _syncPushNotificationToken();
     } catch (_) {
       // Best effort sync for point balance and latest profile state.
     }
+  }
+
+  Future<void> _syncPushNotificationToken() async {
+    if (authToken.trim().isEmpty) {
+      return;
+    }
+
+    await _pushNotificationService.initialize(
+      authToken: authToken,
+      authTokenProvider: () => authToken,
+    );
   }
 
   Future<void> _update() async {

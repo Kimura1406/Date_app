@@ -92,6 +92,31 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, user)
 }
 
+func (h *UserHandler) RegisterDeviceToken(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	var input domain.DeviceTokenInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if err := h.userService.RegisterDeviceToken(r.Context(), claims.Subject, input); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to register device token")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"registered": true})
+}
+
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if !canAccessUser(r, r.PathValue("id")) {
 		writeError(w, http.StatusForbidden, "forbidden")

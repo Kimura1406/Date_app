@@ -185,6 +185,29 @@ class ApiClient {
     }
   }
 
+  Future<void> registerDeviceToken({
+    required String token,
+    required String deviceToken,
+    required String platform,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$apiBaseUrl/api/v1/users/me/device-tokens'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'deviceToken': deviceToken.trim(),
+        'platform': platform.trim(),
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw Exception(
+        _extractError(response.body, 'Register device token failed'),
+      );
+    }
+  }
+
   Future<MyFlowersResponse> fetchMyFlowers({
     required String token,
   }) async {

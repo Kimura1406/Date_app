@@ -26,6 +26,7 @@ type userRepository interface {
 	UpdateUser(ctx context.Context, id string, input domain.UpdateUserInput, passwordHash *string) (domain.User, error)
 	UpdateLastLogin(ctx context.Context, id string, loggedInAt time.Time) error
 	AddPoints(ctx context.Context, id string, points int) (domain.User, error)
+	RegisterDeviceToken(ctx context.Context, userID string, input domain.DeviceTokenInput) error
 	GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error)
 	ToggleLike(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error)
 	ListUsersWhoLiked(ctx context.Context, targetUserID string) ([]domain.UserLiker, error)
@@ -154,6 +155,32 @@ func (s *UserService) AddPoints(ctx context.Context, id string, input domain.Use
 	}
 
 	return s.repo.AddPoints(ctx, id, input.Points)
+}
+
+func (s *UserService) RegisterDeviceToken(ctx context.Context, userID string, input domain.DeviceTokenInput) error {
+	userID = strings.TrimSpace(userID)
+	if userID == "" {
+		return fmt.Errorf("user id is required")
+	}
+
+	input.DeviceToken = strings.TrimSpace(input.DeviceToken)
+	input.Platform = strings.TrimSpace(strings.ToLower(input.Platform))
+
+	if input.DeviceToken == "" {
+		return fmt.Errorf("device token is required")
+	}
+	if input.Platform == "" {
+		return fmt.Errorf("platform is required")
+	}
+	if input.Platform != "android" && input.Platform != "ios" {
+		return fmt.Errorf("platform must be android or ios")
+	}
+
+	if _, err := s.repo.GetUserByID(ctx, userID); err != nil {
+		return err
+	}
+
+	return s.repo.RegisterDeviceToken(ctx, userID, input)
 }
 
 func (s *UserService) GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error) {

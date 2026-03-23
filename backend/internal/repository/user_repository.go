@@ -219,6 +219,24 @@ func (r *UserRepository) AddPoints(ctx context.Context, id string, points int) (
 	return r.GetUserByID(ctx, id)
 }
 
+func (r *UserRepository) RegisterDeviceToken(ctx context.Context, userID string, input domain.DeviceTokenInput) error {
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO user_device_tokens (device_token, user_id, platform)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (device_token)
+		DO UPDATE SET
+			user_id = EXCLUDED.user_id,
+			platform = EXCLUDED.platform,
+			updated_at = NOW(),
+			last_seen_at = NOW()
+	`, input.DeviceToken, userID, input.Platform)
+	if err != nil {
+		return fmt.Errorf("register device token: %w", err)
+	}
+
+	return nil
+}
+
 func (r *UserRepository) GetLikeSummary(ctx context.Context, targetUserID, viewerUserID string) (domain.UserLikeSummary, error) {
 	var summary domain.UserLikeSummary
 	summary.TargetUserID = targetUserID

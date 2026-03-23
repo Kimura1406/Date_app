@@ -142,6 +142,11 @@ type UserPointGrantInput struct {
 	Points int `json:"points"`
 }
 
+type DeviceTokenInput struct {
+	DeviceToken string `json:"deviceToken"`
+	Platform    string `json:"platform"`
+}
+
 type Flower struct {
 	ID             string `json:"id"`
 	Name           string `json:"name"`

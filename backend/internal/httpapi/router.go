@@ -56,6 +56,7 @@ func NewRouter(
 	mux.HandleFunc("POST /api/v1/admin/chat-rooms/{id}/messages", withAuth(tokenManager, requireRole("admin", chatHandler.CreateMessage)))
 	mux.HandleFunc("POST /api/v1/users", userHandler.CreateUser)
 	mux.HandleFunc("GET /api/v1/users/me", withAuth(tokenManager, userHandler.Me))
+	mux.HandleFunc("POST /api/v1/users/me/device-tokens", withAuth(tokenManager, userHandler.RegisterDeviceToken))
 	mux.HandleFunc("GET /api/v1/users/{id}", withAuth(tokenManager, userHandler.GetUser))
 	mux.HandleFunc("GET /api/v1/users/{id}/likes", withAuth(tokenManager, userHandler.GetLikeSummary))
 	mux.HandleFunc("POST /api/v1/users/{id}/likes/toggle", withAuth(tokenManager, userHandler.ToggleLike))
