@@ -116,7 +116,18 @@ class FirestoreChatService {
         participants: participants,
         messages: messages,
       );
-    });
+        });
+  }
+
+  Future<ChatRoomSummary?> fetchRoomSummary({
+    required String roomId,
+    required String currentUserId,
+  }) async {
+    final snapshot = await _rooms.doc(roomId).get();
+    if (!snapshot.exists) {
+      return null;
+    }
+    return _roomSummaryFromSnapshot(snapshot, currentUserId);
   }
 
   Future<void> markRoomAsRead({

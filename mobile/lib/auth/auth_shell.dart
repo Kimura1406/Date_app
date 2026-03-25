@@ -1,19 +1,24 @@
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/constants.dart';
 import '../data/api_client.dart';
 import '../data/models.dart';
+import '../firebase/firestore_chat_service.dart';
 import '../firebase/push_notification_service.dart';
 import '../localization/app_language.dart';
 import '../localization/app_localizations.dart';
 import '../screens/account_screen.dart';
+import '../screens/chat_room_detail_screen.dart';
 import '../screens/discover_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/matches_screen.dart';
+import '../screens/notifications_screen.dart';
 import '../screens/timeline_screen.dart';
+import '../screens/user_profile_screen.dart';
 import '../widgets/app_scene_background.dart';
 
 class AuthShell extends StatefulWidget {
@@ -29,6 +34,7 @@ class _AuthShellState extends State<AuthShell> {
   );
 
   final _apiClient = ApiClient();
+  final _firestoreChatService = FirestoreChatService();
   final _pushNotificationService = PushNotificationService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -163,6 +169,249 @@ class _AuthShellState extends State<AuthShell> {
     await _pushNotificationService.initialize(
       authToken: authToken,
       authTokenProvider: () => authToken,
+      onForegroundMessage: _handleForegroundPushMessage,
+      onMessageOpenedApp: _handlePushNavigation,
+    );
+  }
+
+  Future<void> _handleForegroundPushMessage(RemoteMessage message) async {
+    if (!mounted || currentUser == null) {
+      return;
+    }
+
+    final notification = message.notification;
+    final title = notification?.title?.trim().isNotEmpty == true
+        ? notification!.title!.trim()
+        : context.strings.notificationsTitle;
+    final body = notification?.body?.trim().isNotEmpty == true
+        ? notification!.body!.trim()
+        : (message.data['body']?.toString().trim().isNotEmpty == true
+            ? message.data['body']!.toString().trim()
+            : message.data['message']?.toString().trim() ?? '');
+
+    if (body.isEmpty) {
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title),
+            const SizedBox(height: 4),
+            Text(body),
+          ],
+        ),
+        action: SnackBarAction(
+          label: 'Open',
+          onPressed: () {
+            _handlePushNavigation(message);
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handlePushNavigation(RemoteMessage message) async {
+    if (!mounted || currentUser == null || authToken.trim().isEmpty) {
+      return;
+    }
+
+    final data = message.data;
+    final type = (data['type'] ?? data['notificationType'] ?? '').toString();
+    final roomId = (data['roomId'] ?? '').toString();
+    final roomType = (data['roomType'] ?? '').toString();
+    final actorUserId = (data['actorUserId'] ??
+            data['userId'] ??
+            data['senderUserId'] ??
+            data['targetUserId'] ??
+            '')
+        .toString();
+    final actorUserName = (data['actorUserName'] ??
+            data['userName'] ??
+            data['senderName'] ??
+            '')
+        .toString();
+
+    if (type == 'profile_like' || type == 'profile_view') {
+      await _openUserProfileFromPush(actorUserId);
+      return;
+    }
+
+    if (type == 'user_message' ||
+        type == 'admin_message' ||
+        type == 'chat_message' ||
+        roomId.isNotEmpty) {
+      await _openChatRoomFromPush(
+        roomId: roomId,
+        roomType: roomType.isEmpty ? 'user' : roomType,
+        actorUserId: actorUserId,
+        actorUserName: actorUserName,
+      );
+      return;
+    }
+
+    await _openNotificationsScreen();
+  }
+
+  Future<void> _openNotificationsScreen() async {
+    if (!mounted || currentUser == null) {
+      return;
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => NotificationsScreen(
+          currentUser: currentUser!,
+          authToken: authToken,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openUserProfileFromPush(String userId) async {
+    if (!mounted || currentUser == null || userId.trim().isEmpty) {
+      return;
+    }
+
+    final signedInUser = currentUser!;
+    final user = await _apiClient.fetchUserById(
+      token: authToken,
+      userId: userId,
+    );
+    if (!mounted) {
+      return;
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => UserProfileScreen(
+          currentUser: signedInUser,
+          authToken: authToken,
+          profile: DatingProfile(
+            id: user.id,
+            name: user.name,
+            age: user.age,
+            job: user.job,
+            bio: user.bio,
+            distance: user.distance,
+            interests: user.interests,
+            country: user.country,
+            gender: user.gender,
+            location: user.prefecture,
+            imageUrl: '',
+            isNew: false,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openChatRoomFromPush({
+    required String roomId,
+    required String roomType,
+    required String actorUserId,
+    required String actorUserName,
+  }) async {
+    if (!mounted || currentUser == null) {
+      return;
+    }
+
+    final signedInUser = currentUser!;
+    final strings = context.strings;
+    ChatRoomSummary? room;
+    var roomDisplayName = actorUserName.trim();
+
+    if (roomType == 'user' &&
+        FirestoreChatService.isSupportedPlatform &&
+        roomId.trim().isNotEmpty) {
+      room = await _firestoreChatService.fetchRoomSummary(
+        roomId: roomId,
+        currentUserId: signedInUser.id,
+      );
+      if (room != null && roomDisplayName.isEmpty) {
+        final roomParticipants = room.participants;
+        final other = room.participants.firstWhere(
+          (participant) => participant.userId != signedInUser.id,
+          orElse: () => roomParticipants.isNotEmpty
+              ? roomParticipants.first
+              : ChatParticipant(
+                  userId: '',
+                  name: strings.unknownUserLabel,
+                  role: 'user',
+                  isSender: false,
+                ),
+        );
+        roomDisplayName = other.name.isNotEmpty ? other.name : strings.unknownUserLabel;
+      }
+    }
+
+    if (room == null && actorUserId.trim().isNotEmpty && roomType == 'user') {
+      final user = await _apiClient.fetchUserById(
+        token: authToken,
+        userId: actorUserId,
+      );
+      final profile = DatingProfile(
+        id: user.id,
+        name: user.name,
+        age: user.age,
+        job: user.job,
+        bio: user.bio,
+        distance: user.distance,
+        interests: user.interests,
+        country: user.country,
+        gender: user.gender,
+        location: user.prefecture,
+        imageUrl: '',
+        isNew: false,
+      );
+      room = await _firestoreChatService.ensureDirectRoom(
+        currentUser: signedInUser,
+        targetProfile: profile,
+      );
+      roomDisplayName = profile.name;
+    }
+
+    if (room == null && roomId.trim().isNotEmpty) {
+      final detail = await _apiClient.fetchChatRoomDetail(
+        token: authToken,
+        roomId: roomId,
+      );
+      final lastMessage =
+          detail.messages.isNotEmpty ? detail.messages.last : null;
+      room = ChatRoomSummary(
+        roomId: detail.roomId,
+        roomType: detail.roomType,
+        participants: detail.participants,
+        lastMessage: lastMessage?.body ?? '',
+        lastMessageAt: lastMessage?.sentAt ?? '',
+        unreadCount: 0,
+      );
+      if (roomDisplayName.isEmpty) {
+        roomDisplayName = roomType == 'admin'
+            ? strings.operatorRoomName
+            : strings.chatRoomsTitle;
+      }
+    }
+
+    if (!mounted || room == null) {
+      return;
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChatRoomDetailScreen(
+          currentUser: signedInUser,
+          authToken: authToken,
+          initialRoom: room!,
+          roomDisplayName:
+              roomDisplayName.isEmpty ? strings.chatRoomsTitle : roomDisplayName,
+        ),
+      ),
     );
   }
 
