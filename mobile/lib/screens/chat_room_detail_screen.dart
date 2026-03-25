@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../data/api_client.dart';
@@ -31,8 +33,10 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
   final _scrollController = ScrollController();
   late Future<ChatRoomDetail> _detailFuture;
   Stream<ChatRoomDetail>? _firestoreDetailStream;
+  Timer? _apiRefreshTimer;
   ChatRoomDetail? _cachedDetail;
   bool _sending = false;
+  bool _didInitialApiScroll = false;
   String _lastMarkedReadMessageId = '';
 
   bool get _usesFirestoreUserChat =>
@@ -53,11 +57,13 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
       );
     } else {
       _detailFuture = _loadDetail();
+      _startApiDetailPolling();
     }
   }
 
   @override
   void dispose() {
+    _apiRefreshTimer?.cancel();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -81,12 +87,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
       );
       return;
     }
-    final future = _loadDetail();
-    setState(() {
-      _detailFuture = future;
-    });
-    await future;
-    _scrollToBottom();
+    await _pollLatestDetail(forceScroll: true);
   }
 
   Future<void> _sendMessage() async {
@@ -169,6 +170,49 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
         curve: Curves.easeOut,
       );
     });
+  }
+
+  void _startApiDetailPolling() {
+    _apiRefreshTimer?.cancel();
+    _apiRefreshTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!mounted || _sending) {
+        return;
+      }
+      unawaited(_pollLatestDetail());
+    });
+  }
+
+  Future<void> _pollLatestDetail({bool forceScroll = false}) async {
+    if (_usesFirestoreUserChat) {
+      return;
+    }
+
+    try {
+      final detail = await _apiClient.fetchChatRoomDetail(
+        token: widget.authToken,
+        roomId: widget.initialRoom.roomId,
+      );
+      if (!mounted) {
+        return;
+      }
+
+      final previousLastMessageId = _cachedDetail?.messages.isNotEmpty == true
+          ? _cachedDetail!.messages.last.id
+          : '';
+      final nextLastMessageId =
+          detail.messages.isNotEmpty ? detail.messages.last.id : '';
+
+      setState(() {
+        _cachedDetail = detail;
+        _detailFuture = Future.value(detail);
+      });
+
+      if (forceScroll || nextLastMessageId != previousLastMessageId) {
+        _scrollToBottom();
+      }
+    } catch (_) {
+      // Keep current content visible if background refresh fails.
+    }
   }
 
   String _subtitle(ChatRoomDetail detail, AppStrings strings) {
@@ -274,6 +318,10 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
           final detail = snapshot.data!;
           _cachedDetail = detail;
           final subtitle = _subtitle(detail, strings);
+          if (!_didInitialApiScroll && detail.messages.isNotEmpty) {
+            _didInitialApiScroll = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+          }
 
           return _buildDetailBody(
             context: context,

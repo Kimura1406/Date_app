@@ -483,6 +483,21 @@ function App() {
     return () => window.cancelAnimationFrame(frame);
   }, [selectedChatRoom?.roomId, selectedChatRoom?.messages.length, chatDetailLoading]);
 
+  useEffect(() => {
+    if (!selectedChatRoom || !authToken) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      void openChatRoomDetail(selectedChatRoom.roomId, {
+        silent: true,
+        preserveDraft: true,
+      });
+    }, 3000);
+
+    return () => window.clearInterval(interval);
+  }, [authToken, selectedChatRoom?.roomId]);
+
   async function loadUsers(token: string = authToken) {
     if (!token) return;
 
@@ -633,11 +648,19 @@ function App() {
     }
   }
 
-  async function openChatRoomDetail(roomId: string) {
+  async function openChatRoomDetail(
+    roomId: string,
+    options?: { silent?: boolean; preserveDraft?: boolean },
+  ) {
     if (!authToken) return;
 
-    setChatDetailLoading(true);
-    setMessage('');
+    const silent = options?.silent ?? false;
+    const preserveDraft = options?.preserveDraft ?? false;
+
+    if (!silent) {
+      setChatDetailLoading(true);
+      setMessage('');
+    }
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/v1/admin/chat-rooms/${roomId}`, {
@@ -655,11 +678,17 @@ function App() {
       }
 
       setSelectedChatRoom(data);
-      setChatMessageDraft('');
+      if (!preserveDraft) {
+        setChatMessageDraft('');
+      }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Failed to load chat detail');
+      if (!silent) {
+        setMessage(error instanceof Error ? error.message : 'Failed to load chat detail');
+      }
     } finally {
-      setChatDetailLoading(false);
+      if (!silent) {
+        setChatDetailLoading(false);
+      }
     }
   }
 
