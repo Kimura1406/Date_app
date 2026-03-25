@@ -219,7 +219,11 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                 final systemItems =
                     backendItems.where((item) => item.isSystem).toList();
                 final profileItems = backendItems
-                    .where((item) => item.type == 'profile_view')
+                    .where(
+                      (item) =>
+                          item.type == 'profile_view' ||
+                          item.type == 'profile_like',
+                    )
                     .map(
                       (item) => _NotificationEntry(
                         title: item.actorUserName.isEmpty

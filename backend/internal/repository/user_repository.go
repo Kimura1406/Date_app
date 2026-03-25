@@ -299,6 +299,24 @@ func (r *UserRepository) ToggleLike(ctx context.Context, targetUserID, viewerUse
 			_ = tx.Rollback()
 			return domain.UserLikeSummary{}, fmt.Errorf("insert like: %w", err)
 		}
+
+		var likerName string
+		if err := tx.QueryRowContext(ctx, `
+			SELECT name
+			FROM users
+			WHERE id = $1
+		`, viewerUserID).Scan(&likerName); err != nil {
+			_ = tx.Rollback()
+			return domain.UserLikeSummary{}, fmt.Errorf("load liker name: %w", err)
+		}
+
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO notifications (id, user_id, type, message, actor_user_id, created_at)
+			VALUES ($1, $2, 'profile_like', $3, $4, NOW())
+		`, "like_"+generateRepositoryHexID(16), targetUserID, fmt.Sprintf("%s đã like bạn", likerName), viewerUserID); err != nil {
+			_ = tx.Rollback()
+			return domain.UserLikeSummary{}, fmt.Errorf("insert like notification: %w", err)
+		}
 	}
 
 	var summary domain.UserLikeSummary
