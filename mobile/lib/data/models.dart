@@ -288,6 +288,43 @@ class BlockedUserItem {
   }
 }
 
+class NotificationItem {
+  NotificationItem({
+    required this.id,
+    required this.type,
+    required this.message,
+    required this.actorUserId,
+    required this.actorUserName,
+    required this.roomId,
+    required this.roomType,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String type;
+  final String message;
+  final String actorUserId;
+  final String actorUserName;
+  final String roomId;
+  final String roomType;
+  final String createdAt;
+
+  bool get isSystem => type == 'welcome' || type == 'admin_message';
+
+  factory NotificationItem.fromJson(Map<String, dynamic> json) {
+    return NotificationItem(
+      id: json['id'] as String? ?? '',
+      type: json['type'] as String? ?? '',
+      message: json['message'] as String? ?? '',
+      actorUserId: json['actorUserId'] as String? ?? '',
+      actorUserName: json['actorUserName'] as String? ?? '',
+      roomId: json['roomId'] as String? ?? '',
+      roomType: json['roomType'] as String? ?? '',
+      createdAt: json['createdAt'] as String? ?? '',
+    );
+  }
+}
+
 class OwnedFlowerItem {
   OwnedFlowerItem({
     required this.flower,
@@ -462,6 +499,8 @@ class AppUser {
     required this.bio,
     required this.distance,
     required this.interests,
+    required this.country,
+    required this.prefecture,
     required this.pointBalance,
   });
 
@@ -476,6 +515,8 @@ class AppUser {
   final String bio;
   final String distance;
   final List<String> interests;
+  final String country;
+  final String prefecture;
   final int pointBalance;
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
@@ -493,6 +534,8 @@ class AppUser {
       interests: (json['interests'] as List<dynamic>? ?? [])
           .map((item) => item.toString())
           .toList(),
+      country: json['country'] as String? ?? '',
+      prefecture: json['prefecture'] as String? ?? '',
       pointBalance: json['pointBalance'] as int? ?? 0,
     );
   }
@@ -510,6 +553,8 @@ class AppUser {
       'bio': bio,
       'distance': distance,
       'interests': interests,
+      'country': country,
+      'prefecture': prefecture,
       'pointBalance': pointBalance,
     };
   }

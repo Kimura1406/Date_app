@@ -154,6 +154,54 @@ class ApiClient {
         .toList();
   }
 
+  Future<List<NotificationItem>> fetchNotifications({
+    required String token,
+  }) async {
+    final response = await _client.get(
+      Uri.parse('$apiBaseUrl/api/v1/me/notifications'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Load notifications failed'));
+    }
+
+    final jsonMap = jsonDecode(response.body) as Map<String, dynamic>;
+    final items = jsonMap['items'] as List<dynamic>? ?? [];
+    return items
+        .map((item) => NotificationItem.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> recordProfileView({
+    required String token,
+    required String userId,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$apiBaseUrl/api/v1/users/$userId/profile-views'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 201) {
+      throw Exception(_extractError(response.body, 'Record profile view failed'));
+    }
+  }
+
+  Future<AppUser> fetchUserById({
+    required String token,
+    required String userId,
+  }) async {
+    final response = await _client.get(
+      Uri.parse('$apiBaseUrl/api/v1/users/$userId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.body, 'Load user failed'));
+    }
+
+    return AppUser.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
   Future<void> blockUser({
     required String token,
     required String userId,

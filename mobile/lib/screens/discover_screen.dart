@@ -9,6 +9,7 @@ import '../data/discovery_filter_options.dart';
 import '../data/models.dart';
 import '../localization/app_localizations.dart';
 import '../localization/discovery_strings.dart';
+import 'notifications_screen.dart';
 import 'user_profile_screen.dart';
 import '../widgets/discovery_filter_panel.dart';
 import '../widgets/error_state.dart';
@@ -134,6 +135,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   void _openProfile(DatingProfile profile) {
+    ApiClient().recordProfileView(
+      token: widget.authToken,
+      userId: profile.id,
+    ).catchError((_) {});
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => UserProfileScreen(
@@ -145,15 +150,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     );
   }
 
-  Future<void> _openPlaceholderScreen({
-    required String title,
-    required IconData icon,
-  }) async {
+  Future<void> _openNotificationsScreen() async {
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => _DiscoverPlaceholderScreen(
-          title: title,
-          icon: icon,
+        builder: (_) => NotificationsScreen(
+          currentUser: widget.currentUser,
+          authToken: widget.authToken,
         ),
       ),
     );
@@ -206,10 +208,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       filtersExpanded = !filtersExpanded;
                     });
                   },
-                  onOpenNotifications: () => _openPlaceholderScreen(
-                    title: strings.notificationsTitle,
-                    icon: Icons.notifications_active_rounded,
-                  ),
+                  onOpenNotifications: _openNotificationsScreen,
                 ),
               ),
             ),
@@ -525,62 +524,6 @@ class _HeaderIconButton extends StatelessWidget {
               icon,
               color: Colors.white,
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DiscoverPlaceholderScreen extends StatelessWidget {
-  const _DiscoverPlaceholderScreen({
-    required this.title,
-    required this.icon,
-  });
-
-  final String title;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = context.strings;
-
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2F2323),
-        title: Text(title),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 68,
-                color: const Color(0xFF9E4E5D),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: const Color(0xFF2F2323),
-                      fontWeight: FontWeight.w800,
-                    ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                strings.myPageEmptyPlaceholder,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF6D5A5A),
-                    ),
-              ),
-            ],
           ),
         ),
       ),

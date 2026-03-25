@@ -147,6 +147,17 @@ type DeviceTokenInput struct {
 	Platform    string `json:"platform"`
 }
 
+type NotificationItem struct {
+	ID            string `json:"id"`
+	Type          string `json:"type"`
+	Message       string `json:"message"`
+	ActorUserID   string `json:"actorUserId,omitempty"`
+	ActorUserName string `json:"actorUserName,omitempty"`
+	RoomID        string `json:"roomId,omitempty"`
+	RoomType      string `json:"roomType,omitempty"`
+	CreatedAt     string `json:"createdAt"`
+}
+
 type Flower struct {
 	ID             string `json:"id"`
 	Name           string `json:"name"`

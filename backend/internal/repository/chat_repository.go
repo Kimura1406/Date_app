@@ -347,7 +347,60 @@ func (r *ChatRepository) CreateMessage(ctx context.Context, roomID, senderUserID
 		return domain.ChatMessage{}, fmt.Errorf("touch chat room: %w", err)
 	}
 
+	if err := r.createMessageNotification(ctx, roomID, message); err != nil {
+		return domain.ChatMessage{}, err
+	}
+
 	return message, nil
+}
+
+func (r *ChatRepository) createMessageNotification(ctx context.Context, roomID string, message domain.ChatMessage) error {
+	var (
+		roomType  string
+		userOneID string
+		userTwoID string
+	)
+	if err := r.db.QueryRowContext(ctx, `
+		SELECT room_type, user_one_id, user_two_id
+		FROM chat_rooms
+		WHERE id = $1
+	`, roomID).Scan(&roomType, &userOneID, &userTwoID); err != nil {
+		return fmt.Errorf("load chat room for notification: %w", err)
+	}
+
+	recipientUserID := userOneID
+	if recipientUserID == message.SenderID {
+		recipientUserID = userTwoID
+	}
+	if recipientUserID == "" || recipientUserID == message.SenderID {
+		return nil
+	}
+
+	var (
+		notificationType string
+		notificationBody string
+	)
+	switch {
+	case roomType == "user":
+		notificationType = "user_message"
+		notificationBody = fmt.Sprintf("%s đã gửi tin nhắn cho bạn.", message.SenderName)
+	case roomType == "admin" && message.Participant.Role == "admin":
+		notificationType = "admin_message"
+		notificationBody = "Bạn nhận được tin nhắn từ admin."
+	default:
+		return nil
+	}
+
+	notificationID := "ntf_" + generateRepositoryHexID(16)
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO notifications (id, user_id, type, message, actor_user_id, room_id, room_type, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+	`, notificationID, recipientUserID, notificationType, notificationBody, message.SenderID, roomID, roomType)
+	if err != nil {
+		return fmt.Errorf("insert message notification: %w", err)
+	}
+
+	return nil
 }
 
 func (r *ChatRepository) IsParticipant(ctx context.Context, roomID, userID string) (bool, error) {

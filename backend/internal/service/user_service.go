@@ -34,6 +34,8 @@ type userRepository interface {
 	ListBlockedUsers(ctx context.Context, blockerUserID string) ([]domain.BlockedUser, error)
 	ReportUser(ctx context.Context, reportedUserID, reporterUserID, reason string) error
 	ListReportedUsers(ctx context.Context) ([]domain.ReportedUserSummary, error)
+	RecordProfileView(ctx context.Context, viewedUserID, viewerUserID string) error
+	ListNotifications(ctx context.Context, userID string) ([]domain.NotificationItem, error)
 	DeleteUser(ctx context.Context, id string) error
 }
 
@@ -318,6 +320,47 @@ func (s *UserService) ReportUser(ctx context.Context, reportedUserID, reporterUs
 
 func (s *UserService) ListReportedUsers(ctx context.Context) ([]domain.ReportedUserSummary, error) {
 	return s.repo.ListReportedUsers(ctx)
+}
+
+func (s *UserService) RecordProfileView(ctx context.Context, viewedUserID, viewerUserID string) error {
+	viewedUserID = strings.TrimSpace(viewedUserID)
+	viewerUserID = strings.TrimSpace(viewerUserID)
+	if viewedUserID == "" {
+		return fmt.Errorf("viewed user id is required")
+	}
+	if viewerUserID == "" {
+		return fmt.Errorf("viewer user id is required")
+	}
+	if viewedUserID == viewerUserID {
+		return nil
+	}
+
+	viewedUser, err := s.repo.GetUserByID(ctx, viewedUserID)
+	if err != nil {
+		return err
+	}
+	if viewedUser.Role != "user" {
+		return fmt.Errorf("only users can be viewed")
+	}
+
+	if _, err := s.repo.GetUserByID(ctx, viewerUserID); err != nil {
+		return err
+	}
+
+	return s.repo.RecordProfileView(ctx, viewedUserID, viewerUserID)
+}
+
+func (s *UserService) ListNotifications(ctx context.Context, userID string) ([]domain.NotificationItem, error) {
+	userID = strings.TrimSpace(userID)
+	if userID == "" {
+		return nil, fmt.Errorf("user id is required")
+	}
+
+	if _, err := s.repo.GetUserByID(ctx, userID); err != nil {
+		return nil, err
+	}
+
+	return s.repo.ListNotifications(ctx, userID)
 }
 
 func (s *UserService) Login(ctx context.Context, input domain.LoginInput) (domain.AuthResponse, error) {

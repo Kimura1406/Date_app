@@ -99,6 +99,14 @@ func (r *UserRepository) CreateUser(ctx context.Context, id string, input domain
 		return domain.User{}, fmt.Errorf("create user: %w", err)
 	}
 
+	if _, err := r.db.ExecContext(ctx, `
+		INSERT INTO notifications (id, user_id, type, message, created_at)
+		VALUES ($1, $2, 'welcome', $3, NOW())
+		ON CONFLICT (id) DO NOTHING
+	`, "welcome_"+id, id, "Xin chào, mình là Dating admin. Rất mong bạn có những trải nghiệm tuyệt vời và sớm tìm được người đồng hành nhé."); err != nil {
+		return domain.User{}, fmt.Errorf("create welcome notification: %w", err)
+	}
+
 	return r.GetUserByID(ctx, id)
 }
 
@@ -416,6 +424,78 @@ func (r *UserRepository) ReportUser(ctx context.Context, reportedUserID, reporte
 	}
 
 	return nil
+}
+
+func (r *UserRepository) RecordProfileView(ctx context.Context, viewedUserID, viewerUserID string) error {
+	var viewerName string
+	if err := r.db.QueryRowContext(ctx, `
+		SELECT name
+		FROM users
+		WHERE id = $1
+	`, viewerUserID).Scan(&viewerName); err != nil {
+		return fmt.Errorf("load viewer name: %w", err)
+	}
+
+	notificationID := "pv_" + generateRepositoryHexID(16)
+	_, err := r.db.ExecContext(ctx, `
+		INSERT INTO notifications (id, user_id, type, message, actor_user_id, created_at)
+		VALUES ($1, $2, 'profile_view', $3, $4, NOW())
+	`, notificationID, viewedUserID, fmt.Sprintf("%s đã xem profile của bạn.", viewerName), viewerUserID)
+	if err != nil {
+		return fmt.Errorf("insert profile view notification: %w", err)
+	}
+
+	return nil
+}
+
+func (r *UserRepository) ListNotifications(ctx context.Context, userID string) ([]domain.NotificationItem, error) {
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT
+			n.id,
+			n.type,
+			n.message,
+			COALESCE(n.actor_user_id, ''),
+			COALESCE(u.name, ''),
+			COALESCE(n.room_id, ''),
+			COALESCE(n.room_type, ''),
+			n.created_at
+		FROM notifications n
+		LEFT JOIN users u ON u.id = n.actor_user_id
+		WHERE n.user_id = $1
+		ORDER BY n.created_at DESC, n.id DESC
+	`, userID)
+	if err != nil {
+		return nil, fmt.Errorf("query notifications: %w", err)
+	}
+	defer rows.Close()
+
+	items := make([]domain.NotificationItem, 0)
+	for rows.Next() {
+		var (
+			item      domain.NotificationItem
+			createdAt time.Time
+		)
+		if err := rows.Scan(
+			&item.ID,
+			&item.Type,
+			&item.Message,
+			&item.ActorUserID,
+			&item.ActorUserName,
+			&item.RoomID,
+			&item.RoomType,
+			&createdAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan notification: %w", err)
+		}
+		item.CreatedAt = createdAt.Format(time.RFC3339)
+		items = append(items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate notifications: %w", err)
+	}
+
+	return items, nil
 }
 
 func (r *UserRepository) ListReportedUsers(ctx context.Context) ([]domain.ReportedUserSummary, error) {
