@@ -164,7 +164,7 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
         return;
       }
       _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
+        _scrollController.position.minScrollExtent,
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
       );
@@ -372,14 +372,16 @@ class _ChatRoomDetailScreenState extends State<ChatRoomDetailScreen> {
                   ),
                 ],
               ),
-              child: RefreshIndicator(
-                onRefresh: _refreshDetail,
-                child: ListView.builder(
+                child: RefreshIndicator(
+                  onRefresh: _refreshDetail,
+                  child: ListView.builder(
                   controller: _scrollController,
+                  reverse: true,
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                   itemCount: detail.messages.length,
                   itemBuilder: (context, index) {
-                    final message = detail.messages[index];
+                    final message =
+                        detail.messages[detail.messages.length - 1 - index];
                     final isMe = message.senderId == widget.currentUser.id;
                     return Align(
                       alignment:

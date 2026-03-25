@@ -9,15 +9,17 @@ class PushNotificationService {
   PushNotificationService({
     FirebaseMessaging? messaging,
     ApiClient? apiClient,
-  })  : _messaging = messaging ?? FirebaseMessaging.instance,
+  })  : _messaging = messaging,
         _apiClient = apiClient ?? ApiClient();
 
-  final FirebaseMessaging _messaging;
+  final FirebaseMessaging? _messaging;
   final ApiClient _apiClient;
   StreamSubscription<String>? _tokenRefreshSubscription;
 
   bool get _isSupportedPlatform =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  FirebaseMessaging get _instance => _messaging ?? FirebaseMessaging.instance;
 
   Future<void> initialize({
     required String authToken,
@@ -28,7 +30,7 @@ class PushNotificationService {
     }
 
     try {
-      await _messaging.requestPermission(
+      await _instance.requestPermission(
         alert: true,
         badge: true,
         sound: true,
@@ -37,7 +39,7 @@ class PushNotificationService {
       await _registerCurrentToken(authToken);
 
       _tokenRefreshSubscription ??=
-          _messaging.onTokenRefresh.listen((token) async {
+          _instance.onTokenRefresh.listen((token) async {
         if (token.trim().isEmpty) {
           return;
         }
@@ -61,7 +63,7 @@ class PushNotificationService {
   }
 
   Future<void> _registerCurrentToken(String authToken) async {
-    final token = await _messaging.getToken();
+    final token = await _instance.getToken();
     if (token == null || token.trim().isEmpty) {
       return;
     }

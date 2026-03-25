@@ -4,18 +4,19 @@ import 'package:flutter/foundation.dart';
 import '../data/models.dart';
 
 class FirestoreChatService {
-  FirestoreChatService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirestoreChatService({FirebaseFirestore? firestore}) : _firestore = firestore;
 
-  final FirebaseFirestore _firestore;
+  final FirebaseFirestore? _firestore;
 
   static bool get isSupportedPlatform =>
       !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS);
 
+  FirebaseFirestore get _instance => _firestore ?? FirebaseFirestore.instance;
+
   CollectionReference<Map<String, dynamic>> get _rooms =>
-      _firestore.collection('chat_rooms');
+      _instance.collection('chat_rooms');
 
   String directRoomId(String currentUserId, String targetUserId) {
     final ordered = [currentUserId.trim(), targetUserId.trim()]..sort();
@@ -161,7 +162,7 @@ class FirestoreChatService {
     }
 
     final messageRef = roomRef.collection('messages').doc();
-    final batch = _firestore.batch();
+    final batch = _instance.batch();
     batch.set(messageRef, {
       'id': messageRef.id,
       'roomId': room.roomId,
