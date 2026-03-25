@@ -440,12 +440,12 @@ class _PinnedOperatorRoomCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Row(
                 children: [
-                  if ((room?.unreadCount ?? 0) > 0)
-                    _UnreadBadge(count: room!.unreadCount),
-                  const SizedBox(height: 10),
+                  if ((room?.unreadCount ?? 0) > 0) ...[
+                    _UnreadDot(count: room!.unreadCount),
+                    const SizedBox(width: 10),
+                  ],
                   const Icon(
                     Icons.chevron_right_rounded,
                     color: Color(0xFF4BA9E8),
@@ -548,7 +548,11 @@ class _ChatRoomListTile extends StatelessWidget {
                     ),
                   const SizedBox(height: 10),
                   if (unreadCount > 0) ...[
-                    _UnreadBadge(count: unreadCount),
+                    const SizedBox(height: 2),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: _UnreadDot(count: unreadCount),
+                    ),
                     const SizedBox(height: 10),
                   ],
                   const Icon(
@@ -565,36 +569,26 @@ class _ChatRoomListTile extends StatelessWidget {
   }
 }
 
-class _UnreadBadge extends StatelessWidget {
-  const _UnreadBadge({required this.count});
+class _UnreadDot extends StatelessWidget {
+  const _UnreadDot({required this.count});
 
   final int count;
 
   @override
   Widget build(BuildContext context) {
-    final display = count > 99 ? '99+' : '$count';
-
     return Container(
-      constraints: const BoxConstraints(minWidth: 22),
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      width: 12,
+      height: 12,
       decoration: BoxDecoration(
-        color: const Color(0xFFE85A74),
-        borderRadius: BorderRadius.circular(999),
+        color: const Color(0xFFE4475D),
+        shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.10),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: const Color(0xFFE4475D).withValues(alpha: 0.28),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
-      ),
-      child: Text(
-        display,
-        textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
       ),
     );
   }
