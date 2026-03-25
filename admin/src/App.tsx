@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
 const adminAuthStorageKey = 'kimura_admin_auth';
@@ -353,6 +353,7 @@ function App() {
   const [sendingChatMessage, setSendingChatMessage] = useState(false);
   const [chatMessageDraft, setChatMessageDraft] = useState('');
   const [pointGrantValue, setPointGrantValue] = useState('0');
+  const chatThreadRef = useRef<HTMLDivElement | null>(null);
 
   function clearAdminSession(sessionMessage: string) {
     window.localStorage.removeItem(adminAuthStorageKey);
@@ -465,6 +466,22 @@ function App() {
       void loadReports(authToken);
     }
   }, [activeMenu, authToken]);
+
+  useEffect(() => {
+    if (!selectedChatRoom) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const thread = chatThreadRef.current;
+      if (!thread) {
+        return;
+      }
+      thread.scrollTop = thread.scrollHeight;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [selectedChatRoom?.roomId, selectedChatRoom?.messages.length, chatDetailLoading]);
 
   async function loadUsers(token: string = authToken) {
     if (!token) return;
@@ -2361,7 +2378,7 @@ function App() {
               {chatDetailLoading ? <p className="muted">Loading chat detail...</p> : null}
 
               <div className="chat-detail-thread-wrap">
-                <div className="chat-detail-thread">
+                <div className="chat-detail-thread" ref={chatThreadRef}>
                   {selectedChatRoom.messages.map((chat) => {
                     const isAdminMessage = chat.senderId === adminUser?.id;
                     return (
