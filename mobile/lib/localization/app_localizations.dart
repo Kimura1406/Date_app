@@ -201,7 +201,7 @@ class AppStrings {
       AppLanguage.thai: 'ยังไม่มีโปรไฟล์',
     },
     'matchesTitle': {
-      AppLanguage.vietnamese: 'Ghép đôi',
+      AppLanguage.vietnamese: 'Tim kiem',
       AppLanguage.japanese: 'マッチ一覧',
       AppLanguage.korean: '매칭 목록',
       AppLanguage.russian: 'Совпадения',
