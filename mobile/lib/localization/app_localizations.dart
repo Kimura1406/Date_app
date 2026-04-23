@@ -1497,7 +1497,7 @@ class AppStrings {
       case AppLanguage.vietnamese:
         return 'Timeline';
       case AppLanguage.japanese:
-        return 'タイムライン';
+        return 'タイムライン.kimura edit';
       case AppLanguage.korean:
         return '타임라인';
       case AppLanguage.russian:
