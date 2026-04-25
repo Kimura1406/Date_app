@@ -63,7 +63,7 @@ class AppStrings {
       AppLanguage.thai: 'เข้าสู่ระบบ',
     },
     'loginSubtitle': {
-      AppLanguage.vietnamese: 'Vui lòng đăng nhập bằng email và mật khẩu.',
+      AppLanguage.vietnamese: 'kimura edited. Vui lòng đăng nhập bằng email và mật khẩu.',
       AppLanguage.japanese: 'メールアドレスとパスワードでログインしてください',
       AppLanguage.korean: '이메일 주소와 비밀번호로 로그인해 주세요',
       AppLanguage.russian:
