@@ -101,6 +101,7 @@ After that, deploy is just:
 2. Choose `Deploy Render`.
 3. Click `Run workflow`.
 4. Pick `all`, `backend`, or `admin`.
+
 ## Next Steps
 
 1. Add likes, matches, messages, and reports.
@@ -117,6 +118,12 @@ The backend now uses PostgreSQL for discovery and match data.
 ```bash
 docker compose up -d postgres
 ```
+
+## Project Notes
+
+- Docs index: [docs/README.md](./docs/README.md)
+- Vietnamese setup history: [docs/lich-su-thiet-lap-du-an.md](./docs/lich-su-thiet-lap-du-an.md)
+- English setup history: [docs/dev-setup-history.md](./docs/dev-setup-history.md)
 
 ### Backend env
 

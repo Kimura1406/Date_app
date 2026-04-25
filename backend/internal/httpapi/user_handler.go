@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 
 	backendauth "github.com/kimura/dating/backend/internal/auth"
@@ -28,6 +29,16 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{"items": users})
+}
+
+func (h *UserHandler) ListReportedUsers(w http.ResponseWriter, r *http.Request) {
+	items, err := h.userService.ListReportedUsers(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to load reported users")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
 }
 
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -81,6 +92,70 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, user)
 }
 
+func (h *UserHandler) RegisterDeviceToken(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	var input domain.DeviceTokenInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if err := h.userService.RegisterDeviceToken(r.Context(), claims.Subject, input); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to register device token")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"registered": true})
+}
+
+func (h *UserHandler) ListNotifications(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	items, err := h.userService.ListNotifications(r.Context(), claims.Subject)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to load notifications")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
+func (h *UserHandler) RecordProfileView(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	if err := h.userService.RecordProfileView(r.Context(), r.PathValue("id"), claims.Subject); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to record profile view")
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, map[string]any{"recorded": true})
+}
+
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if !canAccessUser(r, r.PathValue("id")) {
 		writeError(w, http.StatusForbidden, "forbidden")
@@ -121,6 +196,150 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"deleted": true})
 }
 
+func (h *UserHandler) GetLikeSummary(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	summary, err := h.userService.GetLikeSummary(r.Context(), r.PathValue("id"), claims.Subject)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to load like summary")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, summary)
+}
+
+func (h *UserHandler) ToggleLike(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	summary, err := h.userService.ToggleLike(r.Context(), r.PathValue("id"), claims.Subject)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to toggle like")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, summary)
+}
+
+func (h *UserHandler) ListUsersWhoLikedMe(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	items, err := h.userService.ListUsersWhoLiked(r.Context(), claims.Subject)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to load users who liked")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
+func (h *UserHandler) BlockUser(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	if err := h.userService.BlockUser(r.Context(), r.PathValue("id"), claims.Subject); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to block user")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"blocked": true})
+}
+
+func (h *UserHandler) ListBlockedUsers(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	items, err := h.userService.ListBlockedUsers(r.Context(), claims.Subject)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to load blocked users")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
+func (h *UserHandler) ReportUser(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authClaimsFromContext(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	var input domain.UserReportInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if err := h.userService.ReportUser(r.Context(), r.PathValue("id"), claims.Subject, input); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to report user")
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, map[string]any{"reported": true})
+}
+
+func (h *UserHandler) AddPoints(w http.ResponseWriter, r *http.Request) {
+	var input domain.UserPointGrantInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	user, err := h.userService.AddPoints(r.Context(), r.PathValue("id"), input)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		writeDomainError(w, err, "failed to grant points")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, user)
+}
+
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	h.login(w, r, false)
 }
@@ -150,6 +369,7 @@ func (h *UserHandler) login(w http.ResponseWriter, r *http.Request, adminOnly bo
 			writeError(w, http.StatusUnauthorized, "invalid email or password")
 			return
 		}
+		log.Printf("auth login failed adminOnly=%t email=%q: %v", adminOnly, input.Email, err)
 		writeError(w, http.StatusInternalServerError, "failed to login")
 		return
 	}
@@ -170,6 +390,7 @@ func (h *UserHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusUnauthorized, "invalid refresh token")
 			return
 		}
+		log.Printf("auth refresh failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "failed to refresh session")
 		return
 	}
@@ -189,6 +410,7 @@ func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusUnauthorized, "invalid refresh token")
 			return
 		}
+		log.Printf("auth logout failed: %v", err)
 		writeError(w, http.StatusInternalServerError, "failed to logout")
 		return
 	}

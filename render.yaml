@@ -1,0 +1,40 @@
+databases:
+  - name: date-app-db
+    databaseName: date_app
+    user: date_app_user
+
+services:
+  - type: web
+    name: date-app-backend
+    runtime: go
+    rootDir: backend
+    buildCommand: go build -o bin/api ./cmd/api
+    startCommand: ./bin/api
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: date-app-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        fromService:
+          type: web
+          name: date-app-admin
+          envVarKey: RENDER_EXTERNAL_URL
+
+  - type: web
+    name: date-app-admin
+    runtime: static
+    rootDir: admin
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: date-app-backend
+          envVarKey: RENDER_EXTERNAL_URL

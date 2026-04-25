@@ -1,4 +1,4 @@
-package com.example.kimura_dating
+package dating.kimhouse.com
 
 import io.flutter.embedding.android.FlutterActivity
 

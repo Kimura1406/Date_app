@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "568193353719",
+    "project_id": "dating-a8b07",
+    "storage_bucket": "dating-a8b07.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568193353719:android:576ef39ecdf9b77599d0f2",
+        "android_client_info": {
+          "package_name": "dating.kimhouse.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_TGn2FSejOhDIgRZYeUqqeXm4w-YhC68"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

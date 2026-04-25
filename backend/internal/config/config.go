@@ -14,7 +14,10 @@ func Load() Config {
 	return Config{
 		AppEnv:         envOrDefault("APP_ENV", "development"),
 		Port:           envOrDefault("PORT", "8080"),
-		AllowedOrigins: envOrDefault("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000"),
+		AllowedOrigins: envOrDefault(
+			"ALLOWED_ORIGINS",
+			"http://localhost:5173,http://localhost:3000,http://localhost:8081,http://127.0.0.1:8081",
+		),
 		DatabaseURL:    envOrDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/date_app?sslmode=disable"),
 		JWTSecret:      envOrDefault("JWT_SECRET", "change-me-in-production"),
 	}

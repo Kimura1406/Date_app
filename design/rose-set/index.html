@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rose Set Preview</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background:
+          linear-gradient(180deg, #f9f0ec 0%, #f4e5df 100%);
+        color: #2f2323;
+      }
+      .page {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 32px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 30px;
+      }
+      p {
+        margin: 0 0 24px;
+        color: #6d5a5a;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(240px, 1fr));
+        gap: 24px;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(202, 177, 170, 0.45);
+        border-radius: 28px;
+        padding: 18px;
+        box-shadow: 0 20px 40px rgba(71, 44, 44, 0.08);
+        backdrop-filter: blur(4px);
+      }
+      .art {
+        min-height: 420px;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at 50% 20%, rgba(255,255,255,0.9), rgba(255,255,255,0) 42%),
+          radial-gradient(circle at 50% 100%, rgba(244,213,205,0.55), rgba(255,255,255,0) 42%);
+        border-radius: 22px;
+      }
+      img {
+        width: 100%;
+        max-width: 320px;
+        height: auto;
+        display: block;
+      }
+      .label {
+        margin-top: 14px;
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .sub {
+        margin-top: 6px;
+        font-size: 14px;
+        color: #7c6767;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <h1>Rose Set</h1>
+      <p>Transparent-background concept assets for gift badge direction.</p>
+      <div class="grid">
+        <div class="card">
+          <div class="art"><img src="rose-red.svg" alt="Red rose" /></div>
+          <div class="label">Red Rose</div>
+          <div class="sub">Romantic, premium, direct-impact gift look</div>
+        </div>
+        <div class="card">
+          <div class="art"><img src="rose-blue.svg" alt="Blue rose" /></div>
+          <div class="label">Blue Rose</div>
+          <div class="sub">Rare, cool-tone, fantasy premium gift look</div>
+        </div>
+        <div class="card">
+          <div class="art"><img src="rose-purple.svg" alt="Purple rose" /></div>
+          <div class="label">Purple Rose</div>
+          <div class="sub">Elegant, luxury, soft prestige gift look</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

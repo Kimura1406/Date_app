@@ -25,7 +25,7 @@ func writeError(w http.ResponseWriter, status int, message string) {
 func writeDomainError(w http.ResponseWriter, err error, fallback string) {
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
-		writeError(w, http.StatusNotFound, "user not found")
+		writeError(w, http.StatusNotFound, "resource not found")
 	case errors.Is(err, service.ErrInvalidCredentials):
 		writeError(w, http.StatusUnauthorized, "invalid email or password")
 	case isValidationError(err):
