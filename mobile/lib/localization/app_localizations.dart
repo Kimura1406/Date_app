@@ -54,7 +54,7 @@ class AppStrings {
       AppLanguage.thai: 'Change language',
     },
     'loginTitle': {
-      AppLanguage.vietnamese: 'Đăng nhập',
+      AppLanguage.vietnamese: 'Đăng nhập.edit2026.04.24',
       AppLanguage.japanese: 'ログイン',
       AppLanguage.korean: '로그인',
       AppLanguage.russian: 'Вход',
@@ -1435,7 +1435,8 @@ class AppStrings {
     }
   }
 
-  String flowerShopInsufficientMessage(Object requiredPoints, Object currentPoints) {
+  String flowerShopInsufficientMessage(
+      Object requiredPoints, Object currentPoints) {
     switch (language) {
       case AppLanguage.vietnamese:
         return 'Bạn cần ${requiredPoints}P nhưng hiện chỉ có ${currentPoints}P. Hãy tích lũy thêm point rồi quay lại nhận hoa.';
