@@ -54,7 +54,7 @@ class AppStrings {
       AppLanguage.thai: 'Change language',
     },
     'loginTitle': {
-      AppLanguage.vietnamese: 'Đăng nhập.edit2026.04.24',
+      AppLanguage.vietnamese: 'Đăng nhập.edit2026.04',
       AppLanguage.japanese: 'ログイン',
       AppLanguage.korean: '로그인',
       AppLanguage.russian: 'Вход',
