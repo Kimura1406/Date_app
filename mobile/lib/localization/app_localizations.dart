@@ -1435,7 +1435,8 @@ class AppStrings {
     }
   }
 
-  String flowerShopInsufficientMessage(Object requiredPoints, Object currentPoints) {
+  String flowerShopInsufficientMessage(
+      Object requiredPoints, Object currentPoints) {
     switch (language) {
       case AppLanguage.vietnamese:
         return 'Bạn cần ${requiredPoints}P nhưng hiện chỉ có ${currentPoints}P. Hãy tích lũy thêm point rồi quay lại nhận hoa.';

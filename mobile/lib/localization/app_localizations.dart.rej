@@ -1,0 +1,10 @@
+diff a/mobile/lib/localization/app_localizations.dart b/mobile/lib/localization/app_localizations.dart	(rejected hunks)
+@@ -201,7 +201,7 @@
+       AppLanguage.thai: 'ยังไม่มีโปรไฟล์',
+     },
+     'matchesTitle': {
+-      AppLanguage.vietnamese: 'Ghép đôi',
++      AppLanguage.vietnamese: 'Tim kiem',
+       AppLanguage.japanese: 'マッチ一覧',
+       AppLanguage.korean: '매칭 목록',
+       AppLanguage.russian: 'Совпадения',
